@@ -9,3 +9,7 @@ Hope to bring more cool features in the future.
 
 # How to install
 Either download source code and compile with your own android compiler to build your own APK, or download the latest APK built, and install (enable unknown sources first)
+
+# Credits
+
+99% of the work made to create this app is from the contributors of optc-db.github.io. They created the database, so they made the ugly work. I only created the mobile interface, and it took me only one day of programming so far, so if you have to thank someone, thank the guys mentioned before. 
