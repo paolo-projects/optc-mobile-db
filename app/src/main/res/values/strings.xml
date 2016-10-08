@@ -19,6 +19,7 @@
     <string name="lvlmax">Max</string>
     <string name="captability">Captain Ability</string>
     <string name="specability">Special:</string>
+    <string name="speccooldown">Cooldowns (min/max):</string>
 
     <!-- Filter box hint text -->
     <string name="filter_hint">Search by name</string>

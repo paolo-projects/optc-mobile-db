@@ -6,7 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
-import android.text.style.ImageSpan;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -41,18 +41,45 @@ public class MainActivity extends AppCompatActivity {
     //  SO I NEEDED TO CONVERT THEM TO JSON AND HOST THEM ON MY WEBSITE
     private final String CharacterListJSONUrl = "http://www.instruman.it/assets/chars.json";
     private final String CharacterDetailsJSONUrl = "http://www.instruman.it/assets/details.json";
+    private final String SpecialCooldownsJSONUrl = "http://www.instruman.it/assets/cooldowns.json";
+
     ImageView sortName, sortType, sortStars;
     Integer nsort, tsort, ssort;
-    ImageSpan ar_d, ar_u, circ;
     ListView lview;
     listViewAdapter adapter;
     EditText filterText;
     Activity activity;
+    private ArrayList<HashMap> list, original_list, details;
+    ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (nsort == 0) sortNameAscending();
+            else if (nsort == 1) sortNameDescending();
+            else sortNameAscending();
+        }
+    };
+    ImageView.OnClickListener sortTypeOnClick = new ImageView.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (tsort == 0) sortTypeAscending();
+            else if (tsort == 1) sortTypeDescending();
+            else sortTypeAscending();
+        }
+    };
+    ImageView.OnClickListener sortStarsOnClick = new ImageView.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            if (ssort == 0) sortStarsAscending();
+            else if (ssort == 1) sortStarsDescending();
+            else sortStarsAscending();
+        }
+    };
+    private ArrayList<CoolDowns> cooldowns;
     ListView.OnItemClickListener lvOnClick = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             HashMap item = (HashMap) adapter.getItem(position);
-
+            boolean multiCD = false;
             final Dialog dialog = new Dialog(context);
             dialog.setContentView(R.layout.character_info);
             TextView title = (TextView) dialog.findViewById(R.id.titleText);
@@ -89,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
             TextView captability = (TextView) dialog.findViewById(R.id.captabilityText);
             TextView specname = (TextView) dialog.findViewById(R.id.specnameText);
             TextView specability = (TextView) dialog.findViewById(R.id.specabilityText);
+            TextView speccooldown = (TextView) dialog.findViewById(R.id.speccooldownTxt);
+            TextView speccooldownTitle = (TextView) dialog.findViewById(R.id.speccooldownTitle);
 
             Object classes = item.get(Constants.CLASSES);
             if (classes.getClass().equals(String.class)) {
@@ -124,10 +153,35 @@ public class MainActivity extends AppCompatActivity {
                 HashMap extra = details.get((Integer) item.get(Constants.ID));
                 captability.setText((String) extra.get(Constants2.CAPTAIN));
                 specname.setText((String) extra.get(Constants2.SPECIALNAME));
-                specability.setText((String) extra.get(Constants2.SPECIAL));
+                Object specobject = extra.get(Constants2.SPECIAL);
+                if (specobject.getClass().equals(JSONArray.class)) {
+                    JSONArray specmulti = (JSONArray) specobject;
+                    String txt = "";
+                    for (int n = 0; n < specmulti.length(); n++) {
+                        JSONObject currstep = specmulti.getJSONObject(n);
+                        txt += "Level " + (n + 1) + ": ";
+                        txt += currstep.getString("description");
+                        txt += System.getProperty("line.separator");
+                        CoolDowns cd = new CoolDowns(currstep.getJSONArray("cooldown"));
+                        txt += cd.print();
+                        txt += System.getProperty("line.separator");
+                    }
+                    specability.setText(txt);
+                    multiCD = true;
+
+                } else specability.setText((String) extra.get(Constants2.SPECIAL));
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
+            if (!multiCD) {
+                CoolDowns cdwns = cooldowns.get((Integer) item.get(Constants.ID));
+                speccooldown.setText(cdwns.print());
+            } else {
+                speccooldown.setVisibility(View.INVISIBLE);
+                speccooldownTitle.setVisibility(View.INVISIBLE);
+            }
+
             ImageButton backbtn = (ImageButton) dialog.findViewById(R.id.backBtn);
             backbtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -137,35 +191,10 @@ public class MainActivity extends AppCompatActivity {
             });
 
             dialog.show();
-            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.95);
+            int width = getResources().getDisplayMetrics().widthPixels * 1;
             int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.95);
             if (dialog.getWindow() != null)
                 dialog.getWindow().setLayout(width, height);
-        }
-    };
-    private ArrayList<HashMap> list, original_list, details;
-    ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (nsort == 0) sortNameAscending();
-            else if (nsort == 1) sortNameDescending();
-            else sortNameAscending();
-        }
-    };
-    ImageView.OnClickListener sortTypeOnClick = new ImageView.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (tsort == 0) sortTypeAscending();
-            else if (tsort == 1) sortTypeDescending();
-            else sortTypeAscending();
-        }
-    };
-    ImageView.OnClickListener sortStarsOnClick = new ImageView.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            if (ssort == 0) sortStarsAscending();
-            else if (ssort == 1) sortStarsDescending();
-            else sortStarsAscending();
         }
     };
 
@@ -313,6 +342,7 @@ public class MainActivity extends AppCompatActivity {
     private void populateList() {
         list = new ArrayList<>();
         details = new ArrayList<>();
+        cooldowns = new ArrayList<>();
         JSONArray characters = getJSON(CharacterListJSONUrl);
         if ((characters != null) && (characters.length() > 0)) {
             for (int i = 0; i < characters.length(); i++) {
@@ -366,7 +396,7 @@ public class MainActivity extends AppCompatActivity {
 
                 while (temp.hasNext()) {
                     String key = temp.next();
-                    if (details.size() != Integer.parseInt(key)) {
+                    if (details.size() != Integer.parseInt(key)) { //indexes must always match character number!
                         while (details.size() != Integer.parseInt(key)) details.add(new HashMap());
                     }
 
@@ -379,6 +409,27 @@ public class MainActivity extends AppCompatActivity {
                     details.add(map);
                 }
             } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
+
+        JSONArray cooldwns = getJSON(SpecialCooldownsJSONUrl);
+        if ((cooldwns != null) && (cooldwns.length() > 0)) {
+            try {
+                cooldowns.add(new CoolDowns()); //first entry null to make index start from 1
+                for (int i = 0; i < cooldwns.length(); i++) {
+                    Object entry = cooldwns.get(i);
+                    if (entry == JSONObject.NULL) cooldowns.add(new CoolDowns());
+                    else if (entry.getClass().equals(Integer.class))
+                        cooldowns.add(new CoolDowns(cooldwns.getInt(i)));
+                    else if (entry.getClass().equals(JSONArray.class)) {
+                        JSONArray entry_array = cooldwns.getJSONArray(i);
+                        Integer a = entry_array.getInt(0);
+                        Integer b = entry_array.getInt(1);
+                        cooldowns.add(new CoolDowns(a, b));
+                    } else Log.e("CRITICAL", "Object type determination failed!");
+                }
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -461,6 +512,78 @@ public class MainActivity extends AppCompatActivity {
         else if (ID < 100) return ("00" + ID.toString());
         else if (ID < 1000) return ("0" + ID.toString());
         else return ID.toString();
+    }
+
+    private class CoolDowns {
+        private Integer init, max = -1;
+        private Integer type = 0;
+
+        public CoolDowns(Integer initiallvl, Integer maximumlvl) {
+            init = initiallvl;
+            max = maximumlvl;
+            type = 2;
+        }
+
+        public CoolDowns(Integer initiallvl) {
+            init = initiallvl;
+            type = 1;
+        }
+
+        public CoolDowns() {
+            type = 0;
+        }
+
+        public CoolDowns(JSONArray cd) {
+            if (cd != null) {
+                try {
+                    switch (cd.length()) {
+                        case 0:
+                            type = 0;
+                            break;
+                        case 1:
+                            init = cd.getInt(0);
+                            type = 1;
+                            break;
+                        case 2:
+                            init = cd.getInt(0);
+                            max = cd.getInt(1);
+                            type = 2;
+                            break;
+                        default:
+                            type = 0;
+                            break;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else type = 0;
+        }
+
+        public Integer getType() {
+            return type;
+        }
+
+        public Integer getInitLvl() {
+            return init;
+        }
+
+        public Integer getMaxLvl() {
+            return max;
+        }
+
+        public String print() {
+            switch (type) {
+                case 0:
+                    return "";
+                case 1:
+                    return init.toString();
+                case 2:
+                    String o = init + "/" + max;
+                    return o;
+                default:
+                    return "";
+            }
+        }
     }
 
     class MapComparator implements Comparator<HashMap> {
