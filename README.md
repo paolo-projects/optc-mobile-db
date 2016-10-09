@@ -8,7 +8,7 @@ So far, the project is still in initial state, the UI is simple and contains a l
 Hope to bring more cool features in the future.
 
 # How to install
-Either download source code and compile with your own android compiler to build your own APK, or download the latest APK built, and install (enable unknown sources first)
+Either download source code and compile with your own android compiler to build your own APK, or download the latest APK built, and install (enable unknown sources first) from the [Release](https://github.com/paolo-optc/optc-mobile-db/releases/tag/1.0) section!
 
 # Credits
 
