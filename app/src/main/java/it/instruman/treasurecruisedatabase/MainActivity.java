@@ -3,6 +3,10 @@ package it.instruman.treasurecruisedatabase;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
@@ -10,6 +14,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -17,31 +22,35 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.Scriptable;
 
 import java.io.BufferedReader;
-import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     private final Context context = this;
-    //  URLs WHERE JSON DATABASES ARE
-    //  I USED MY PERSONAL WEBSITE TO HOST JSON DBs
-    //  ORIGINAL OPTC-DB PROJECT DOESN'T HAVE JSON DBs BUT JAVASCRIPT ARRAYS
-    //  SO I NEEDED TO CONVERT THEM TO JSON AND HOST THEM ON MY WEBSITE
-    private final String CharacterListJSONUrl = "http://www.instruman.it/assets/chars.json";
-    private final String CharacterDetailsJSONUrl = "http://www.instruman.it/assets/details.json";
-    private final String SpecialCooldownsJSONUrl = "http://www.instruman.it/assets/cooldowns.json";
+
+    private final String UNITS_CACHED_NAME = "units.serial";
+    private final String DETAILS_CACHED_NAME = "details.serial";
+    private final String COOLDOWNS_CACHED_NAME = "cooldowns.serial";
 
     ImageView sortName, sortType, sortStars;
     Integer nsort, tsort, ssort;
@@ -49,7 +58,9 @@ public class MainActivity extends AppCompatActivity {
     listViewAdapter adapter;
     EditText filterText;
     Activity activity;
-    private ArrayList<HashMap> list, original_list, details;
+    Dialog dlg_hwnd = null;
+
+    private ArrayList<HashMap> list, original_list;
     ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -74,22 +85,26 @@ public class MainActivity extends AppCompatActivity {
             else sortStarsAscending();
         }
     };
+    private HashMap<Integer, Map> details;
     private ArrayList<CoolDowns> cooldowns;
     ListView.OnItemClickListener lvOnClick = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             HashMap item = (HashMap) adapter.getItem(position);
             boolean multiCD = false;
-            final Dialog dialog = new Dialog(context);
+            final Dialog dialog = new Dialog(context, R.style.AppTheme);
             dialog.setContentView(R.layout.character_info);
             TextView title = (TextView) dialog.findViewById(R.id.titleText);
             title.setText((String) item.get(Constants.NAME));
 
             // set the custom dialog components - text, image and button
             ImageView image = (ImageView) dialog.findViewById(R.id.char_img_big);
-            DrawableBackgroundDownloader Draw = new DrawableBackgroundDownloader();
 
-            Draw.loadDrawable("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID((Integer) item.get(Constants.ID)) + ".png", image, getResources().getDrawable(R.drawable.ic_refresh_dark));
+            Glide
+                    .with(activity)
+                    .load("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID((Integer) item.get(Constants.ID)) + ".png")
+                    .into(image);
+
             dialog.setCanceledOnTouchOutside(true);
 
             //NOW WE SHOULD SET EVERYTHING (OUCH!)
@@ -122,17 +137,17 @@ public class MainActivity extends AppCompatActivity {
             Object classes = item.get(Constants.CLASSES);
             if (classes.getClass().equals(String.class)) {
                 class1.setText((String) classes);
-                class2.setText("N/N");
-            } else if (classes.getClass().equals(JSONArray.class)) {
+                class2.setText("");
+            } else if (classes.getClass().equals(NativeArray.class)) {
                 try {
-                    class1.setText((String) ((JSONArray) classes).get(0));
-                    class2.setText((String) ((JSONArray) classes).get(1));
+                    class1.setText((String) ((NativeArray) classes).get(0));
+                    class2.setText((String) ((NativeArray) classes).get(1));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
             type.setText((String) item.get(Constants.TYPE));
-            stars.setText((String) item.get(Constants.STARS));
+            stars.setText(String.valueOf(item.get(Constants.STARS)));
             cost.setText((String) item.get(Constants.COST));
 
             combo.setText((String) item.get(Constants.COMBO));
@@ -150,19 +165,19 @@ public class MainActivity extends AppCompatActivity {
             maxrcv.setText((String) item.get(Constants.MAXRCV));
 
             try {
-                HashMap extra = details.get((Integer) item.get(Constants.ID));
+                Map extra = details.get(item.get(Constants.ID));
                 captability.setText((String) extra.get(Constants2.CAPTAIN));
                 specname.setText((String) extra.get(Constants2.SPECIALNAME));
                 Object specobject = extra.get(Constants2.SPECIAL);
-                if (specobject.getClass().equals(JSONArray.class)) {
-                    JSONArray specmulti = (JSONArray) specobject;
+                if (specobject.getClass().equals(NativeArray.class)) {
+                    List<Map> specmulti = (List<Map>) specobject;
                     String txt = "";
-                    for (int n = 0; n < specmulti.length(); n++) {
-                        JSONObject currstep = specmulti.getJSONObject(n);
+                    for (int n = 0; n < specmulti.size(); n++) {
+                        Map<String, Object> currstep = specmulti.get(n);
                         txt += "Level " + (n + 1) + ": ";
-                        txt += currstep.getString("description");
+                        txt += currstep.get("description");
                         txt += System.getProperty("line.separator");
-                        CoolDowns cd = new CoolDowns(currstep.getJSONArray("cooldown"));
+                        CoolDowns cd = new CoolDowns(currstep.get("cooldown"));
                         txt += cd.print();
                         txt += System.getProperty("line.separator");
                     }
@@ -191,10 +206,14 @@ public class MainActivity extends AppCompatActivity {
             });
 
             dialog.show();
-            int width = getResources().getDisplayMetrics().widthPixels * 1;
-            int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.95);
-            if (dialog.getWindow() != null)
+            dlg_hwnd = dialog;
+
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
+            int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
                 dialog.getWindow().setLayout(width, height);
+            }
         }
     };
 
@@ -208,8 +227,45 @@ public class MainActivity extends AppCompatActivity {
 
         nsort = tsort = ssort = 0;
         lview = (ListView) findViewById(R.id.listView1);
-        populateList();
-        adapter = new listViewAdapter(this, list);
+
+        //CREATE EMPTY DATABASES
+        list = new ArrayList<>();
+        details = new HashMap<>();
+        cooldowns = new ArrayList<>();
+        original_list = new ArrayList<>();
+
+        //CHECK IF CONNECTION IS OFF
+        if (!isNetworkConnected()) {
+            //IF YES CHECK IF THERE'S ANY CACHED DATA
+            if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() && (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile()) {
+                //LOAD CACHED DATA
+                try {
+                    FileInputStream unitsser = openFileInput(UNITS_CACHED_NAME);
+                    FileInputStream detailsser = openFileInput(DETAILS_CACHED_NAME);
+                    FileInputStream cooldownsser = openFileInput(COOLDOWNS_CACHED_NAME);
+
+                    ObjectInputStream units_ser = new ObjectInputStream(unitsser);
+                    list = (ArrayList<HashMap>) units_ser.readObject();
+                    original_list = list;
+                    unitsser.close();
+
+                    ObjectInputStream details_ser = new ObjectInputStream(detailsser);
+                    details = (HashMap<Integer, Map>) details_ser.readObject();
+                    detailsser.close();
+
+                    ObjectInputStream cooldowns_ser = new ObjectInputStream(cooldownsser);
+                    cooldowns = (ArrayList<CoolDowns>) cooldowns_ser.readObject();
+                    cooldownsser.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            //IF NO CACHED DATA, JUMP POPULATELIST AND SHOW EMPTY LIST
+        } else {
+            //IF CONNECTION IS ON DOWNLOAD NORMALLY THROUGH POPULATELIST
+            populateList();
+        }
+        adapter = new listViewAdapter(getApplicationContext(), list);
         lview.setAdapter(adapter);
         lview.setOnItemClickListener(lvOnClick);
 
@@ -263,34 +319,26 @@ public class MainActivity extends AppCompatActivity {
                     sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
                     nsort = tsort = ssort = 0;
                 }
+                InputMethodManager inputManager = (InputMethodManager)
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
             }
         });
-
-        populateList();
     }
 
-    protected String HTTPGetCall(String WebMethodURL) throws IOException {
-        StringBuilder response = new StringBuilder();
-
-        //Prepare the URL and the connection
-        URL u = new URL(WebMethodURL);
-        HttpURLConnection conn = (HttpURLConnection) u.openConnection();
-
-        if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
-            //Get the Stream reader ready
-            BufferedReader input = new BufferedReader(new InputStreamReader(conn.getInputStream()), 8192);
-
-            //Loop through the return data and copy it over to the response object to be processed
-            String line;
-
-            while ((line = input.readLine()) != null) {
-                response.append(line);
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if ((dlg_hwnd != null) && (dlg_hwnd.isShowing())) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
+            int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
+            if (dlg_hwnd.getWindow() != null) {
+                dlg_hwnd.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+                dlg_hwnd.getWindow().setLayout(width, height);
             }
-
-            input.close();
         }
-
-        return response.toString();
     }
 
     private String getFileURL(String uri) {
@@ -298,15 +346,14 @@ public class MainActivity extends AppCompatActivity {
             URL url = new URL(uri);
             InputStream is = url.openStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
-
             String line;
-            String res = "";
-            while ((line = br.readLine()) != null)
-                res = res + line + System.getProperty("line.separator");
-
+            StringBuilder bdr = new StringBuilder();
+            String endLine = System.getProperty("line.separator");
+            while ((line = br.readLine()) != null) bdr.append(line + endLine);
+            //res = res + line + System.getProperty("line.separator");
             br.close();
             is.close();
-            return res;
+            return bdr.toString();
         } catch (Exception e) {
             e.printStackTrace();
             return "";
@@ -339,30 +386,60 @@ public class MainActivity extends AppCompatActivity {
         //Parse the result for the JSON data
     }
 
+    public Object parseJScript(String uri, String objname) {
+
+        String dump = getFileURL(uri);
+
+        // Every Rhino VM begins with the enter()
+        // This Context is not Android's Context
+
+        org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
+
+        // Turn off optimization to make Rhino Android compatible
+
+        rhino.setOptimizationLevel(-1);
+
+        try {
+            Scriptable scope = rhino.initStandardObjects();
+
+            // Note the forth argument is 1, which means the JavaScript source has
+            // been compressed to only one line using something like YUI
+            rhino.evaluateString(scope, "var window = {" + objname + ":null};" + dump, "JavaScript", 1, null);
+            // Get the functionName defined in JavaScriptCode
+            Object x = scope.get("window", scope);
+            Map<String, Object> y = (Map<String, Object>) x;
+            return y.get(objname);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            org.mozilla.javascript.Context.exit();
+        }
+        return null;
+    }
+
     private void populateList() {
-        list = new ArrayList<>();
-        details = new ArrayList<>();
-        cooldowns = new ArrayList<>();
-        JSONArray characters = getJSON(CharacterListJSONUrl);
-        if ((characters != null) && (characters.length() > 0)) {
-            for (int i = 0; i < characters.length(); i++) {
+        List<List> characters = (List) parseJScript("https://optc-db.github.io/common/data/units.js", "units");
+        //JSONArray characters = getJSON(CharacterListJSONUrl);
+        int char_size = characters.size();
+        if (char_size > 0) {
+            for (int i = 0; i < char_size; i++) {
                 try {
-                    JSONArray arr_2 = characters.getJSONArray(i);
-                    String name = (String) arr_2.get(0);
-                    String type = (String) arr_2.get(1);
-                    String stars = arr_2.get(3).toString();
-                    Object classes = arr_2.get(2);
-                    String cost = arr_2.get(4).toString();
-                    String combo = arr_2.get(5).toString();
-                    String sockets = arr_2.get(6).toString();
-                    String maxlvl = arr_2.get(7).toString();
-                    String exptomax = arr_2.get(8).toString();
-                    String lvl1hp = arr_2.get(9).toString();
-                    String lvl1atk = arr_2.get(10).toString();
-                    String lvl1rcv = arr_2.get(11).toString();
-                    String maxhp = arr_2.get(12).toString();
-                    String maxatk = arr_2.get(13).toString();
-                    String maxrcv = arr_2.get(14).toString();
+                    List arr_2 = characters.get(i);
+                    String name = (arr_2.get(0) == null) ? "" : (String) arr_2.get(0);
+                    String type = (arr_2.get(1) == null) ? "" : (String) arr_2.get(1);
+                    Integer stars = (arr_2.get(3) == null) ? 1 : ((Double) arr_2.get(3)).intValue();
+                    Object classes = (arr_2.get(2) == null) ? null : arr_2.get(2);
+                    String cost = (arr_2.get(4) == null) ? "" : String.valueOf(((Double) arr_2.get(4)).intValue());
+                    String combo = (arr_2.get(5) == null) ? "" : String.valueOf(((Double) arr_2.get(5)).intValue());
+                    String sockets = (arr_2.get(6) == null) ? "" : String.valueOf(((Double) arr_2.get(6)).intValue());
+                    String maxlvl = (arr_2.get(7) == null) ? "" : String.valueOf(((Double) arr_2.get(7)).intValue());
+                    String exptomax = (arr_2.get(8) == null) ? "" : String.valueOf(((Double) arr_2.get(8)).intValue());
+                    String lvl1hp = (arr_2.get(9) == null) ? "" : String.valueOf(((Double) arr_2.get(9)).intValue());
+                    String lvl1atk = (arr_2.get(10) == null) ? "" : String.valueOf(((Double) arr_2.get(10)).intValue());
+                    String lvl1rcv = (arr_2.get(11) == null) ? "" : String.valueOf(((Double) arr_2.get(11)).intValue());
+                    String maxhp = (arr_2.get(12) == null) ? "" : String.valueOf(((Double) arr_2.get(12)).intValue());
+                    String maxatk = (arr_2.get(13) == null) ? "" : String.valueOf(((Double) arr_2.get(13)).intValue());
+                    String maxrcv = (arr_2.get(14) == null) ? "" : String.valueOf(((Double) arr_2.get(14)).intValue());
 
                     HashMap temp = new HashMap();
                     temp.put(Constants.NAME, name);
@@ -384,12 +461,24 @@ public class MainActivity extends AppCompatActivity {
                     list.add(temp);
                 } catch (Exception e) {
                     e.printStackTrace();
+                    Log.d("CYCLE NUM", String.valueOf(i));
                 }
             }
         }
-        original_list = list;
 
-        JSONObject dett = getJSONObj(CharacterDetailsJSONUrl);
+        original_list = list;
+        Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/details.js", "details");
+        if ((details_js != null) && (details_js.size() > 0)) {
+            for (Map.Entry<Integer, Map> entry : details_js.entrySet()) {
+                Map<String, Object> value = entry.getValue();
+                HashMap map = new HashMap();
+                map.put(Constants2.SPECIAL, (value.containsKey("special") ? value.get("special") : ""));
+                map.put(Constants2.SPECIALNAME, (value.containsKey("specialName") ? value.get("specialName") : ""));
+                map.put(Constants2.CAPTAIN, (value.containsKey("captain") ? value.get("captain") : ""));
+                details.put(entry.getKey(), map);
+            }
+        }
+        /*JSONObject dett = getJSONObj(CharacterDetailsJSONUrl);
         if ((dett != null) && (dett.length() > 0)) {
             try {
                 Iterator<String> temp = dett.keys();
@@ -411,9 +500,55 @@ public class MainActivity extends AppCompatActivity {
             } catch (JSONException e) {
                 e.printStackTrace();
             }
+        }*/
+        List<Object> coolds = (List) parseJScript("https://optc-db.github.io/common/data/cooldowns.js", "cooldowns");
+        if ((coolds != null) && (coolds.size() > 0)) {
+            cooldowns.add(new CoolDowns());
+            for (int i = 0; i < coolds.size(); i++) {
+                Object entry = coolds.get(i);
+                if (entry == null) cooldowns.add(new CoolDowns());
+                else if (entry.getClass().equals(Integer.class))
+                    cooldowns.add(new CoolDowns((Integer) coolds.get(i)));
+                else if (entry.getClass().equals(NativeArray.class)) {
+                    List<Double> entry_array = (List<Double>) coolds.get(i);
+                    Integer a = entry_array.get(0).intValue();
+                    Integer b = entry_array.get(1).intValue();
+                    cooldowns.add(new CoolDowns(a, b));
+                } else {
+                    Log.e("ERR", "Object type determination failed!");
+                    cooldowns.add(new CoolDowns());
+                }
+                if (i == 905) {
+                    Log.d("", "");
+                }
+            }
         }
 
-        JSONArray cooldwns = getJSON(SpecialCooldownsJSONUrl);
+        //CACHING DATA
+
+        // with Serializable interface
+        FileOutputStream unitsser;
+        FileOutputStream detailsser;
+        FileOutputStream cooldownsser;
+        try {
+            unitsser = openFileOutput(UNITS_CACHED_NAME, MODE_PRIVATE);
+            ObjectOutputStream list_ser = new ObjectOutputStream(unitsser);
+            list_ser.writeObject(list);
+            unitsser.close();
+
+            detailsser = openFileOutput(DETAILS_CACHED_NAME, MODE_PRIVATE);
+            ObjectOutputStream details_ser = new ObjectOutputStream(detailsser);
+            details_ser.writeObject(details);
+            detailsser.close();
+
+            cooldownsser = openFileOutput(COOLDOWNS_CACHED_NAME, MODE_PRIVATE);
+            ObjectOutputStream cooldowns_ser = new ObjectOutputStream(cooldownsser);
+            cooldowns_ser.writeObject(cooldowns);
+            cooldownsser.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        /*JSONArray cooldwns = getJSON(SpecialCooldownsJSONUrl);
         if ((cooldwns != null) && (cooldwns.length() > 0)) {
             try {
                 cooldowns.add(new CoolDowns()); //first entry null to make index start from 1
@@ -432,7 +567,13 @@ public class MainActivity extends AppCompatActivity {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
+        }*/
+    }
+
+    private boolean isNetworkConnected() {
+        ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        return cm.getActiveNetworkInfo() != null;
     }
 
     public void sortNameAscending() {
@@ -514,78 +655,6 @@ public class MainActivity extends AppCompatActivity {
         else return ID.toString();
     }
 
-    private class CoolDowns {
-        private Integer init, max = -1;
-        private Integer type = 0;
-
-        public CoolDowns(Integer initiallvl, Integer maximumlvl) {
-            init = initiallvl;
-            max = maximumlvl;
-            type = 2;
-        }
-
-        public CoolDowns(Integer initiallvl) {
-            init = initiallvl;
-            type = 1;
-        }
-
-        public CoolDowns() {
-            type = 0;
-        }
-
-        public CoolDowns(JSONArray cd) {
-            if (cd != null) {
-                try {
-                    switch (cd.length()) {
-                        case 0:
-                            type = 0;
-                            break;
-                        case 1:
-                            init = cd.getInt(0);
-                            type = 1;
-                            break;
-                        case 2:
-                            init = cd.getInt(0);
-                            max = cd.getInt(1);
-                            type = 2;
-                            break;
-                        default:
-                            type = 0;
-                            break;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else type = 0;
-        }
-
-        public Integer getType() {
-            return type;
-        }
-
-        public Integer getInitLvl() {
-            return init;
-        }
-
-        public Integer getMaxLvl() {
-            return max;
-        }
-
-        public String print() {
-            switch (type) {
-                case 0:
-                    return "";
-                case 1:
-                    return init.toString();
-                case 2:
-                    String o = init + "/" + max;
-                    return o;
-                default:
-                    return "";
-            }
-        }
-    }
-
     class MapComparator implements Comparator<HashMap> {
         private final String key;
 
@@ -596,8 +665,8 @@ public class MainActivity extends AppCompatActivity {
         public int compare(HashMap first,
                            HashMap second) {
             // TODO: Null checking, both for maps and values
-            String firstValue = (String) first.get(key);
-            String secondValue = (String) second.get(key);
+            String firstValue = String.valueOf(first.get(key));
+            String secondValue = String.valueOf(second.get(key));
             return firstValue.compareTo(secondValue);
         }
     }

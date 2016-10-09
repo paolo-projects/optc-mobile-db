@@ -13,9 +13,10 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="30dp"
-        android:layout_marginBottom="5dp"
-        android:orientation="horizontal">
+        android:layout_height="50dp"
+        android:background="@drawable/sort_selector_bg"
+        android:orientation="horizontal"
+        android:padding="10dp">
 
         <EditText
             android:id="@+id/filterText"
@@ -23,7 +24,7 @@
             android:layout_height="match_parent"
             android:layout_marginRight="5dp"
             android:layout_weight="1"
-            android:background="#fff"
+            android:background="@drawable/filtertext_bg"
             android:hint="@string/filter_hint"
             android:imeActionId="666"
             android:imeOptions="actionSearch"
@@ -37,18 +38,21 @@
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:layout_gravity="center_vertical|center_horizontal"
-            android:background="#77FFFFFF"
+            android:background="@drawable/button_bg"
             android:contentDescription="@string/filterBtn_contDesc"
-            android:elevation="4dp"
             android:foreground="@drawable/ic_filter"
             android:scaleType="fitCenter" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="18dp"
-        android:layout_marginBottom="5dp"
-        android:orientation="horizontal">
+        android:layout_height="26dp"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/sort_selector_bg"
+        android:orientation="horizontal"
+        android:paddingBottom="4dp"
+        android:paddingRight="2dp"
+        android:paddingTop="4dp">
 
         <TextView
             android:layout_width="48dp"
@@ -56,31 +60,44 @@
 
         <ImageView
             android:id="@+id/sortName"
-            android:layout_width="18dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical"
             android:layout_weight="1"
-            android:contentDescription="@string/sort_contDesc" />
+            android:background="@drawable/sortbtn_bg"
+            android:contentDescription="@string/sort_contDesc"
+            android:textAlignment="center" />
 
         <ImageView
             android:id="@+id/sortType"
-            android:layout_width="18dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical"
             android:layout_weight="0.2"
+            android:background="@drawable/sortbtn_bg"
             android:contentDescription="@string/sort_contDesc" />
 
         <ImageView
             android:id="@+id/sortStars"
-            android:layout_width="18dp"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_gravity="center"
+            android:layout_gravity="center_vertical"
             android:layout_weight="0.2"
+            android:background="@drawable/sortbtn_bg"
             android:contentDescription="@string/sort_contDesc" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:background="@drawable/sort_selector_bg"
+        android:padding="10dp">
     <ListView
         android:id="@+id/listView1"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:animationCache="true"
+        android:scrollingCache="true" />
+    </LinearLayout>
 </LinearLayout>

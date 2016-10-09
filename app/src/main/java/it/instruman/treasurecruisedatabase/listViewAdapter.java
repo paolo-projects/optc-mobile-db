@@ -4,10 +4,10 @@ package it.instruman.treasurecruisedatabase;
  * Created by Paolo on 05/10/2016.
  */
 
-import android.app.Activity;
+import android.app.Service;
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ScaleDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,27 +15,20 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static android.R.attr.scaleHeight;
-import static android.R.attr.scaleWidth;
-
 public class listViewAdapter extends BaseAdapter {
-    private DrawableBackgroundDownloader Downloader;
+    Drawable drawable;
     private ArrayList<HashMap> list;
-    private Activity activity;
-    private ScaleDrawable sd;
+    private Context activity;
 
-    public listViewAdapter(Activity activity, ArrayList<HashMap> list) {
+    public listViewAdapter(Context activity, ArrayList<HashMap> list) {
         super();
         this.activity = activity;
         this.list = list;
-        Downloader = new DrawableBackgroundDownloader();
-        Drawable drawable = activity.getResources().getDrawable(R.drawable.ic_refresh);
-        drawable.setBounds(0, 0, (int) (drawable.getIntrinsicWidth() * 0.5),
-                (int) (drawable.getIntrinsicHeight() * 0.5));
-        sd = new ScaleDrawable(drawable, 0, scaleWidth, scaleHeight);
     }
 
     @Override
@@ -62,7 +55,7 @@ public class listViewAdapter extends BaseAdapter {
 
         // TODO Auto-generated method stub
         ViewHolder holder;
-        LayoutInflater inflater = activity.getLayoutInflater();
+        LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
 
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.column_row, null);
@@ -77,8 +70,14 @@ public class listViewAdapter extends BaseAdapter {
         }
 
         HashMap map = list.get(position);
-        //holder.smallImg.setImageDrawable(LoadImageFromWebOperations("http://onepiece-treasurecruise.com/wp-content/uploads/f"+convertID((Integer)map.get(Constants.ID))+".png"));
-        Downloader.loadDrawable("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID((Integer) map.get(Constants.ID)) + ".png", holder.smallImg, sd.getDrawable());
+
+        Glide
+                .with(activity)
+                .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID((Integer) map.get(Constants.ID)) + ".png")
+                .override(96, 96)
+                .fitCenter()
+                .into(holder.smallImg);
+
         holder.txtFirst.setText((String) map.get(Constants.NAME));
         String SEC_COL = (String) map.get(Constants.TYPE);
         holder.txtSecond.setText(SEC_COL);
@@ -101,14 +100,14 @@ public class listViewAdapter extends BaseAdapter {
             default:
                 break;
         }
-        holder.txtThird.setText((String) map.get(Constants.STARS));
-        switch (Integer.parseInt((String) map.get(Constants.STARS))) {
+        holder.txtThird.setText(map.get(Constants.STARS).toString());
+        switch ((Integer) map.get(Constants.STARS)) {
             case 1:
             case 2:
-                holder.txtThird.setTextColor(Color.argb(255, 124, 35, 0));
+                holder.txtThird.setTextColor(Color.argb(255, 160, 45, 0));
                 break;
             case 3:
-                holder.txtThird.setTextColor(Color.argb(255, 90, 90, 90));
+                holder.txtThird.setTextColor(Color.argb(255, 120, 120, 120));
                 break;
             case 4:
             case 5:
@@ -133,6 +132,5 @@ public class listViewAdapter extends BaseAdapter {
         TextView txtFirst;
         TextView txtSecond;
         TextView txtThird;
-        TextView txtFourth;
     }
 }
