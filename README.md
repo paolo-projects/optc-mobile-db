@@ -12,4 +12,4 @@ Either download source code and compile with your own android compiler to build 
 
 # Credits
 
-Most of the work done for this app is from the people at optc-db.github.io. They created the database, so they made the ugly work. I only created the mobile interface, and I didn't spend so much time on it. So if you have to thank someone, thank the guys mentioned before. 
+Most of the work done for this app is from the people at optc-db.github.io. They created the database, so they made the ugly work. I only created the mobile interface, and I didn't spend so much time on it. So if you have to thank someone, thank the guys mentioned before.

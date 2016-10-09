@@ -675,6 +675,7 @@ public class MainActivity extends AppCompatActivity {
     class DownloadData extends AsyncTask<Void, Void, DwResult> {
         boolean forceDownload = false;
         boolean updateCheck = true;
+        boolean isDowloaded = false;
 
         protected void onPreExecute() {
             showLoading(context);
@@ -690,6 +691,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         protected DwResult doInBackground(Void... voids) {
+            //android.os.Process.setThreadPriority(THREAD_PRIORITY_BACKGROUND + THREAD_PRIORITY_MORE_FAVORABLE);
             DwResult storage = new DwResult();
             if (!forceDownload) {
                 if (!isNetworkConnected()) {
@@ -736,9 +738,10 @@ public class MainActivity extends AppCompatActivity {
             lview.setAdapter(adapter);
             lview.setOnItemClickListener(lvOnClick);
             lview.requestFocus();
-            hideLoading();
+            if (isDowloaded) (new SerializeData(result)).run();
             /// UPDATE CHECK
             if (updateCheck) (new CheckUpdates()).execute();
+            hideLoading();
         }
 
         private DwResult downloadData() {
@@ -830,31 +833,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             storage.setCooldowns(cools_tmp);
-
-            //CACHING DATA
-
-            // with Serializable interface
-            FileOutputStream unitsser;
-            FileOutputStream detailsser;
-            FileOutputStream cooldownsser;
-            try {
-                unitsser = openFileOutput(UNITS_CACHED_NAME, MODE_PRIVATE);
-                ObjectOutputStream list_ser = new ObjectOutputStream(unitsser);
-                list_ser.writeObject(chars);
-                unitsser.close();
-
-                detailsser = openFileOutput(DETAILS_CACHED_NAME, MODE_PRIVATE);
-                ObjectOutputStream details_ser = new ObjectOutputStream(detailsser);
-                details_ser.writeObject(det_tmp);
-                detailsser.close();
-
-                cooldownsser = openFileOutput(COOLDOWNS_CACHED_NAME, MODE_PRIVATE);
-                ObjectOutputStream cooldowns_ser = new ObjectOutputStream(cooldownsser);
-                cooldowns_ser.writeObject(cools_tmp);
-                cooldownsser.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            isDowloaded = true;
             return storage;
         }
     }
@@ -944,6 +923,38 @@ public class MainActivity extends AppCompatActivity {
                         msg.dismiss();
                     }
                 });
+            }
+        }
+    }
+
+    class SerializeData extends Thread {
+        DwResult data = null;
+
+        public SerializeData(DwResult data) {
+            this.data = data;
+        }
+
+        public void run() {
+            FileOutputStream unitsser;
+            FileOutputStream detailsser;
+            FileOutputStream cooldownsser;
+            try {
+                unitsser = openFileOutput(UNITS_CACHED_NAME, MODE_PRIVATE);
+                ObjectOutputStream list_ser = new ObjectOutputStream(unitsser);
+                list_ser.writeObject(data.getChars());
+                unitsser.close();
+
+                detailsser = openFileOutput(DETAILS_CACHED_NAME, MODE_PRIVATE);
+                ObjectOutputStream details_ser = new ObjectOutputStream(detailsser);
+                details_ser.writeObject(data.getDetails());
+                detailsser.close();
+
+                cooldownsser = openFileOutput(COOLDOWNS_CACHED_NAME, MODE_PRIVATE);
+                ObjectOutputStream cooldowns_ser = new ObjectOutputStream(cooldownsser);
+                cooldowns_ser.writeObject(data.getCooldowns());
+                cooldownsser.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
