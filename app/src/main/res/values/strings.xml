@@ -26,4 +26,6 @@
 
     <string name="filterBtn_contDesc">Search button pic</string>
     <string name="sort_contDesc">Sort button pic</string>
+
+    <string name="loadingmsg">Please wait while loading data...</string>
 </resources>
