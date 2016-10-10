@@ -28,4 +28,40 @@
     <string name="sort_contDesc">Sort button pic</string>
 
     <string name="loadingmsg">Please wait while loading data...</string>
+    <string name="navigation_drawer_open"></string>
+    <string name="navigation_drawer_close"></string>
+
+    <!-- EXPERIMENTAL ### Navigation Drawer List Array -->
+    <string name="type_title">Type</string>
+    <string-array name="type_array">
+        <item>STR</item>
+        <item>DEX</item>
+        <item>QCK</item>
+        <item>PSY</item>
+        <item>INT</item>
+    </string-array>
+
+    <string name="class_title">Class</string>
+    <string-array name="class_array">
+        <item>Fighter</item>
+        <item>Striker</item>
+        <item>Slasher</item>
+        <item>Shooter</item>
+        <item>Free Spirit</item>
+        <item>Cerebral</item>
+        <item>Powerhouse</item>
+        <item>Driven</item>
+        <item>Booster</item>
+        <item>Evolver</item>
+    </string-array>
+
+    <string name="stars_title">Stars</string>
+    <string-array name="stars_array">
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+    </string-array>
 </resources>

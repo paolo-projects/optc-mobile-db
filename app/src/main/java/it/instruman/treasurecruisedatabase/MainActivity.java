@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
@@ -13,8 +15,10 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -22,15 +26,16 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
+import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.github.amlcurran.showcaseview.ShowcaseView;
+import com.github.amlcurran.showcaseview.targets.ViewTarget;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.Scriptable;
 
@@ -43,12 +48,19 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.URL;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Handler;
 
 public class MainActivity extends AppCompatActivity {
     private final Context context = this;
@@ -56,15 +68,76 @@ public class MainActivity extends AppCompatActivity {
     /*
         ################### APP VERSION ##################
     */
-    private final static Double APP_VERSION = 1.1;
+    private final static Double APP_VERSION = 1.2;
 /*
     ##################################################
  */
 
+    ExpandableListAdapter explistAdapter;
+    ExpandableListView expListView;
+    List<String> explistDataHeader;
+    HashMap<String, LinkedHashMap<String, Boolean>> explistDataChild;
+
+    public enum FL_TYPE {
+        STR, DEX, QCK, PSY, INT
+    }
+
+    public enum FL_CLASS {
+        FIGHTER("fighter"),
+        SLASHER("slasher"),
+        STRIKER("striker"),
+        SHOOTER("shooter"),
+        FREESPIRIT("free spirit"),
+        CEREBRAL("cerebral"),
+        POWERHOUSE("powerhouse"),
+        DRIVEN("driven"),
+        BOOSTER("booster"),
+        EVOLVER("evolver");
+
+
+        private String text;
+
+        FL_CLASS(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+        public boolean equalsCaseInsensitive(String what) {
+            if (what != null) {
+                return this.text.equalsIgnoreCase(what);
+            }
+            throw new IllegalArgumentException("Argument can't be null");
+        }
+
+        public static FL_CLASS fromString(String text) {
+            if (text != null) {
+                for (FL_CLASS b : FL_CLASS.values()) {
+                    if (text.equalsIgnoreCase(b.text)) {
+                        return b;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No constant named " + text);
+        }
+    }
+
+    public enum FL_STARS {
+        ONE, TWO, THREE, FOUR, FIVE, SIX
+    }
+
+    public EnumSet<FL_TYPE> TypeFlags = EnumSet.allOf(FL_TYPE.class);
+    //public EnumSet<FL_CLASS> ClassFlags = EnumSet.allOf(FL_CLASS.class);
+    public EnumSet<FL_CLASS> ClassFlags = EnumSet.noneOf(FL_CLASS.class);
+    public EnumSet<FL_STARS> StarsFlags = EnumSet.allOf(FL_STARS.class);
+    public String FilterText = "";
 
     private final String UNITS_CACHED_NAME = "units.serial";
     private final String DETAILS_CACHED_NAME = "details.serial";
     private final String COOLDOWNS_CACHED_NAME = "cooldowns.serial";
+    private final String LAST_UPDATE_FILE = "lastupdate.serial";
 
     ImageView sortName, sortType, sortStars;
     Integer nsort, tsort, ssort;
@@ -74,6 +147,8 @@ public class MainActivity extends AppCompatActivity {
     Activity activity;
     Dialog dlg_hwnd = null;
     Dialog loadingdlg_hwnd = null;
+    ActionBarDrawerToggle mDrawerToggle;
+    Handler handle;
 
     private ArrayList<HashMap> list, original_list;
     ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
@@ -284,35 +359,8 @@ public class MainActivity extends AppCompatActivity {
         filterBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!filterText.getText().toString().equals("")) {
-                    list = original_list;
-                    String tocheck = filterText.getText().toString();
-                    ArrayList<HashMap> result = new ArrayList<>();
-                    for (HashMap foo : list) {
-                        if (((String) foo.get(Constants.NAME)).toLowerCase().contains(tocheck.toLowerCase()))
-                            result.add(foo);
-                    }
-                    list = result;
-                    adapter = new listViewAdapter(activity, list);
-                    lview.setAdapter(adapter);
-                    sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-                    sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-                    sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-                    nsort = tsort = ssort = 0;
-                } else {
-                    list = original_list;
-                    adapter = new listViewAdapter(activity, list);
-                    lview.setAdapter(adapter);
-                    sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-                    sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-                    sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-                    nsort = tsort = ssort = 0;
-                }
-                InputMethodManager inputManager = (InputMethodManager)
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-
-                inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
-                        InputMethodManager.HIDE_NOT_ALWAYS);
+                FilterText = filterText.getText().toString();
+                rebuildList();
             }
         });
 
@@ -323,8 +371,99 @@ public class MainActivity extends AppCompatActivity {
         details = new HashMap<>();
         cooldowns = new ArrayList<>();
         original_list = new ArrayList<>();
+
+        //Add data to navigation drawer
+        // get the listview
+        expListView = (ExpandableListView) findViewById(R.id.left_drawer_list);
+        // preparing list data
+        prepareListData();
+        explistAdapter = new ExpandableListAdapter(this, explistDataHeader, explistDataChild);
+        // setting list adapter
+        expListView.setAdapter(explistAdapter);
+        expListView.setOnChildClickListener(setFlags);
+
+        ImageButton filterReset = (ImageButton) findViewById(R.id.reset_filters);
+        filterReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                resetFilters();
+            }
+        });
+
         // run async task to download or load DB
-        (new DownloadData()).execute();
+        if ((new File(getFilesDir(), LAST_UPDATE_FILE)).isFile()) {
+            Date lastupdateDB = getLastUpdate();
+            Date datecachedDB = getSerializedDate();
+            if (lastupdateDB.after(datecachedDB)) {
+                (new DownloadData(true, true)).execute();
+            } else (new DownloadData(false, true)).execute();
+        } else (new DownloadData(true, true)).execute();
+
+        SharedPreferences mPrefs = getSharedPreferences("label", 0);
+        Boolean displayedTutorial = mPrefs.getBoolean("displayed_tutorial", false);
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int height = size.y;
+        TextView placeholder = (TextView) findViewById(R.id.placeholder);
+        placeholder.setX(0);
+        placeholder.setY(height / 2);
+        if (!displayedTutorial) {
+            new ShowcaseView.Builder(this)
+                    .setTarget(new ViewTarget(placeholder))
+                    .setContentTitle("New features!")
+                    .setContentText("Try the new custom filters by swiping from the left side of screen!")
+                    .setStyle(R.style.CustomShowcaseTheme2)
+                    .hideOnTouchOutside()
+                    .build();
+            SharedPreferences.Editor mEditor = mPrefs.edit();
+            mEditor.putBoolean("displayed_tutorial", true).apply();
+        }
+    }
+
+    private void prepareListData() {
+        explistDataHeader = new ArrayList<String>();
+        explistDataChild = new HashMap<String, LinkedHashMap<String, Boolean>>();
+
+        // Adding child data
+        explistDataHeader.add(getString(R.string.type_title));
+        explistDataHeader.add(getString(R.string.class_title));
+        explistDataHeader.add(getString(R.string.stars_title));
+
+        // Adding child data
+        List<String> type_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.type_array)));
+        List<String> class_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.class_array)));
+        List<String> stars_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.stars_array)));
+
+        LinkedHashMap<String, Boolean> tmp = new LinkedHashMap<>();
+        for (String entry : type_list) {
+            tmp.put(entry, true);
+        }
+        explistDataChild.put(explistDataHeader.get(0), tmp); // Header, Child data
+
+        tmp = new LinkedHashMap<>();
+        for (String entry : class_list) {
+            tmp.put(entry, false);
+        }
+        explistDataChild.put(explistDataHeader.get(1), tmp);
+
+        tmp = new LinkedHashMap<>();
+        for (String entry : stars_list) {
+            tmp.put(entry, true);
+        }
+        explistDataChild.put(explistDataHeader.get(2), tmp);
+    }
+
+    private void resetFilters() {
+        prepareListData();
+        TypeFlags = EnumSet.allOf(FL_TYPE.class);
+        ClassFlags = EnumSet.noneOf(FL_CLASS.class);
+        StarsFlags = EnumSet.allOf(FL_STARS.class);
+        rebuildList();
+        explistAdapter = new ExpandableListAdapter(this, explistDataHeader, explistDataChild);
+        // setting list adapter
+        expListView.setAdapter(explistAdapter);
+        expListView.setOnChildClickListener(setFlags);
     }
 
     @Override
@@ -359,32 +498,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private JSONArray getJSON(String url) {
-        //Make the actual request - method displayed above
-
-        try {
-            String result = getFileURL(url);
-            return new JSONArray(result);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        //Parse the result for the JSON data
-    }
-
-    private JSONObject getJSONObj(String url) {
-        //Make the actual request - method displayed above
-
-        try {
-            String result = getFileURL(url);
-            return new JSONObject(result);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return null;
-        }
-        //Parse the result for the JSON data
-    }
-
     public Object parseJScript(String uri, String objname) {
 
         String dump = getFileURL(uri);
@@ -414,159 +527,6 @@ public class MainActivity extends AppCompatActivity {
             org.mozilla.javascript.Context.exit();
         }
         return null;
-    }
-
-    private void populateList() {
-        List<List> characters = (List) parseJScript("https://optc-db.github.io/common/data/units.js", "units");
-        //JSONArray characters = getJSON(CharacterListJSONUrl);
-        int char_size = characters.size();
-        if (char_size > 0) {
-            for (int i = 0; i < char_size; i++) {
-                try {
-                    List arr_2 = characters.get(i);
-                    String name = (arr_2.get(0) == null) ? "" : (String) arr_2.get(0);
-                    String type = (arr_2.get(1) == null) ? "" : (String) arr_2.get(1);
-                    Integer stars = (arr_2.get(3) == null) ? 1 : ((Double) arr_2.get(3)).intValue();
-                    Object classes = (arr_2.get(2) == null) ? null : arr_2.get(2);
-                    String cost = (arr_2.get(4) == null) ? "" : String.valueOf(((Double) arr_2.get(4)).intValue());
-                    String combo = (arr_2.get(5) == null) ? "" : String.valueOf(((Double) arr_2.get(5)).intValue());
-                    String sockets = (arr_2.get(6) == null) ? "" : String.valueOf(((Double) arr_2.get(6)).intValue());
-                    String maxlvl = (arr_2.get(7) == null) ? "" : String.valueOf(((Double) arr_2.get(7)).intValue());
-                    String exptomax = (arr_2.get(8) == null) ? "" : String.valueOf(((Double) arr_2.get(8)).intValue());
-                    String lvl1hp = (arr_2.get(9) == null) ? "" : String.valueOf(((Double) arr_2.get(9)).intValue());
-                    String lvl1atk = (arr_2.get(10) == null) ? "" : String.valueOf(((Double) arr_2.get(10)).intValue());
-                    String lvl1rcv = (arr_2.get(11) == null) ? "" : String.valueOf(((Double) arr_2.get(11)).intValue());
-                    String maxhp = (arr_2.get(12) == null) ? "" : String.valueOf(((Double) arr_2.get(12)).intValue());
-                    String maxatk = (arr_2.get(13) == null) ? "" : String.valueOf(((Double) arr_2.get(13)).intValue());
-                    String maxrcv = (arr_2.get(14) == null) ? "" : String.valueOf(((Double) arr_2.get(14)).intValue());
-
-                    HashMap temp = new HashMap();
-                    temp.put(Constants.NAME, name);
-                    temp.put(Constants.TYPE, type);
-                    temp.put(Constants.STARS, stars);
-                    temp.put(Constants.ID, i + 1);
-                    temp.put(Constants.CLASSES, classes);
-                    temp.put(Constants.COST, cost);
-                    temp.put(Constants.COMBO, combo);
-                    temp.put(Constants.SOCKETS, sockets);
-                    temp.put(Constants.MAXLVL, maxlvl);
-                    temp.put(Constants.EXPTOMAX, exptomax);
-                    temp.put(Constants.LVL1HP, lvl1hp);
-                    temp.put(Constants.LVL1ATK, lvl1atk);
-                    temp.put(Constants.LVL1RCV, lvl1rcv);
-                    temp.put(Constants.MAXHP, maxhp);
-                    temp.put(Constants.MAXATK, maxatk);
-                    temp.put(Constants.MAXRCV, maxrcv);
-                    list.add(temp);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    Log.d("CYCLE NUM", String.valueOf(i));
-                }
-            }
-        }
-
-        original_list = list;
-        Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/details.js", "details");
-        if ((details_js != null) && (details_js.size() > 0)) {
-            for (Map.Entry<Integer, Map> entry : details_js.entrySet()) {
-                Map<String, Object> value = entry.getValue();
-                HashMap map = new HashMap();
-                map.put(Constants2.SPECIAL, (value.containsKey("special") ? value.get("special") : ""));
-                map.put(Constants2.SPECIALNAME, (value.containsKey("specialName") ? value.get("specialName") : ""));
-                map.put(Constants2.CAPTAIN, (value.containsKey("captain") ? value.get("captain") : ""));
-                details.put(entry.getKey(), map);
-            }
-        }
-        /*JSONObject dett = getJSONObj(CharacterDetailsJSONUrl);
-        if ((dett != null) && (dett.length() > 0)) {
-            try {
-                Iterator<String> temp = dett.keys();
-
-                while (temp.hasNext()) {
-                    String key = temp.next();
-                    if (details.size() != Integer.parseInt(key)) { //indexes must always match character number!
-                        while (details.size() != Integer.parseInt(key)) details.add(new HashMap());
-                    }
-
-                    JSONObject value = dett.getJSONObject(key);
-                    HashMap map = new HashMap();
-                    map.put(Constants2.ID, Integer.parseInt(key));
-                    map.put(Constants2.SPECIAL, (value.has("special") ? value.get("special") : ""));
-                    map.put(Constants2.SPECIALNAME, (value.has("specialName") ? value.get("specialName") : ""));
-                    map.put(Constants2.CAPTAIN, (value.has("captain") ? value.get("captain") : ""));
-                    details.add(map);
-                }
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-        }*/
-        List<Object> coolds = (List) parseJScript("https://optc-db.github.io/common/data/cooldowns.js", "cooldowns");
-        if ((coolds != null) && (coolds.size() > 0)) {
-            cooldowns.add(new CoolDowns());
-            for (int i = 0; i < coolds.size(); i++) {
-                Object entry = coolds.get(i);
-                if (entry == null) cooldowns.add(new CoolDowns());
-                else if (entry.getClass().equals(Integer.class))
-                    cooldowns.add(new CoolDowns((Integer) coolds.get(i)));
-                else if (entry.getClass().equals(NativeArray.class)) {
-                    List<Double> entry_array = (List<Double>) coolds.get(i);
-                    Integer a = entry_array.get(0).intValue();
-                    Integer b = entry_array.get(1).intValue();
-                    cooldowns.add(new CoolDowns(a, b));
-                } else {
-                    Log.e("ERR", "Object type determination failed!");
-                    cooldowns.add(new CoolDowns());
-                }
-                if (i == 905) {
-                    Log.d("", "");
-                }
-            }
-        }
-
-        //CACHING DATA
-
-        // with Serializable interface
-        FileOutputStream unitsser;
-        FileOutputStream detailsser;
-        FileOutputStream cooldownsser;
-        try {
-            unitsser = openFileOutput(UNITS_CACHED_NAME, MODE_PRIVATE);
-            ObjectOutputStream list_ser = new ObjectOutputStream(unitsser);
-            list_ser.writeObject(list);
-            unitsser.close();
-
-            detailsser = openFileOutput(DETAILS_CACHED_NAME, MODE_PRIVATE);
-            ObjectOutputStream details_ser = new ObjectOutputStream(detailsser);
-            details_ser.writeObject(details);
-            detailsser.close();
-
-            cooldownsser = openFileOutput(COOLDOWNS_CACHED_NAME, MODE_PRIVATE);
-            ObjectOutputStream cooldowns_ser = new ObjectOutputStream(cooldownsser);
-            cooldowns_ser.writeObject(cooldowns);
-            cooldownsser.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        /*JSONArray cooldwns = getJSON(SpecialCooldownsJSONUrl);
-        if ((cooldwns != null) && (cooldwns.length() > 0)) {
-            try {
-                cooldowns.add(new CoolDowns()); //first entry null to make index start from 1
-                for (int i = 0; i < cooldwns.length(); i++) {
-                    Object entry = cooldwns.get(i);
-                    if (entry == JSONObject.NULL) cooldowns.add(new CoolDowns());
-                    else if (entry.getClass().equals(Integer.class))
-                        cooldowns.add(new CoolDowns(cooldwns.getInt(i)));
-                    else if (entry.getClass().equals(JSONArray.class)) {
-                        JSONArray entry_array = cooldwns.getJSONArray(i);
-                        Integer a = entry_array.getInt(0);
-                        Integer b = entry_array.getInt(1);
-                        cooldowns.add(new CoolDowns(a, b));
-                    } else Log.e("CRITICAL", "Object type determination failed!");
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }*/
     }
 
     private boolean isNetworkConnected() {
@@ -673,7 +633,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class DownloadData extends AsyncTask<Void, Void, DwResult> {
-        boolean forceDownload = false;
+        boolean doDownload = false;
         boolean updateCheck = true;
         boolean isDowloaded = false;
 
@@ -681,8 +641,8 @@ public class MainActivity extends AppCompatActivity {
             showLoading(context);
         }
 
-        public DownloadData(boolean forceDownload, boolean updateCheck) {
-            this.forceDownload = forceDownload;
+        public DownloadData(boolean doDownload, boolean updateCheck) {
+            this.doDownload = doDownload;
             this.updateCheck = updateCheck;
         }
 
@@ -693,38 +653,40 @@ public class MainActivity extends AppCompatActivity {
         protected DwResult doInBackground(Void... voids) {
             //android.os.Process.setThreadPriority(THREAD_PRIORITY_BACKGROUND + THREAD_PRIORITY_MORE_FAVORABLE);
             DwResult storage = new DwResult();
-            if (!forceDownload) {
-                if (!isNetworkConnected()) {
+            if (!doDownload) {
+
                     //IF YES CHECK IF THERE'S ANY CACHED DATA
-                    if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() && (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile()) {
-                        //LOAD CACHED DATA
-                        try {
-                            FileInputStream unitsser = openFileInput(UNITS_CACHED_NAME);
-                            FileInputStream detailsser = openFileInput(DETAILS_CACHED_NAME);
-                            FileInputStream cooldownsser = openFileInput(COOLDOWNS_CACHED_NAME);
+                if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() && (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile()) {
+                    //LOAD CACHED DATA
+                    try {
+                        FileInputStream unitsser = openFileInput(UNITS_CACHED_NAME);
+                        FileInputStream detailsser = openFileInput(DETAILS_CACHED_NAME);
+                        FileInputStream cooldownsser = openFileInput(COOLDOWNS_CACHED_NAME);
 
-                            ObjectInputStream units_ser = new ObjectInputStream(unitsser);
-                            storage.setChars((ArrayList<HashMap>) units_ser.readObject());
-                            unitsser.close();
+                        ObjectInputStream units_ser = new ObjectInputStream(unitsser);
+                        storage.setChars((ArrayList<HashMap>) units_ser.readObject());
+                        unitsser.close();
 
-                            ObjectInputStream details_ser = new ObjectInputStream(detailsser);
-                            storage.setDetails((HashMap<Integer, Map>) details_ser.readObject());
-                            detailsser.close();
+                        ObjectInputStream details_ser = new ObjectInputStream(detailsser);
+                        storage.setDetails((HashMap<Integer, Map>) details_ser.readObject());
+                        detailsser.close();
 
-                            ObjectInputStream cooldowns_ser = new ObjectInputStream(cooldownsser);
-                            storage.setCooldowns((ArrayList<CoolDowns>) cooldowns_ser.readObject());
-                            cooldownsser.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        ObjectInputStream cooldowns_ser = new ObjectInputStream(cooldownsser);
+                        storage.setCooldowns((ArrayList<CoolDowns>) cooldowns_ser.readObject());
+                        cooldownsser.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
+
                     //IF NO CACHED DATA, JUMP POPULATELIST AND SHOW EMPTY LIST
                 } else {
                     //IF CONNECTION IS ON DOWNLOAD NORMALLY THROUGH POPULATELIST
-                    storage = downloadData();
+                    if (isNetworkConnected())
+                        storage = downloadData();
                 }
             } else {
-                storage = downloadData();
+                if (isNetworkConnected())
+                    storage = downloadData();
             }
             return storage;
         }
@@ -738,7 +700,9 @@ public class MainActivity extends AppCompatActivity {
             lview.setAdapter(adapter);
             lview.setOnItemClickListener(lvOnClick);
             lview.requestFocus();
-            if (isDowloaded) (new SerializeData(result)).run();
+            if (isDowloaded) {
+                (new SerializeData(result)).run();
+            }
             /// UPDATE CHECK
             if (updateCheck) (new CheckUpdates()).execute();
             hideLoading();
@@ -953,13 +917,255 @@ public class MainActivity extends AppCompatActivity {
                 ObjectOutputStream cooldowns_ser = new ObjectOutputStream(cooldownsser);
                 cooldowns_ser.writeObject(data.getCooldowns());
                 cooldownsser.close();
+
+                serializeDate(getLastUpdate());
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
+    private Date getLastUpdate() {
+        Date lastupdate = new Date();
+        try {
+            FeedParser optc_db_check = new FeedParser(); // 2016-10-08T19:12:23+02:00
+            String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("https://github.com/optc-db/optc-db.github.io/commits/master.atom"));
+            DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
+            lastupdate = df1.parse(update_date);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return lastupdate;
+    }
+
+    private void serializeDate(Date value) {
+        try {
+            FileOutputStream out = openFileOutput(LAST_UPDATE_FILE, Context.MODE_PRIVATE);
+            ObjectOutputStream oos = new ObjectOutputStream(out);
+            oos.writeObject(value);
+            out.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private Date getSerializedDate() {
+        Date date = new Date();
+        try {
+            FileInputStream in = openFileInput(LAST_UPDATE_FILE);
+            ObjectInputStream ois = new ObjectInputStream(in);
+            date = (Date) ois.readObject();
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return date;
+    }
+
+    ExpandableListView.OnChildClickListener setFlags = new ExpandableListView.OnChildClickListener() {
+        @Override
+        public boolean onChildClick(ExpandableListView expandableListView, View view, int groupPosition, int childPosition, long id) {
+            boolean remove = explistAdapter.getChildValue(groupPosition, childPosition);
+            int ClassFlagsSize = ClassFlags.size();
+            if (remove) {
+                switch (groupPosition) {
+                    case 0: //Type Flag
+                        switch (childPosition) {
+                            case 0: // STR
+                                TypeFlags.remove(FL_TYPE.STR);
+                                break;
+                            case 1: // DEX
+                                TypeFlags.remove(FL_TYPE.DEX);
+                                break;
+                            case 2: // QCK
+                                TypeFlags.remove(FL_TYPE.QCK);
+                                break;
+                            case 3: // PSY
+                                TypeFlags.remove(FL_TYPE.PSY);
+                                break;
+                            case 4: // INT
+                                TypeFlags.remove(FL_TYPE.INT);
+                                break;
+                        }
+                        break;
+                    case 1: //Class Flag
+                        switch (childPosition) {
+                            case 0: // Fighter
+                                ClassFlags.remove(FL_CLASS.FIGHTER);
+                                break;
+                            case 1: // Striker
+                                ClassFlags.remove(FL_CLASS.STRIKER);
+                                break;
+                            case 2: // Slasher
+                                ClassFlags.remove(FL_CLASS.SLASHER);
+                                break;
+                            case 3: // Shooter
+                                ClassFlags.remove(FL_CLASS.SHOOTER);
+                                break;
+                            case 4: // Free Spirit
+                                ClassFlags.remove(FL_CLASS.FREESPIRIT);
+                                break;
+                            case 5: // Cerebral
+                                ClassFlags.remove(FL_CLASS.CEREBRAL);
+                                break;
+                            case 6: // Powerhouse
+                                ClassFlags.remove(FL_CLASS.POWERHOUSE);
+                                break;
+                            case 7: // Driven
+                                ClassFlags.remove(FL_CLASS.DRIVEN);
+                                break;
+                            case 8: //Booster
+                                ClassFlags.remove(FL_CLASS.BOOSTER);
+                                break;
+                            case 9: //Evolver
+                                ClassFlags.remove(FL_CLASS.EVOLVER);
+                                break;
+                        }
+                        break;
+                    case 2: //Stars Flag
+                        switch (childPosition) {
+                            case 0: // 6 stars
+                                StarsFlags.remove(FL_STARS.SIX);
+                                break;
+                            case 1: // 5 stars
+                                StarsFlags.remove(FL_STARS.FIVE);
+                                break;
+                            case 2: // 4 stars
+                                StarsFlags.remove(FL_STARS.FOUR);
+                                break;
+                            case 3: // 3 stars
+                                StarsFlags.remove(FL_STARS.THREE);
+                                break;
+                            case 4: // 2 stars
+                                StarsFlags.remove(FL_STARS.TWO);
+                                break;
+                            case 5: // 1 star
+                                StarsFlags.remove(FL_STARS.ONE);
+                                break;
+                        }
+                        break;
+                }
+            } else {
+                switch (groupPosition) {
+                    case 0: //Type Flag
+                        switch (childPosition) {
+                            case 0: // STR
+                                TypeFlags.add(FL_TYPE.STR);
+                                break;
+                            case 1: // DEX
+                                TypeFlags.add(FL_TYPE.DEX);
+                                break;
+                            case 2: // QCK
+                                TypeFlags.add(FL_TYPE.QCK);
+                                break;
+                            case 3: // PSY
+                                TypeFlags.add(FL_TYPE.PSY);
+                                break;
+                            case 4: // INT
+                                TypeFlags.add(FL_TYPE.INT);
+                                break;
+                        }
+                        break;
+                    case 1: //Class Flag
+                        if (ClassFlagsSize <= 1) {
+                            switch (childPosition) {
+                                case 0: // Fighter
+                                    ClassFlags.add(FL_CLASS.FIGHTER);
+                                    break;
+                                case 1: // Striker
+                                    ClassFlags.add(FL_CLASS.STRIKER);
+                                    break;
+                                case 2: // Slasher
+                                    ClassFlags.add(FL_CLASS.SLASHER);
+                                    break;
+                                case 3: // Shooter
+                                    ClassFlags.add(FL_CLASS.SHOOTER);
+                                    break;
+                                case 4: // Free Spirit
+                                    ClassFlags.add(FL_CLASS.FREESPIRIT);
+                                    break;
+                                case 5: // Cerebral
+                                    ClassFlags.add(FL_CLASS.CEREBRAL);
+                                    break;
+                                case 6: // Powerhouse
+                                    ClassFlags.add(FL_CLASS.POWERHOUSE);
+                                    break;
+                                case 7: // Driven
+                                    ClassFlags.add(FL_CLASS.DRIVEN);
+                                    break;
+                                case 8: //Booster
+                                    ClassFlags.add(FL_CLASS.BOOSTER);
+                                    break;
+                                case 9: //Evolver
+                                    ClassFlags.add(FL_CLASS.EVOLVER);
+                                    break;
+                            }
+                        }
+                        break;
+                    case 2: //Stars Flag
+                        switch (childPosition) {
+                            case 0: // 6 stars
+                                StarsFlags.add(FL_STARS.SIX);
+                                break;
+                            case 1: // 5 stars
+                                StarsFlags.add(FL_STARS.FIVE);
+                                break;
+                            case 2: // 4 stars
+                                StarsFlags.add(FL_STARS.FOUR);
+                                break;
+                            case 3: // 3 stars
+                                StarsFlags.add(FL_STARS.THREE);
+                                break;
+                            case 4: // 2 stars
+                                StarsFlags.add(FL_STARS.TWO);
+                                break;
+                            case 5: // 1 star
+                                StarsFlags.add(FL_STARS.ONE);
+                                break;
+                        }
+                        break;
+                }
+            }
+            //explistAdapter.notifyDataSetChanged();
+            if (remove || (groupPosition != 1) || (ClassFlagsSize <= 1)) {
+                explistAdapter.setChildValue(groupPosition, childPosition, !remove);
+                rebuildList();
+            }
+            return false;
+        }
+    };
+
+    private void updateList() {
+        adapter = new listViewAdapter(activity, list);
+        lview.setAdapter(adapter);
+        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        nsort = tsort = ssort = 0;
+        InputMethodManager inputManager = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    private void rebuildList() {
+        list = original_list;
+
+        list = FilterClass.filterByStars(
+                FilterClass.filterByClass(
+                        FilterClass.filterByType(
+                                FilterClass.filterByText(list, FilterText)
+                                , TypeFlags)
+                        , ClassFlags)
+                , StarsFlags);
+        Log.d("SIZE", String.valueOf(list.size()));
+        updateList();
+    }
+
     //DONE: Add loading screen when DB updates
-    //TODO: Avoid downloading db every time app starts. Need to check RSS or something else to see if DB has been updated, and then ask user if he wants to update
+    //DONE: Avoid downloading db every time app starts. Need to check RSS or something else to see if DB has been updated, and then ask user if he wants to update
     //DONE: Add update notification for this app
+    //DONE: Custom filters
+    //TODO: Improve custom filters
 }

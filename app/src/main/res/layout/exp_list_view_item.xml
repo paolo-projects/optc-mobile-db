@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="35dip"
+    android:orientation="horizontal">
+
+    <CheckedTextView
+        android:id="@+id/lblListItem"
+        android:layout_width="fill_parent"
+        android:layout_height="35dip"
+        android:gravity="center_vertical"
+        android:textSize="17dip"
+        android:checked="true"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple" />
+
+</LinearLayout>

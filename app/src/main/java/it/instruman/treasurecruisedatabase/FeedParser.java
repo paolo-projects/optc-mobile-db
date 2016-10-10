@@ -51,6 +51,31 @@ public class FeedParser {
         return entries;
     }
 
+    public String readUpdated(InputStream in) throws XmlPullParserException, IOException {
+        try {
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, false);
+            parser.setInput(in, null);
+            parser.nextTag();
+            parser.require(XmlPullParser.START_TAG, ns, "feed");
+            while (parser.next() != XmlPullParser.END_TAG) {
+                if (parser.getEventType() != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                String name = parser.getName();
+                // Starts by looking for the entry tag
+                if (name.equals("updated")) {
+                    return readUpdated(parser);
+                } else {
+                    skip(parser);
+                }
+            }
+        } finally {
+            in.close();
+        }
+        return "";
+    }
+
     public static class Entry {
         public final String title;
         public final String link;
@@ -99,6 +124,13 @@ public class FeedParser {
         String title = readText(parser);
         parser.require(XmlPullParser.END_TAG, ns, "title");
         return title;
+    }
+
+    private String readUpdated(XmlPullParser parser) throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "updated");
+        String updated = readText(parser);
+        parser.require(XmlPullParser.END_TAG, ns, "updated");
+        return updated;
     }
 
     private String readId(XmlPullParser parser) throws IOException, XmlPullParserException {
