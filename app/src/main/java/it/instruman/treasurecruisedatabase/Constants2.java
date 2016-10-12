@@ -9,5 +9,6 @@ public class Constants2 {
     public static final String CAPTAIN = "First";
     public static final String SPECIAL = "Second";
     public static final String SPECIALNAME = "Third";
-
+    public static final String CAPTAINNOTES = "Fourth";
+    public static final String SPECIALNOTES = "Fifth";
 }

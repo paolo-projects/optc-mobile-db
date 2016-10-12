@@ -52,6 +52,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
     /*
         ################### APP VERSION ##################
     */
-    private final static Double APP_VERSION = 1.2;
+    private final static Double APP_VERSION = 1.21;
 /*
     ##################################################
  */
@@ -129,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public EnumSet<FL_TYPE> TypeFlags = EnumSet.allOf(FL_TYPE.class);
-    //public EnumSet<FL_CLASS> ClassFlags = EnumSet.allOf(FL_CLASS.class);
     public EnumSet<FL_CLASS> ClassFlags = EnumSet.noneOf(FL_CLASS.class);
     public EnumSet<FL_STARS> StarsFlags = EnumSet.allOf(FL_STARS.class);
     public String FilterText = "";
@@ -219,8 +219,10 @@ public class MainActivity extends AppCompatActivity {
             TextView lvlmax = (TextView) dialog.findViewById(R.id.lvlmaxtext);
 
             TextView captability = (TextView) dialog.findViewById(R.id.captabilityText);
+            TextView captnotes = (TextView) dialog.findViewById(R.id.capt_notes);
             TextView specname = (TextView) dialog.findViewById(R.id.specnameText);
             TextView specability = (TextView) dialog.findViewById(R.id.specabilityText);
+            TextView specnotes = (TextView) dialog.findViewById(R.id.spec_notes);
             TextView speccooldown = (TextView) dialog.findViewById(R.id.speccooldownTxt);
             TextView speccooldownTitle = (TextView) dialog.findViewById(R.id.speccooldownTitle);
 
@@ -257,6 +259,11 @@ public class MainActivity extends AppCompatActivity {
             try {
                 Map extra = details.get(item.get(Constants.ID));
                 captability.setText((String) extra.get(Constants2.CAPTAIN));
+                String capt_notes = (String) extra.get(Constants2.CAPTAINNOTES);
+                if (!capt_notes.equals("")) {
+                    captnotes.setText("Notes: " + capt_notes);
+                    captnotes.setVisibility(View.VISIBLE);
+                }
                 specname.setText((String) extra.get(Constants2.SPECIALNAME));
                 Object specobject = extra.get(Constants2.SPECIAL);
                 if (specobject.getClass().equals(NativeArray.class)) {
@@ -275,6 +282,11 @@ public class MainActivity extends AppCompatActivity {
                     multiCD = true;
 
                 } else specability.setText((String) extra.get(Constants2.SPECIAL));
+                String spec_notes = (String) extra.get(Constants2.SPECIALNOTES);
+                if (!spec_notes.equals("")) {
+                    specnotes.setText("Notes: " + spec_notes);
+                    specnotes.setVisibility(View.VISIBLE);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -283,8 +295,8 @@ public class MainActivity extends AppCompatActivity {
                 CoolDowns cdwns = cooldowns.get((Integer) item.get(Constants.ID));
                 speccooldown.setText(cdwns.print());
             } else {
-                speccooldown.setVisibility(View.INVISIBLE);
-                speccooldownTitle.setVisibility(View.INVISIBLE);
+                speccooldown.setVisibility(View.GONE);
+                speccooldownTitle.setVisibility(View.GONE);
             }
 
             ImageButton backbtn = (ImageButton) dialog.findViewById(R.id.backBtn);
@@ -642,7 +654,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public DownloadData(boolean doDownload, boolean updateCheck) {
-            this.doDownload = doDownload;
+            this.doDownload = true;//doDownload;
             this.updateCheck = updateCheck;
         }
 
@@ -655,38 +667,26 @@ public class MainActivity extends AppCompatActivity {
             DwResult storage = new DwResult();
             if (!doDownload) {
 
-                    //IF YES CHECK IF THERE'S ANY CACHED DATA
+                //IF YES CHECK IF THERE'S ANY CACHED DATA AND LOAD IT :)
                 if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() && (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile()) {
-                    //LOAD CACHED DATA
-                    try {
-                        FileInputStream unitsser = openFileInput(UNITS_CACHED_NAME);
-                        FileInputStream detailsser = openFileInput(DETAILS_CACHED_NAME);
-                        FileInputStream cooldownsser = openFileInput(COOLDOWNS_CACHED_NAME);
-
-                        ObjectInputStream units_ser = new ObjectInputStream(unitsser);
-                        storage.setChars((ArrayList<HashMap>) units_ser.readObject());
-                        unitsser.close();
-
-                        ObjectInputStream details_ser = new ObjectInputStream(detailsser);
-                        storage.setDetails((HashMap<Integer, Map>) details_ser.readObject());
-                        detailsser.close();
-
-                        ObjectInputStream cooldowns_ser = new ObjectInputStream(cooldownsser);
-                        storage.setCooldowns((ArrayList<CoolDowns>) cooldowns_ser.readObject());
-                        cooldownsser.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    //IF NO CACHED DATA, JUMP POPULATELIST AND SHOW EMPTY LIST
+                    storage = getFromSerialized();
+                    //IF NO CACHED DATA, TRY TO DOWNLOAD IT :/
                 } else {
-                    //IF CONNECTION IS ON DOWNLOAD NORMALLY THROUGH POPULATELIST
+                    //IF CONNECTION IS ON DOWNLOAD :)
                     if (isNetworkConnected())
                         storage = downloadData();
+                    //ELSE LIST WILL BE EMPTY (DATA NEVER DOWNLOADED AND NO INTERNET CONNECTION MEANS BAD THINGS WILL HAPPEN) :(
                 }
             } else {
+                //IF CONNECTION IS ON DOWNLOAD DATA :)
                 if (isNetworkConnected())
                     storage = downloadData();
+                    //ELSE TRY TO GATHER IT FROM CACHED :/
+                else {
+                    if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() && (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile())
+                        storage = getFromSerialized();
+                    // NO CONNECTION + NO CACHED DATA = USELESS APP :(
+                }
             }
             return storage;
         }
@@ -706,6 +706,30 @@ public class MainActivity extends AppCompatActivity {
             /// UPDATE CHECK
             if (updateCheck) (new CheckUpdates()).execute();
             hideLoading();
+        }
+
+        private DwResult getFromSerialized() {
+            DwResult storage = new DwResult();
+            try {
+                FileInputStream unitsser = openFileInput(UNITS_CACHED_NAME);
+                FileInputStream detailsser = openFileInput(DETAILS_CACHED_NAME);
+                FileInputStream cooldownsser = openFileInput(COOLDOWNS_CACHED_NAME);
+
+                ObjectInputStream units_ser = new ObjectInputStream(unitsser);
+                storage.setChars((ArrayList<HashMap>) units_ser.readObject());
+                unitsser.close();
+
+                ObjectInputStream details_ser = new ObjectInputStream(detailsser);
+                storage.setDetails((HashMap<Integer, Map>) details_ser.readObject());
+                detailsser.close();
+
+                ObjectInputStream cooldowns_ser = new ObjectInputStream(cooldownsser);
+                storage.setCooldowns((ArrayList<CoolDowns>) cooldowns_ser.readObject());
+                cooldownsser.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return storage;
         }
 
         private DwResult downloadData() {
@@ -758,7 +782,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             storage.setChars(chars);
-
+            ParseAdditionalNotes notes_parser = new ParseAdditionalNotes();
             Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/details.js", "details");
             HashMap<Integer, Map> det_tmp = new HashMap<>();
             if ((details_js != null) && (details_js.size() > 0)) {
@@ -768,6 +792,8 @@ public class MainActivity extends AppCompatActivity {
                     map.put(Constants2.SPECIAL, (value.containsKey("special") ? value.get("special") : ""));
                     map.put(Constants2.SPECIALNAME, (value.containsKey("specialName") ? value.get("specialName") : ""));
                     map.put(Constants2.CAPTAIN, (value.containsKey("captain") ? value.get("captain") : ""));
+                    map.put(Constants2.CAPTAINNOTES, notes_parser.parseNotes(value.containsKey("captainNotes") ? (String) value.get("captainNotes") : ""));
+                    map.put(Constants2.SPECIALNOTES, notes_parser.parseNotes(value.containsKey("specialNotes") ? (String) value.get("specialNotes") : ""));
                     det_tmp.put(entry.getKey(), map);
                 }
             }
@@ -926,7 +952,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Date getLastUpdate() {
-        Date lastupdate = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, 1900);
+        cal.set(Calendar.MONTH, Calendar.JANUARY);
+        cal.set(Calendar.DAY_OF_MONTH, 1);
+
+        Date lastupdate = cal.getTime();
         try {
             FeedParser optc_db_check = new FeedParser(); // 2016-10-08T19:12:23+02:00
             String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("https://github.com/optc-db/optc-db.github.io/commits/master.atom"));
