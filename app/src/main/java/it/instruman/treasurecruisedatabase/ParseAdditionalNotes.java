@@ -45,7 +45,7 @@ public class ParseAdditionalNotes {
             String tmp_result = "";
             if (flags.size() > 1) {
                 int size = flags.size();
-                tmp_result = notes.get(flags.get(0));
+                tmp_result = notes.containsKey(flags.get(0)) ? notes.get(flags.get(0)) : "";
                 for (int i = 1; i < size; i++) {
                     String placeholder = "#" + i;
                     tmp_result = tmp_result.replace(placeholder, flags.get(i));
