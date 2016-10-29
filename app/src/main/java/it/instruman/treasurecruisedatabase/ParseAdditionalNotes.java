@@ -1,7 +1,5 @@
 package it.instruman.treasurecruisedatabase;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -31,15 +29,15 @@ public class ParseAdditionalNotes {
         notes.put("stages", "The special can be used as soon as the first stage is reached.");
         notes.put("zombie", "The protection only works when attacked by one single enemy and will leave the team with at least 1 HP; " +
                 "the effect will not work when attacked by multiples enemies at once.");
+        notes.put("colorAffinity", "'Color Affinity' boosts color type advantages. For example, a STR unit normally deals 2x to a DEX unit " +
+                "and .5x to QCK. With this Color Affinity boost, it will deal (2*#1)x to DEX and (0.5*(#1-1))x to QCK.");
     }
 
     public String parseNotes(String value) {
         if (!hasTag(value)) return value;
         String result_string = "";
         ArrayList<String> tags = getTags(value);
-        if (tags.size() > 1) {
-            Log.d("", "");
-        }
+
         for (String tag : tags) {
             ArrayList<String> flags = getFlags(tag);
             String tmp_result = "";
@@ -57,26 +55,6 @@ public class ParseAdditionalNotes {
         }
         return result_string.substring(0, result_string.length() - 1);
     }
-    /*public String parseSpecialNotes(String value)
-    {
-        if(!hasTag(value)) return value;
-        ArrayList<String> flags = getFlags(value);
-        String final_string = "";
-        if(flags.size()>1)
-        {
-            int size = flags.size();
-            final_string = notes.get(flags.get(0));
-            for(int i = 1; i<size; i++)
-            {
-                String placeholder = "#"+i;
-                final_string = final_string.replace(placeholder, flags.get(i));
-            }
-        } else if (flags.size()==1)
-        {
-            final_string = notes.get(flags.get(0));
-        }
-        return final_string;
-    }*/
 
     private static int tagNumber(String value) {
         if (!value.equals("") && value.replaceAll("^\\s+|\\s+$", "").substring(0, 1).equals("#")) {
@@ -101,7 +79,7 @@ public class ParseAdditionalNotes {
 
     private static ArrayList<String> getFlags(String value) {
         ArrayList<String> mList = new ArrayList<>();
-        int tagNumber = tagNumber(value);
+
         value = value.replace("#{", "");
         value = value.replace("}", "");
         int index = value.indexOf(":");
