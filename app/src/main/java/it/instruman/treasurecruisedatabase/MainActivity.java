@@ -15,6 +15,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -47,6 +49,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -66,13 +69,13 @@ import java.util.logging.Handler;
 public class MainActivity extends AppCompatActivity {
     private final Context context = this;
 
-    /*
-        ################### APP VERSION ##################
-    */
-    private final static Double APP_VERSION = 1.3;
+/*
+    ################### APP VERSION ##################
+*/
+private final static Double APP_VERSION = 1.6;
 /*
     ##################################################
- */
+*/
 
     ExpandableListAdapter explistAdapter;
     ExpandableListView expListView;
@@ -404,11 +407,15 @@ public class MainActivity extends AppCompatActivity {
 
         // run async task to download or load DB
         if ((new File(getFilesDir(), LAST_UPDATE_FILE)).isFile()) {
+            //There's cached data, so check if it's old
             Date lastupdateDB = getLastUpdate();
             Date datecachedDB = getSerializedDate();
             if (lastupdateDB.after(datecachedDB)) {
+                //if last db update is earlier than cached data then download new data
                 (new DownloadData(true, true)).execute();
+                //else load cached data
             } else (new DownloadData(false, true)).execute();
+            //if no cached data download new data
         } else (new DownloadData(true, true)).execute();
 
         SharedPreferences mPrefs = getSharedPreferences("label", 0);
@@ -430,6 +437,33 @@ public class MainActivity extends AppCompatActivity {
                     .build();
             SharedPreferences.Editor mEditor = mPrefs.edit();
             mEditor.putBoolean("displayed_tutorial", true).apply();
+        }
+
+        DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+
+        mDrawerLayout.addDrawerListener(mDrawerToggle);
+
+        try {
+
+            // get dragger responsible for the dragging of the left drawer
+            Field draggerField = DrawerLayout.class.getDeclaredField("mLeftDragger");
+            draggerField.setAccessible(true);
+            ViewDragHelper vdh = (ViewDragHelper) draggerField.get(mDrawerLayout);
+
+            // get access to the private field which defines
+            // how far from the edge dragging can start
+            Field edgeSizeField = ViewDragHelper.class.getDeclaredField("mEdgeSize");
+            edgeSizeField.setAccessible(true);
+
+            // increase the edge size - while x2 should be good enough,
+            // try bigger values to easily see the difference
+            int origEdgeSize = (int) edgeSizeField.get(vdh);
+            int newEdgeSize = origEdgeSize * 2;
+            edgeSizeField.setInt(vdh, newEdgeSize);
+
+        } catch (Exception e) {
+            // we unexpectedly failed - e.g. if internal implementation of
+            // either ViewDragHelper or DrawerLayout changed
         }
     }
 
@@ -654,7 +688,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public DownloadData(boolean doDownload, boolean updateCheck) {
-            this.doDownload = true;//doDownload;
+            this.doDownload = doDownload;
             this.updateCheck = updateCheck;
         }
 
