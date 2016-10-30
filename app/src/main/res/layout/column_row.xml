@@ -17,20 +17,32 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:textColor="#fff"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_gravity="center"
+        android:gravity="center_horizontal" />
 
     <TextView
         android:id="@+id/type"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center" />
 
     <TextView
         android:id="@+id/stars"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
-        android:textAlignment="center" />
+        android:textAlignment="center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center" />
 
 </LinearLayout>

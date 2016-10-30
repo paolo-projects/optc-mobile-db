@@ -2,5 +2,42 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+
+    <!-- TYPE COLORS -->
+    <!-- STR -->
+    <color name="str_bg">#d50000</color>
+    <color name="str_txt">#ffffff</color>
+
+    <!-- DEX -->
+    <color name="dex_bg">#64dd17</color>
+    <color name="dex_txt">#000000</color>
+
+    <!-- QCK -->
+    <color name="qck_bg">#0d47a1</color>
+    <color name="qck_txt">#ffffff</color>
+
+    <!-- INT -->
+    <color name="int_bg">#4a148c</color>
+    <color name="int_txt">#ffffff</color>
+
+    <!-- PSY -->
+    <color name="psy_bg">#ffd600</color>
+    <color name="psy_txt">#000000</color>
+
+    <!-- STARS COLORS -->
+    <!-- 1, 2 stars -->
+    <color name="bronze_bg">#3e2723</color>
+    <color name="bronze_txt">#ffffff</color>
+
+    <!-- 3 stars -->
+    <color name="silver_bg">#616161</color>
+    <color name="silver_txt">#ffffff</color>
+
+    <!-- 4, 5 stars -->
+    <color name="gold_bg">#ffb300</color>
+    <color name="gold_txt">#000000</color>
+
+    <!-- 6 stars -->
+    <color name="red_bg">#ff0000</color>
+    <color name="red_txt">#ffffff</color>
 </resources>

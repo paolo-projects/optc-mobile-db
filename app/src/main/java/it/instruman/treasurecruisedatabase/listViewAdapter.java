@@ -6,7 +6,6 @@ package it.instruman.treasurecruisedatabase;
 
 import android.app.Service;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -83,19 +82,24 @@ public class listViewAdapter extends BaseAdapter {
         holder.txtSecond.setText(SEC_COL);
         switch (SEC_COL) {
             case "STR":
-                holder.txtSecond.setTextColor(Color.RED);
+                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.str_bg));
+                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.str_txt));
                 break;
             case "QCK":
-                holder.txtSecond.setTextColor(Color.BLUE);
+                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.qck_bg));
+                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.qck_txt));
                 break;
             case "DEX":
-                holder.txtSecond.setTextColor(Color.GREEN);
+                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.dex_bg));
+                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.dex_txt));
                 break;
             case "PSY":
-                holder.txtSecond.setTextColor(Color.YELLOW);
+                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.psy_bg));
+                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.psy_txt));
                 break;
             case "INT":
-                holder.txtSecond.setTextColor(Color.argb(255, 204, 0, 102));
+                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.int_bg));
+                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.int_txt));
                 break;
             default:
                 break;
@@ -104,17 +108,21 @@ public class listViewAdapter extends BaseAdapter {
         switch ((Integer) map.get(Constants.STARS)) {
             case 1:
             case 2:
-                holder.txtThird.setTextColor(Color.argb(255, 160, 45, 0));
+                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.bronze_bg));
+                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.bronze_txt));
                 break;
             case 3:
-                holder.txtThird.setTextColor(Color.argb(255, 120, 120, 120));
+                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.silver_bg));
+                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.silver_txt));
                 break;
             case 4:
             case 5:
-                holder.txtThird.setTextColor(Color.argb(255, 199, 199, 0));
+                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.gold_bg));
+                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.gold_txt));
                 break;
             case 6:
-                holder.txtThird.setTextColor(Color.RED);
+                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.red_bg));
+                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.red_txt));
                 break;
         }
         return convertView;

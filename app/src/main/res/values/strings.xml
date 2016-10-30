@@ -11,7 +11,7 @@
     <string name="slots">Slots</string>
     <string name="maxlevel">Max Level</string>
     <string name="exptomax">Max Exp</string>
-    <string name="level">Lvl</string>
+    <string name="level">Level</string>
     <string name="hp">HP</string>
     <string name="atk">Atk</string>
     <string name="rcv">Rcv</string>
@@ -25,13 +25,15 @@
     <string name="filter_hint">Search by name</string>
 
     <string name="filterBtn_contDesc">Search button pic</string>
+    <string name="resetBtn_contDesc">Reset button pic</string>
     <string name="sort_contDesc">Sort button pic</string>
 
-    <string name="loadingmsg">Please wait while loading data...</string>
-    <string name="navigation_drawer_open"></string>
-    <string name="navigation_drawer_close"></string>
+    <string name="loadingmsg">Please wait while loading data…</string>
 
-    <!-- EXPERIMENTAL ### Navigation Drawer List Array -->
+    <string name="evolutions">Character evolutions:</string>
+    <string name="evolution_text"> Material needed: </string>
+
+    <!-- Navigation Drawer List Array -->
     <string name="type_title">Type</string>
     <string-array name="type_array">
         <item>STR</item>

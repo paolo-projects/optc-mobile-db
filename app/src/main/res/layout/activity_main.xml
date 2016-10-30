@@ -25,9 +25,22 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@drawable/sort_selector_bg"
+            android:background="@drawable/allround_bg"
             android:orientation="horizontal"
-            android:padding="10dp">
+            android:paddingRight="10dp"
+            android:paddingLeft="10dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp">
+
+            <ImageButton
+                android:id="@+id/resetBtn"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:background="@drawable/ic_reset_btn"
+                android:contentDescription="@string/resetBtn_contDesc"
+                android:scaleType="fitCenter"
+                android:layout_marginRight="5dp" />
 
             <EditText
                 android:id="@+id/filterText"
@@ -35,7 +48,7 @@
                 android:layout_height="match_parent"
                 android:layout_marginRight="5dp"
                 android:layout_weight="1"
-                android:background="@drawable/filtertext_bg"
+
                 android:hint="@string/filter_hint"
                 android:imeActionId="666"
                 android:imeOptions="actionSearch"
@@ -49,9 +62,8 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_gravity="center_vertical|center_horizontal"
-                android:background="@drawable/button_bg"
+                android:background="@drawable/ic_search_btn"
                 android:contentDescription="@string/filterBtn_contDesc"
-                android:foreground="@drawable/ic_filter"
                 android:scaleType="fitCenter" />
         </LinearLayout>
 
@@ -72,43 +84,63 @@
             <ImageView
                 android:id="@+id/sortName"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="14dp"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:background="@drawable/sortbtn_bg"
+                android:scaleType="fitCenter"
                 android:contentDescription="@string/sort_contDesc"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" />
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:background="@android:color/darker_gray" />
 
             <ImageView
                 android:id="@+id/sortType"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="14dp"
+                android:scaleType="fitCenter"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="0.2"
-                android:background="@drawable/sortbtn_bg"
-                android:contentDescription="@string/sort_contDesc" />
+                android:contentDescription="@string/sort_contDesc"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" />
+
+            <View
+                android:layout_width="0.5dp"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="2dp"
+                android:layout_marginRight="2dp"
+                android:background="@android:color/darker_gray" />
 
             <ImageView
                 android:id="@+id/sortStars"
                 android:layout_width="0dp"
-                android:layout_height="match_parent"
+                android:layout_height="14dp"
+                android:scaleType="fitCenter"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="0.2"
-                android:background="@drawable/sortbtn_bg"
-                android:contentDescription="@string/sort_contDesc" />
+                android:contentDescription="@string/sort_contDesc"
+                android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
-            android:background="@drawable/sort_selector_bg"
+            android:layout_height="match_parent"
+            android:layout_marginTop="-1.5dip"
+            android:background="@drawable/list_bg"
             android:padding="10dp">
 
             <ListView
                 android:id="@+id/listView1"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:animationCache="true"
                 android:scrollingCache="true" />
         </LinearLayout>

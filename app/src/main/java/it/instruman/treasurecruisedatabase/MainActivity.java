@@ -19,8 +19,10 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
@@ -29,9 +31,12 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
+import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -64,7 +69,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Handler;
 
 public class MainActivity extends AppCompatActivity {
     private final Context context = this;
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 1.6;
+private final static Double APP_VERSION = 2.0;
 /*
     ##################################################
 */
@@ -140,6 +144,7 @@ private final static Double APP_VERSION = 1.6;
     private final String UNITS_CACHED_NAME = "units.serial";
     private final String DETAILS_CACHED_NAME = "details.serial";
     private final String COOLDOWNS_CACHED_NAME = "cooldowns.serial";
+    private final String EVOLUTIONS_CACHED_NAME = "evolutions.serial";
     private final String LAST_UPDATE_FILE = "lastupdate.serial";
 
     ImageView sortName, sortType, sortStars;
@@ -151,7 +156,6 @@ private final static Double APP_VERSION = 1.6;
     Dialog dlg_hwnd = null;
     Dialog loadingdlg_hwnd = null;
     ActionBarDrawerToggle mDrawerToggle;
-    Handler handle;
 
     private ArrayList<HashMap> list, original_list;
     ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
@@ -180,147 +184,396 @@ private final static Double APP_VERSION = 1.6;
     };
     private HashMap<Integer, Map> details;
     private ArrayList<CoolDowns> cooldowns;
+    private Map<Integer, Map> evolutions;
     ListView.OnItemClickListener lvOnClick = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            HashMap item = (HashMap) adapter.getItem(position);
-            boolean multiCD = false;
-            final Dialog dialog = new Dialog(context, R.style.AppTheme);
-            dialog.setContentView(R.layout.character_info);
-            TextView title = (TextView) dialog.findViewById(R.id.titleText);
-            title.setText((String) item.get(Constants.NAME));
+            launchDialog(position);
+        }
+    };
 
-            // set the custom dialog components - text, image and button
-            ImageView image = (ImageView) dialog.findViewById(R.id.char_img_big);
+    private void launchDialog(int position) {
+        HashMap item = (HashMap) adapter.getItem(position);
 
-            Glide
-                    .with(activity)
-                    .load("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID((Integer) item.get(Constants.ID)) + ".png")
-                    .into(image);
+        //if((dlg_hwnd!=null)&&(dlg_hwnd.isShowing())) dlg_hwnd.dismiss();
 
-            dialog.setCanceledOnTouchOutside(true);
+        boolean multiCD = false;
+        final Dialog dialog = new Dialog(context, R.style.AppThemeDialog);
+        dialog.setContentView(R.layout.dialog_main);//dialog.setContentView(R.layout.character_info);
 
-            //NOW WE SHOULD SET EVERYTHING (OUCH!)
-            TextView class1 = (TextView) dialog.findViewById(R.id.class1Text);
-            TextView class2 = (TextView) dialog.findViewById(R.id.class2Text);
-            TextView type = (TextView) dialog.findViewById(R.id.typeText);
-            TextView stars = (TextView) dialog.findViewById(R.id.starsText);
-            TextView cost = (TextView) dialog.findViewById(R.id.costText);
+        TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
+        tabs.setup();
 
-            TextView combo = (TextView) dialog.findViewById(R.id.comboText);
-            TextView slots = (TextView) dialog.findViewById(R.id.slotsText);
-            TextView maxlevel = (TextView) dialog.findViewById(R.id.maxlevelText);
-            TextView exptomax = (TextView) dialog.findViewById(R.id.exptomaxText);
+        TabHost.TabSpec main_info = tabs.newTabSpec("MAIN_INFO");
+        main_info.setIndicator("Main Info");
+        main_info.setContent(R.id.tab_maininfo);
+        tabs.addTab(main_info);
 
-            TextView lvl1hp = (TextView) dialog.findViewById(R.id.lvl1hpText);
-            TextView lvl1atk = (TextView) dialog.findViewById(R.id.lvl1atkText);
-            TextView lvl1rcv = (TextView) dialog.findViewById(R.id.lvl1rcvText);
+        TabHost.TabSpec abilities = tabs.newTabSpec("ABILITIES");
+        abilities.setIndicator("Abilities");
+        abilities.setContent(R.id.tab_abilities);
+        tabs.addTab(abilities);
 
-            TextView maxhp = (TextView) dialog.findViewById(R.id.lvlmaxhpText);
-            TextView maxatk = (TextView) dialog.findViewById(R.id.lvlmaxatkText);
-            TextView maxrcv = (TextView) dialog.findViewById(R.id.lvlmaxrcvText);
-            TextView lvlmax = (TextView) dialog.findViewById(R.id.lvlmaxtext);
+        TabHost.TabSpec evolutions_tab = tabs.newTabSpec("EVOLUTIONS");
+        evolutions_tab.setIndicator("Evolutions");
+        evolutions_tab.setContent(R.id.tab_evolutions);
+        tabs.addTab(evolutions_tab);
+        tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
 
-            TextView captability = (TextView) dialog.findViewById(R.id.captabilityText);
-            TextView captnotes = (TextView) dialog.findViewById(R.id.capt_notes);
-            TextView specname = (TextView) dialog.findViewById(R.id.specnameText);
-            TextView specability = (TextView) dialog.findViewById(R.id.specabilityText);
-            TextView specnotes = (TextView) dialog.findViewById(R.id.spec_notes);
-            TextView speccooldown = (TextView) dialog.findViewById(R.id.speccooldownTxt);
-            TextView speccooldownTitle = (TextView) dialog.findViewById(R.id.speccooldownTitle);
+        tabs.setCurrentTab(0);
 
-            Object classes = item.get(Constants.CLASSES);
-            if (classes.getClass().equals(String.class)) {
-                class1.setText((String) classes);
-                class2.setText("");
-            } else if (classes.getClass().equals(NativeArray.class)) {
-                try {
-                    class1.setText((String) ((NativeArray) classes).get(0));
-                    class2.setText((String) ((NativeArray) classes).get(1));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            type.setText((String) item.get(Constants.TYPE));
-            stars.setText(String.valueOf(item.get(Constants.STARS)));
-            cost.setText((String) item.get(Constants.COST));
+        TextView title = (TextView) dialog.findViewById(R.id.titleText);
+        title.setText((String) item.get(Constants.NAME));
 
-            combo.setText((String) item.get(Constants.COMBO));
-            slots.setText((String) item.get(Constants.SOCKETS));
-            maxlevel.setText((String) item.get(Constants.MAXLVL));
-            exptomax.setText((String) item.get(Constants.EXPTOMAX));
+        // set the custom dialog components - text, image and button
+        ImageView image = (ImageView) dialog.findViewById(R.id.char_img_big);
 
-            lvl1hp.setText((String) item.get(Constants.LVL1HP));
-            lvl1atk.setText((String) item.get(Constants.LVL1ATK));
-            lvl1rcv.setText((String) item.get(Constants.LVL1RCV));
-            lvlmax.setText((String) item.get(Constants.MAXLVL));
+        Glide
+                .with(activity)
+                .load("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID((Integer) item.get(Constants.ID)) + ".png")
+                .into(image);
 
-            maxhp.setText((String) item.get(Constants.MAXHP));
-            maxatk.setText((String) item.get(Constants.MAXATK));
-            maxrcv.setText((String) item.get(Constants.MAXRCV));
+        dialog.setCanceledOnTouchOutside(true);
 
+        //NOW WE SHOULD SET EVERYTHING (OUCH!)
+        TextView class1 = (TextView) dialog.findViewById(R.id.class1Text);
+        TextView class2 = (TextView) dialog.findViewById(R.id.class2Text);
+        TextView type = (TextView) dialog.findViewById(R.id.typeText);
+        TextView stars = (TextView) dialog.findViewById(R.id.starsText);
+        TextView cost = (TextView) dialog.findViewById(R.id.costText);
+
+        TextView combo = (TextView) dialog.findViewById(R.id.comboText);
+        TextView slots = (TextView) dialog.findViewById(R.id.slotsText);
+        TextView maxlevel = (TextView) dialog.findViewById(R.id.maxlevelText);
+        TextView exptomax = (TextView) dialog.findViewById(R.id.exptomaxText);
+
+        TextView lvl1hp = (TextView) dialog.findViewById(R.id.lvl1hpText);
+        TextView lvl1atk = (TextView) dialog.findViewById(R.id.lvl1atkText);
+        TextView lvl1rcv = (TextView) dialog.findViewById(R.id.lvl1rcvText);
+
+        TextView maxhp = (TextView) dialog.findViewById(R.id.lvlmaxhpText);
+        TextView maxatk = (TextView) dialog.findViewById(R.id.lvlmaxatkText);
+        TextView maxrcv = (TextView) dialog.findViewById(R.id.lvlmaxrcvText);
+        TextView lvlmax = (TextView) dialog.findViewById(R.id.lvlmaxtext);
+
+        TextView captability = (TextView) dialog.findViewById(R.id.captabilityText);
+        TextView captnotes = (TextView) dialog.findViewById(R.id.capt_notes);
+        TextView specname = (TextView) dialog.findViewById(R.id.specnameText);
+        TextView specability = (TextView) dialog.findViewById(R.id.specabilityText);
+        TextView specnotes = (TextView) dialog.findViewById(R.id.spec_notes);
+        TextView speccooldown = (TextView) dialog.findViewById(R.id.speccooldownTxt);
+        TextView speccooldownTitle = (TextView) dialog.findViewById(R.id.speccooldownTitle);
+
+        Object classes = item.get(Constants.CLASSES);
+        if (classes.getClass().equals(String.class)) {
+            class1.setText((String) classes);
+            class2.setText("");
+        } else if (classes.getClass().equals(NativeArray.class)) {
             try {
-                Map extra = details.get(item.get(Constants.ID));
-                captability.setText((String) extra.get(Constants2.CAPTAIN));
-                String capt_notes = (String) extra.get(Constants2.CAPTAINNOTES);
-                if (!capt_notes.equals("")) {
-                    captnotes.setText("Notes: " + capt_notes);
-                    captnotes.setVisibility(View.VISIBLE);
-                }
-                specname.setText((String) extra.get(Constants2.SPECIALNAME));
-                Object specobject = extra.get(Constants2.SPECIAL);
-                if (specobject.getClass().equals(NativeArray.class)) {
-                    List<Map> specmulti = (List<Map>) specobject;
-                    String txt = "";
-                    for (int n = 0; n < specmulti.size(); n++) {
-                        Map<String, Object> currstep = specmulti.get(n);
-                        txt += "Level " + (n + 1) + ": ";
-                        txt += currstep.get("description");
-                        txt += System.getProperty("line.separator");
-                        CoolDowns cd = new CoolDowns(currstep.get("cooldown"));
-                        txt += cd.print();
-                        txt += System.getProperty("line.separator");
-                    }
-                    specability.setText(txt);
-                    multiCD = true;
-
-                } else specability.setText((String) extra.get(Constants2.SPECIAL));
-                String spec_notes = (String) extra.get(Constants2.SPECIALNOTES);
-                if (!spec_notes.equals("")) {
-                    specnotes.setText("Notes: " + spec_notes);
-                    specnotes.setVisibility(View.VISIBLE);
-                }
+                class1.setText((String) ((NativeArray) classes).get(0));
+                class2.setText((String) ((NativeArray) classes).get(1));
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            if (!multiCD) {
-                CoolDowns cdwns = cooldowns.get((Integer) item.get(Constants.ID));
-                speccooldown.setText(cdwns.print());
-            } else {
-                speccooldown.setVisibility(View.GONE);
-                speccooldownTitle.setVisibility(View.GONE);
-            }
-
-            ImageButton backbtn = (ImageButton) dialog.findViewById(R.id.backBtn);
-            backbtn.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    dialog.dismiss();
-                }
-            });
-
-            dialog.show();
-            dlg_hwnd = dialog;
-
-            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
-            int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
-            if (dialog.getWindow() != null) {
-                dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                dialog.getWindow().setLayout(width, height);
-            }
         }
-    };
+        String ch_type = (String) item.get(Constants.TYPE);
+        type.setText(ch_type);
+        switch (ch_type.toLowerCase()) {
+            case "str":
+                type.setBackgroundColor(getResources().getColor(R.color.str_bg));
+                type.setTextColor(getResources().getColor(R.color.str_txt));
+                break;
+            case "dex":
+                type.setBackgroundColor(getResources().getColor(R.color.dex_bg));
+                type.setTextColor(getResources().getColor(R.color.dex_txt));
+                break;
+            case "qck":
+                type.setBackgroundColor(getResources().getColor(R.color.qck_bg));
+                type.setTextColor(getResources().getColor(R.color.qck_txt));
+                break;
+            case "psy":
+                type.setBackgroundColor(getResources().getColor(R.color.psy_bg));
+                type.setTextColor(getResources().getColor(R.color.psy_txt));
+                break;
+            case "int":
+                type.setBackgroundColor(getResources().getColor(R.color.int_bg));
+                type.setTextColor(getResources().getColor(R.color.int_txt));
+                break;
+        }
+        Integer ch_stars = (Integer) item.get(Constants.STARS);
+        stars.setText(String.valueOf(ch_stars));
+        switch (ch_stars) {
+            case 1:
+            case 2:
+                stars.setBackgroundColor(getResources().getColor(R.color.bronze_bg));
+                stars.setTextColor(getResources().getColor(R.color.bronze_txt));
+                break;
+            case 3:
+                stars.setBackgroundColor(getResources().getColor(R.color.silver_bg));
+                stars.setTextColor(getResources().getColor(R.color.silver_txt));
+                break;
+            case 4:
+            case 5:
+                stars.setBackgroundColor(getResources().getColor(R.color.gold_bg));
+                stars.setTextColor(getResources().getColor(R.color.gold_txt));
+                break;
+            case 6:
+                stars.setBackgroundColor(getResources().getColor(R.color.red_bg));
+                stars.setTextColor(getResources().getColor(R.color.red_txt));
+                break;
+        }
+        cost.setText((String) item.get(Constants.COST));
+
+        combo.setText((String) item.get(Constants.COMBO));
+        slots.setText((String) item.get(Constants.SOCKETS));
+        maxlevel.setText((String) item.get(Constants.MAXLVL));
+        exptomax.setText((String) item.get(Constants.EXPTOMAX));
+
+        lvl1hp.setText((String) item.get(Constants.LVL1HP));
+        lvl1atk.setText((String) item.get(Constants.LVL1ATK));
+        lvl1rcv.setText((String) item.get(Constants.LVL1RCV));
+        lvlmax.setText((String) item.get(Constants.MAXLVL));
+
+        maxhp.setText((String) item.get(Constants.MAXHP));
+        maxatk.setText((String) item.get(Constants.MAXATK));
+        maxrcv.setText((String) item.get(Constants.MAXRCV));
+
+        try {
+            Map extra = details.get(item.get(Constants.ID));
+            captability.setText((String) extra.get(Constants2.CAPTAIN));
+            String capt_notes = (String) extra.get(Constants2.CAPTAINNOTES);
+            if (!capt_notes.equals("")) {
+                captnotes.setText("Notes: " + capt_notes);
+                captnotes.setVisibility(View.VISIBLE);
+            }
+            specname.setText((String) extra.get(Constants2.SPECIALNAME));
+            Object specobject = extra.get(Constants2.SPECIAL);
+            if (specobject.getClass().equals(NativeArray.class)) {
+                List<Map> specmulti = (List<Map>) specobject;
+                String txt = "";
+                for (int n = 0; n < specmulti.size(); n++) {
+                    Map<String, Object> currstep = specmulti.get(n);
+                    txt += "Level " + (n + 1) + ": ";
+                    txt += currstep.get("description");
+                    txt += System.getProperty("line.separator");
+                    CoolDowns cd = new CoolDowns(currstep.get("cooldown"));
+                    txt += cd.print();
+                    txt += System.getProperty("line.separator");
+                }
+                specability.setText(txt);
+                multiCD = true;
+
+            } else specability.setText((String) extra.get(Constants2.SPECIAL));
+            String spec_notes = (String) extra.get(Constants2.SPECIALNOTES);
+            if (!spec_notes.equals("")) {
+                specnotes.setText("Notes: " + spec_notes);
+                specnotes.setVisibility(View.VISIBLE);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (!multiCD) {
+            CoolDowns cdwns = cooldowns.get((Integer) item.get(Constants.ID));
+            speccooldown.setText(cdwns.print());
+        } else {
+            speccooldown.setVisibility(View.GONE);
+            speccooldownTitle.setVisibility(View.GONE);
+        }
+
+        LinearLayout evolutions_content = (LinearLayout) dialog.findViewById(R.id.evolutions_content);
+        Map<String, Object> char_evo = evolutions.get(item.get(Constants.ID));
+        if (char_evo != null) {
+            if (char_evo.get("evolution").getClass().equals(Double.class)) {
+                //ONE EVOLUTION
+                final Integer evo_ID = ((Double) char_evo.get("evolution")).intValue(); //GET EVOLUTION ID
+                HorizontalScrollView evolution_scroll = new HorizontalScrollView(activity);
+                evolution_scroll.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
+                ));
+                LinearLayout evolution_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
+                evolution_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
+                evolution_row.setLayoutParams(new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                )); // SET WIDTH AND HEIGHT
+
+                //############# EVOLUTION SMALL ICON ###############
+                ImageButton evo_pic = new ImageButton(context); //CREATE EVOLUTION PIC
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        dpToPx(48), dpToPx(48)
+                );
+                params.setMargins(2, 5, 2, 5);
+                params.gravity = Gravity.CENTER;
+                evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
+                evo_pic.setPadding(0, 0, 0, 0);
+                evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+                Glide
+                        .with(activity)
+                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evo_ID) + ".png")
+                        .into(evo_pic); //ADD PIC
+                evo_pic.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        //TODO: Add code to open details of evolved character
+                        launchDialog(evo_ID - 1);
+                    }
+                });
+                evolution_row.addView(evo_pic);
+
+                //########### TEXT TO INDICATE EVOLVER MATERIAL ###########
+                TextView evo_text = new TextView(context);
+                LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                params1.setMargins(dpToPx(5), 5, dpToPx(5), 5);
+                params1.gravity = Gravity.CENTER;
+                evo_text.setLayoutParams(params1);
+                evo_text.setGravity(Gravity.CENTER);
+                evo_text.setText(getString(R.string.evolution_text));
+                evolution_row.addView(evo_text);
+
+                //########## EVOLVER MATERIAL PICS ###########
+                List<Double> evolution_material = (List<Double>) char_evo.get("evolvers");
+                for (final Double evolver : evolution_material) {
+                    ImageButton evolver_pic = new ImageButton(context); //CREATE EVOLUTION PIC
+                    LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
+                            dpToPx(48), dpToPx(48)
+                    );
+                    params.setMargins(0, 5, 2, 5);
+                    params.gravity = Gravity.CENTER;
+                    evolver_pic.setLayoutParams(params2); // SET WIDTH AND HEIGHT OF PIC
+                    evolver_pic.setPadding(0, 0, 0, 0);
+                    evolver_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+                    Glide
+                            .with(activity)
+                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver.intValue()) + ".png")
+                            .into(evolver_pic); //ADD PIC
+                    evolver_pic.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //TODO: Add code to open details of evolver character
+                            launchDialog(evolver.intValue() - 1);
+                        }
+                    });
+                    evolution_row.addView(evolver_pic);
+                }
+                evolution_scroll.addView(evolution_row);
+                evolutions_content.addView(evolution_scroll);
+            } else {
+                //MULTIPLE EVOLUTIONS
+                List<Double> evo_IDs = (List<Double>) char_evo.get("evolution"); //GET EVOLUTION IDs
+                List<List> evo_materials = (List<List>) char_evo.get("evolvers"); //GET EVOLVERS IDs
+                for (int i = 0; i < evo_IDs.size(); i++) {
+                    final Integer this_id = evo_IDs.get(i).intValue();
+                    List<Double> this_evos = evo_materials.get(i);
+                    HorizontalScrollView evolution_scroll = new HorizontalScrollView(activity);
+                    evolution_scroll.setLayoutParams(new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
+                    ));
+                    LinearLayout evolution_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
+                    evolution_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
+                    evolution_row.setLayoutParams(new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    )); // SET WIDTH AND HEIGHT
+
+                    //############# EVOLUTION SMALL ICON ###############
+                    ImageButton evo_pic = new ImageButton(context); //CREATE EVOLUTION PIC
+                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                            dpToPx(48), dpToPx(48)
+                    );
+                    params.setMargins(2, 5, 2, 5);
+                    params.gravity = Gravity.CENTER;
+                    evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
+                    evo_pic.setPadding(0, 0, 0, 0);
+                    evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+                    Glide
+                            .with(activity)
+                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(this_id) + ".png")
+                            .into(evo_pic); //ADD PIC
+                    evo_pic.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            //TODO: Add code to open details of evolved character
+                            launchDialog(this_id - 1);
+                        }
+                    });
+                    evolution_row.addView(evo_pic);
+
+                    //########### TEXT TO INDICATE EVOLVER MATERIAL ###########
+                    TextView evo_text = new TextView(context);
+                    LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.WRAP_CONTENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT
+                    );
+                    params1.setMargins(dpToPx(5), 5, dpToPx(5), 5);
+                    params1.gravity = Gravity.CENTER;
+                    evo_text.setLayoutParams(params1);
+                    evo_text.setGravity(Gravity.CENTER);
+                    evo_text.setText(getString(R.string.evolution_text));
+                    evolution_row.addView(evo_text);
+
+                    //########## EVOLVER MATERIAL PICS ###########
+                    for (final Double evolver : this_evos) {
+                        ImageButton evolver_pic = new ImageButton(context); //CREATE EVOLUTION PIC
+                        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
+                                dpToPx(48), dpToPx(48)
+                        );
+                        params.setMargins(0, 5, 2, 5);
+                        params.gravity = Gravity.CENTER;
+                        evolver_pic.setLayoutParams(params2); // SET WIDTH AND HEIGHT OF PIC
+                        evolver_pic.setPadding(0, 0, 0, 0);
+                        evolver_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+                        Glide
+                                .with(activity)
+                                .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver.intValue()) + ".png")
+                                .into(evolver_pic); //ADD PIC
+                        evolver_pic.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                //TODO: Add code to open details of evolver character
+                                launchDialog(evolver.intValue() - 1);
+                            }
+                        });
+                        evolution_row.addView(evolver_pic);
+                    }
+                    evolution_scroll.addView(evolution_row);
+                    evolutions_content.addView(evolution_scroll);
+                }
+            }
+            tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
+        }
+
+        ImageButton backbtn = (ImageButton) dialog.findViewById(R.id.backBtn);
+        backbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+        dlg_hwnd = dialog;
+
+        int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
+        int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
+        if (dialog.getWindow() != null) {
+            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            WindowManager.LayoutParams layoutParams = dialog.getWindow().getAttributes();
+            layoutParams.dimAmount = .7f;
+            dialog.getWindow().setAttributes(layoutParams);
+            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            dialog.getWindow().setLayout(width, height);
+        }
+    }
+
+    public int dpToPx(int dp) {
+        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
+        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
+        return px;
+    }
 
     public void showLoading(Context context) {
         final Dialog loading = new Dialog(context, R.style.AppTheme);
@@ -359,6 +612,7 @@ private final static Double APP_VERSION = 1.6;
         sortStars.setOnClickListener(sortStarsOnClick);
 
         final ImageButton filterBtn = (ImageButton) findViewById(R.id.filterBtn);
+        ImageButton resetBtn = (ImageButton) findViewById(R.id.resetBtn);
         filterText = (EditText) findViewById(R.id.filterText);
         filterText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -378,6 +632,14 @@ private final static Double APP_VERSION = 1.6;
                 rebuildList();
             }
         });
+        resetBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                filterText.setText("");
+                FilterText = "";
+                rebuildList();
+            }
+        });
 
         lview = (ListView) findViewById(R.id.listView1);
 
@@ -385,6 +647,7 @@ private final static Double APP_VERSION = 1.6;
         list = new ArrayList<>();
         details = new HashMap<>();
         cooldowns = new ArrayList<>();
+        evolutions = new HashMap<>();
         original_list = new ArrayList<>();
 
         //Add data to navigation drawer
@@ -681,7 +944,7 @@ private final static Double APP_VERSION = 1.6;
     class DownloadData extends AsyncTask<Void, Void, DwResult> {
         boolean doDownload = false;
         boolean updateCheck = true;
-        boolean isDowloaded = false;
+        boolean isDownloaded = false;
 
         protected void onPreExecute() {
             showLoading(context);
@@ -702,7 +965,8 @@ private final static Double APP_VERSION = 1.6;
             if (!doDownload) {
 
                 //IF YES CHECK IF THERE'S ANY CACHED DATA AND LOAD IT :)
-                if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() && (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile()) {
+                if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() &&
+                        (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile() && (new File(getFilesDir(), EVOLUTIONS_CACHED_NAME)).isFile()) {
                     storage = getFromSerialized();
                     //IF NO CACHED DATA, TRY TO DOWNLOAD IT :/
                 } else {
@@ -729,12 +993,13 @@ private final static Double APP_VERSION = 1.6;
             original_list = list = result.getChars();
             details = result.getDetails();
             cooldowns = result.getCooldowns();
+            evolutions = result.getEvolutions();
 
             adapter = new listViewAdapter(getApplicationContext(), list);
             lview.setAdapter(adapter);
             lview.setOnItemClickListener(lvOnClick);
             lview.requestFocus();
-            if (isDowloaded) {
+            if (isDownloaded) {
                 (new SerializeData(result)).run();
             }
             /// UPDATE CHECK
@@ -748,6 +1013,7 @@ private final static Double APP_VERSION = 1.6;
                 FileInputStream unitsser = openFileInput(UNITS_CACHED_NAME);
                 FileInputStream detailsser = openFileInput(DETAILS_CACHED_NAME);
                 FileInputStream cooldownsser = openFileInput(COOLDOWNS_CACHED_NAME);
+                FileInputStream evolutionsser = openFileInput(EVOLUTIONS_CACHED_NAME);
 
                 ObjectInputStream units_ser = new ObjectInputStream(unitsser);
                 storage.setChars((ArrayList<HashMap>) units_ser.readObject());
@@ -760,6 +1026,10 @@ private final static Double APP_VERSION = 1.6;
                 ObjectInputStream cooldowns_ser = new ObjectInputStream(cooldownsser);
                 storage.setCooldowns((ArrayList<CoolDowns>) cooldowns_ser.readObject());
                 cooldownsser.close();
+
+                ObjectInputStream evolutions_ser = new ObjectInputStream(evolutionsser);
+                storage.setEvolutions((Map<Integer, Map>) evolutions_ser.readObject());
+                evolutionsser.close();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -857,7 +1127,11 @@ private final static Double APP_VERSION = 1.6;
                 }
             }
             storage.setCooldowns(cools_tmp);
-            isDowloaded = true;
+
+            Map<Integer, Map> evolutions = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/evolutions.js", "evolutions");
+            storage.setEvolutions(evolutions);
+
+            isDownloaded = true;
             return storage;
         }
     }
@@ -866,17 +1140,20 @@ private final static Double APP_VERSION = 1.6;
         ArrayList<HashMap> this_list;
         HashMap<Integer, Map> this_details;
         ArrayList<CoolDowns> this_cooldowns;
+        Map<Integer, Map> this_evolutions;
 
-        public DwResult(ArrayList<HashMap> list, HashMap<Integer, Map> details, ArrayList<CoolDowns> cooldowns) {
+        public DwResult(ArrayList<HashMap> list, HashMap<Integer, Map> details, ArrayList<CoolDowns> cooldowns, Map<Integer, Map> evolutions) {
             this_list = list;
             this_details = details;
             this_cooldowns = cooldowns;
+            this_evolutions = evolutions;
         }
 
         public DwResult() {
             this_list = new ArrayList<>();
             this_details = new HashMap<>();
             this_cooldowns = new ArrayList<>();
+            this_evolutions = new HashMap<>();
         }
 
         public void setChars(ArrayList<HashMap> list) {
@@ -891,6 +1168,10 @@ private final static Double APP_VERSION = 1.6;
             this_cooldowns = cooldowns;
         }
 
+        public void setEvolutions(Map<Integer, Map> evolutions) {
+            this_evolutions = evolutions;
+        }
+
         public ArrayList<HashMap> getChars() {
             return this_list;
         }
@@ -901,6 +1182,10 @@ private final static Double APP_VERSION = 1.6;
 
         public ArrayList<CoolDowns> getCooldowns() {
             return this_cooldowns;
+        }
+
+        public Map<Integer, Map> getEvolutions() {
+            return this_evolutions;
         }
     }
 
@@ -962,6 +1247,7 @@ private final static Double APP_VERSION = 1.6;
             FileOutputStream unitsser;
             FileOutputStream detailsser;
             FileOutputStream cooldownsser;
+            FileOutputStream evolutionsser;
             try {
                 unitsser = openFileOutput(UNITS_CACHED_NAME, MODE_PRIVATE);
                 ObjectOutputStream list_ser = new ObjectOutputStream(unitsser);
@@ -977,6 +1263,11 @@ private final static Double APP_VERSION = 1.6;
                 ObjectOutputStream cooldowns_ser = new ObjectOutputStream(cooldownsser);
                 cooldowns_ser.writeObject(data.getCooldowns());
                 cooldownsser.close();
+
+                evolutionsser = openFileOutput(EVOLUTIONS_CACHED_NAME, MODE_PRIVATE);
+                ObjectOutputStream evolutions_ser = new ObjectOutputStream(evolutionsser);
+                evolutions_ser.writeObject(data.getEvolutions());
+                evolutionsser.close();
 
                 serializeDate(getLastUpdate());
             } catch (Exception e) {
@@ -1191,7 +1482,7 @@ private final static Double APP_VERSION = 1.6;
                         break;
                 }
             }
-            //explistAdapter.notifyDataSetChanged();
+
             if (remove || (groupPosition != 1) || (ClassFlagsSize <= 1)) {
                 explistAdapter.setChildValue(groupPosition, childPosition, !remove);
                 rebuildList();
@@ -1224,7 +1515,6 @@ private final static Double APP_VERSION = 1.6;
                                 , TypeFlags)
                         , ClassFlags)
                 , StarsFlags);
-        Log.d("SIZE", String.valueOf(list.size()));
         updateList();
     }
 
@@ -1232,5 +1522,8 @@ private final static Double APP_VERSION = 1.6;
     //DONE: Avoid downloading db every time app starts. Need to check RSS or something else to see if DB has been updated, and then ask user if he wants to update
     //DONE: Add update notification for this app
     //DONE: Custom filters
+    //DONE: List type and stars need a custom background and text color (to improve readability)
     //TODO: Improve custom filters
+    //DONE: Add evolutions and evolvers
+    //TODO: Maybe a white theme is better?
 }
