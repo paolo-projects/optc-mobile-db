@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 2.0;
+private final static Double APP_VERSION = 2.1;
 /*
     ##################################################
 */
@@ -188,12 +188,14 @@ private final static Double APP_VERSION = 2.0;
     ListView.OnItemClickListener lvOnClick = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            launchDialog(position);
+            launchDialog(position, false);
         }
     };
 
-    private void launchDialog(int position) {
-        HashMap item = (HashMap) adapter.getItem(position);
+    private void launchDialog(int position, boolean sub) {
+        HashMap item;
+        if (!sub) item = (HashMap) adapter.getItem(position);
+        else item = original_list.get(position);
 
         //if((dlg_hwnd!=null)&&(dlg_hwnd.isShowing())) dlg_hwnd.dismiss();
 
@@ -416,7 +418,7 @@ private final static Double APP_VERSION = 2.0;
                     @Override
                     public void onClick(View view) {
                         //TODO: Add code to open details of evolved character
-                        launchDialog(evo_ID - 1);
+                        launchDialog(evo_ID - 1, true);
                     }
                 });
                 evolution_row.addView(evo_pic);
@@ -454,7 +456,7 @@ private final static Double APP_VERSION = 2.0;
                         @Override
                         public void onClick(View view) {
                             //TODO: Add code to open details of evolver character
-                            launchDialog(evolver.intValue() - 1);
+                            launchDialog(evolver.intValue() - 1, true);
                         }
                     });
                     evolution_row.addView(evolver_pic);
@@ -497,7 +499,7 @@ private final static Double APP_VERSION = 2.0;
                         @Override
                         public void onClick(View view) {
                             //TODO: Add code to open details of evolved character
-                            launchDialog(this_id - 1);
+                            launchDialog(this_id - 1, true);
                         }
                     });
                     evolution_row.addView(evo_pic);
@@ -534,7 +536,7 @@ private final static Double APP_VERSION = 2.0;
                             @Override
                             public void onClick(View view) {
                                 //TODO: Add code to open details of evolver character
-                                launchDialog(evolver.intValue() - 1);
+                                launchDialog(evolver.intValue() - 1, true);
                             }
                         });
                         evolution_row.addView(evolver_pic);
