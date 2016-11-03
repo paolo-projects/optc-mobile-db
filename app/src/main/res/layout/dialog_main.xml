@@ -26,7 +26,8 @@
             android:layout_height="36dp"
             android:layout_gravity="end"
             android:background="@drawable/ic_back"
-            android:scaleType="fitCenter" />
+            android:scaleType="fitCenter"
+            android:contentDescription="@string/backbutton" />
     </LinearLayout>
 
     <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
@@ -45,7 +46,8 @@
                 android:layout_gravity="center"
                 android:scaleType="fitCenter"
                 android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp" />
+                android:layout_marginBottom="5dp"
+                android:contentDescription="@string/big_char_image" />
 
             <TabHost
                 android:id="@+id/tabs_host"
@@ -65,7 +67,7 @@
                             android:id="@android:id/tabs"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
-                            android:layout_gravity="center"></TabWidget>
+                            android:layout_gravity="center" />
                     </HorizontalScrollView>
 
                     <FrameLayout

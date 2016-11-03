@@ -76,7 +76,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.exp_list_view_item, null);
+            convertView = infalInflater.inflate(R.layout.exp_list_view_item, parent, false);
 
             view = new VHolder();
             view.itemView = (CheckedTextView) convertView
@@ -133,7 +133,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.exp_list_view_gh, null);
+            convertView = infalInflater.inflate(R.layout.exp_list_view_gh, parent, false);
         }
 
         TextView lblListHeader = (TextView) convertView

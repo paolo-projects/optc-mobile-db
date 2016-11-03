@@ -10,12 +10,14 @@
         android:layout_height="wrap_content"
         android:text="@string/captability"
         android:textStyle="bold"
-        android:background="#d0d0d0" />
+        android:background="?char_info_header_bg"
+        android:textColor="?char_info_header_txt" />
 
     <TextView
         android:id="@+id/captabilityText"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textColor="?char_info_txt" />
 
     <TextView
         android:layout_width="match_parent"
@@ -42,7 +44,8 @@
             android:text="@string/specability"
             android:textStyle="bold"
             android:layout_marginRight="2sp"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <TextView
             android:id="@+id/specnameText"
@@ -50,37 +53,44 @@
             android:layout_height="wrap_content"
             android:layout_weight="4"
             android:textStyle="bold"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/specabilityText"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:id="@+id/specials_container"
+        android:orientation="vertical">
+        <!--<TextView
+            android:id="@+id/specabilityText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/speccooldownTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="2sp"
+                android:text="@string/speccooldown"
+                android:textStyle="bold"
+                android:background="#d0d0d0" />
+
+            <TextView
+                android:id="@+id/speccooldownTxt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+        </LinearLayout>-->
+    </LinearLayout>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/spec_notes"
         android:visibility="gone" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-        <TextView
-            android:id="@+id/speccooldownTitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="2sp"
-            android:text="@string/speccooldown"
-            android:textStyle="bold"
-            android:background="#d0d0d0" />
-
-        <TextView
-            android:id="@+id/speccooldownTxt"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1" />
-    </LinearLayout>
 </LinearLayout>

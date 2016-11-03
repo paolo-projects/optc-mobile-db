@@ -1,34 +1,43 @@
 package it.instruman.treasurecruisedatabase;
 
+import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.provider.Settings;
 import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
 import android.widget.HorizontalScrollView;
@@ -40,27 +49,32 @@ import android.widget.TabHost;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.FutureTarget;
+import com.bumptech.glide.signature.StringSignature;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
+import com.github.lzyzsd.circleprogress.ArcProgress;
 
 import org.mozilla.javascript.NativeArray;
+import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.net.URLConnection;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -76,10 +90,13 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 2.1;
+private final static Double APP_VERSION = 2.5;
 /*
     ##################################################
 */
+
+    public static final int thumbnail_width = 96;
+    public static final int thumbnail_height = 96;
 
     ExpandableListAdapter explistAdapter;
     ExpandableListView expListView;
@@ -87,7 +104,39 @@ private final static Double APP_VERSION = 2.1;
     HashMap<String, LinkedHashMap<String, Boolean>> explistDataChild;
 
     public enum FL_TYPE {
-        STR, DEX, QCK, PSY, INT
+        STR("STR"),
+        DEX("DEX"),
+        QCK("QCK"),
+        PSY("PSY"),
+        INT("INT");
+
+        private String text;
+
+        FL_TYPE(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+        public boolean equalsCaseInsensitive(String what) {
+            if (what != null) {
+                return this.text.equalsIgnoreCase(what);
+            }
+            throw new IllegalArgumentException("Argument can't be null");
+        }
+
+        public static FL_TYPE fromString(String text) {
+            if (text != null) {
+                for (FL_TYPE b : FL_TYPE.values()) {
+                    if (text.equalsIgnoreCase(b.text)) {
+                        return b;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No constant named " + text);
+        }
     }
 
     public enum FL_CLASS {
@@ -133,26 +182,54 @@ private final static Double APP_VERSION = 2.1;
     }
 
     public enum FL_STARS {
-        ONE, TWO, THREE, FOUR, FIVE, SIX
+        ONE("1"),
+        TWO("2"),
+        THREE("3"),
+        FOUR("4"),
+        FIVE("5"),
+        SIX("6");
+
+        private String text;
+
+        FL_STARS(String text) {
+            this.text = text;
+        }
+
+        public String getText() {
+            return this.text;
+        }
+
+        public boolean equalsCaseInsensitive(String what) {
+            if (what != null) {
+                return this.text.equalsIgnoreCase(what);
+            }
+            throw new IllegalArgumentException("Argument can't be null");
+        }
+
+        public static FL_STARS fromString(String text) {
+            if (text != null) {
+                for (FL_STARS b : FL_STARS.values()) {
+                    if (text.equalsIgnoreCase(b.text)) {
+                        return b;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No constant named " + text);
+        }
     }
 
+    private Dialog loading;
     public EnumSet<FL_TYPE> TypeFlags = EnumSet.allOf(FL_TYPE.class);
     public EnumSet<FL_CLASS> ClassFlags = EnumSet.noneOf(FL_CLASS.class);
     public EnumSet<FL_STARS> StarsFlags = EnumSet.allOf(FL_STARS.class);
     public String FilterText = "";
-
-    private final String UNITS_CACHED_NAME = "units.serial";
-    private final String DETAILS_CACHED_NAME = "details.serial";
-    private final String COOLDOWNS_CACHED_NAME = "cooldowns.serial";
-    private final String EVOLUTIONS_CACHED_NAME = "evolutions.serial";
-    private final String LAST_UPDATE_FILE = "lastupdate.serial";
+    private Activity activity = this;
 
     ImageView sortName, sortType, sortStars;
     Integer nsort, tsort, ssort;
     ListView lview;
     listViewAdapter adapter;
     EditText filterText;
-    Activity activity;
     Dialog dlg_hwnd = null;
     Dialog loadingdlg_hwnd = null;
     ActionBarDrawerToggle mDrawerToggle;
@@ -182,9 +259,7 @@ private final static Double APP_VERSION = 2.1;
             else sortStarsAscending();
         }
     };
-    private HashMap<Integer, Map> details;
-    private ArrayList<CoolDowns> cooldowns;
-    private Map<Integer, Map> evolutions;
+
     ListView.OnItemClickListener lvOnClick = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -199,7 +274,6 @@ private final static Double APP_VERSION = 2.1;
 
         //if((dlg_hwnd!=null)&&(dlg_hwnd.isShowing())) dlg_hwnd.dismiss();
 
-        boolean multiCD = false;
         final Dialog dialog = new Dialog(context, R.style.AppThemeDialog);
         dialog.setContentView(R.layout.dialog_main);//dialog.setContentView(R.layout.character_info);
 
@@ -207,17 +281,17 @@ private final static Double APP_VERSION = 2.1;
         tabs.setup();
 
         TabHost.TabSpec main_info = tabs.newTabSpec("MAIN_INFO");
-        main_info.setIndicator("Main Info");
+        main_info.setIndicator(getString(R.string.tab_maininfo));
         main_info.setContent(R.id.tab_maininfo);
         tabs.addTab(main_info);
 
         TabHost.TabSpec abilities = tabs.newTabSpec("ABILITIES");
-        abilities.setIndicator("Abilities");
+        abilities.setIndicator(getString(R.string.tab_abilities));
         abilities.setContent(R.id.tab_abilities);
         tabs.addTab(abilities);
 
         TabHost.TabSpec evolutions_tab = tabs.newTabSpec("EVOLUTIONS");
-        evolutions_tab.setIndicator("Evolutions");
+        evolutions_tab.setIndicator(getString(R.string.tab_evolutions));
         evolutions_tab.setContent(R.id.tab_evolutions);
         tabs.addTab(evolutions_tab);
         tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
@@ -226,13 +300,15 @@ private final static Double APP_VERSION = 2.1;
 
         TextView title = (TextView) dialog.findViewById(R.id.titleText);
         title.setText((String) item.get(Constants.NAME));
+        title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
 
         // set the custom dialog components - text, image and button
         ImageView image = (ImageView) dialog.findViewById(R.id.char_img_big);
 
         Glide
-                .with(activity)
+                .with(context)
                 .load("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID((Integer) item.get(Constants.ID)) + ".png")
+                .signature(new StringSignature(convertID((Integer) item.get(Constants.ID))))
                 .into(image);
 
         dialog.setCanceledOnTouchOutside(true);
@@ -261,24 +337,17 @@ private final static Double APP_VERSION = 2.1;
         TextView captability = (TextView) dialog.findViewById(R.id.captabilityText);
         TextView captnotes = (TextView) dialog.findViewById(R.id.capt_notes);
         TextView specname = (TextView) dialog.findViewById(R.id.specnameText);
-        TextView specability = (TextView) dialog.findViewById(R.id.specabilityText);
-        TextView specnotes = (TextView) dialog.findViewById(R.id.spec_notes);
-        TextView speccooldown = (TextView) dialog.findViewById(R.id.speccooldownTxt);
-        TextView speccooldownTitle = (TextView) dialog.findViewById(R.id.speccooldownTitle);
 
-        Object classes = item.get(Constants.CLASSES);
-        if (classes.getClass().equals(String.class)) {
-            class1.setText((String) classes);
-            class2.setText("");
-        } else if (classes.getClass().equals(NativeArray.class)) {
-            try {
-                class1.setText((String) ((NativeArray) classes).get(0));
-                class2.setText((String) ((NativeArray) classes).get(1));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        String ch_type = (String) item.get(Constants.TYPE);
+        DBHelper db = new DBHelper(context);
+        SQLiteDatabase database = db.getReadableDatabase();
+        CharacterInfo charInfo = DBHelper.getCharacterInfo(database, (Integer) item.get(Constants.ID));
+        database.close();
+        db.close();
+
+        class1.setText(charInfo.getClass1());
+        class2.setText(charInfo.getClass2());
+
+        String ch_type = charInfo.getType();
         type.setText(ch_type);
         switch (ch_type.toLowerCase()) {
             case "str":
@@ -302,7 +371,8 @@ private final static Double APP_VERSION = 2.1;
                 type.setTextColor(getResources().getColor(R.color.int_txt));
                 break;
         }
-        Integer ch_stars = (Integer) item.get(Constants.STARS);
+
+        Integer ch_stars = charInfo.getStars();
         stars.setText(String.valueOf(ch_stars));
         switch (ch_stars) {
             case 1:
@@ -324,72 +394,85 @@ private final static Double APP_VERSION = 2.1;
                 stars.setTextColor(getResources().getColor(R.color.red_txt));
                 break;
         }
-        cost.setText((String) item.get(Constants.COST));
 
-        combo.setText((String) item.get(Constants.COMBO));
-        slots.setText((String) item.get(Constants.SOCKETS));
-        maxlevel.setText((String) item.get(Constants.MAXLVL));
-        exptomax.setText((String) item.get(Constants.EXPTOMAX));
+        cost.setText(charInfo.getCost().toString());
+        combo.setText(charInfo.getCombo().toString());
+        slots.setText(charInfo.getSockets().toString());
+        maxlevel.setText(charInfo.getMaxLvl().toString());
+        exptomax.setText(charInfo.getExpToMax().toString());
 
-        lvl1hp.setText((String) item.get(Constants.LVL1HP));
-        lvl1atk.setText((String) item.get(Constants.LVL1ATK));
-        lvl1rcv.setText((String) item.get(Constants.LVL1RCV));
-        lvlmax.setText((String) item.get(Constants.MAXLVL));
+        lvl1hp.setText(charInfo.getLvl1HP().toString());
+        lvl1atk.setText(charInfo.getLvl1ATK().toString());
+        lvl1rcv.setText(charInfo.getLvl1RCV().toString());
+        lvlmax.setText(charInfo.getMaxLvl().toString());
 
-        maxhp.setText((String) item.get(Constants.MAXHP));
-        maxatk.setText((String) item.get(Constants.MAXATK));
-        maxrcv.setText((String) item.get(Constants.MAXRCV));
+        maxhp.setText(charInfo.getMaxHP().toString());
+        maxatk.setText(charInfo.getMaxATK().toString());
+        maxrcv.setText(charInfo.getMaxRCV().toString());
 
-        try {
-            Map extra = details.get(item.get(Constants.ID));
-            captability.setText((String) extra.get(Constants2.CAPTAIN));
-            String capt_notes = (String) extra.get(Constants2.CAPTAINNOTES);
-            if (!capt_notes.equals("")) {
-                captnotes.setText("Notes: " + capt_notes);
-                captnotes.setVisibility(View.VISIBLE);
-            }
-            specname.setText((String) extra.get(Constants2.SPECIALNAME));
-            Object specobject = extra.get(Constants2.SPECIAL);
-            if (specobject.getClass().equals(NativeArray.class)) {
-                List<Map> specmulti = (List<Map>) specobject;
-                String txt = "";
-                for (int n = 0; n < specmulti.size(); n++) {
-                    Map<String, Object> currstep = specmulti.get(n);
-                    txt += "Level " + (n + 1) + ": ";
-                    txt += currstep.get("description");
-                    txt += System.getProperty("line.separator");
-                    CoolDowns cd = new CoolDowns(currstep.get("cooldown"));
-                    txt += cd.print();
-                    txt += System.getProperty("line.separator");
-                }
-                specability.setText(txt);
-                multiCD = true;
-
-            } else specability.setText((String) extra.get(Constants2.SPECIAL));
-            String spec_notes = (String) extra.get(Constants2.SPECIALNOTES);
-            if (!spec_notes.equals("")) {
-                specnotes.setText("Notes: " + spec_notes);
-                specnotes.setVisibility(View.VISIBLE);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        captability.setText(charInfo.getCaptainDescription());
+        String capt_notes = charInfo.getCaptainNotes();
+        if (!capt_notes.equals("")) {
+            captnotes.setText(getString(R.string.notes_text) + capt_notes);
+            captnotes.setVisibility(View.VISIBLE);
         }
+        List<CharacterSpecials> char_specials = charInfo.getSpecials();
+        if (char_specials.size() > 0) {
+            specname.setText(charInfo.getSpecialName());
+            LinearLayout specials_container = (LinearLayout) dialog.findViewById(R.id.specials_container);
+            for (CharacterSpecials special : char_specials) {
+                TextView special_description = new TextView(context);
+                special_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                special_description.setText(special.getSpecialDescription());
+                special_description.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+                specials_container.addView(special_description);
 
-        if (!multiCD) {
-            CoolDowns cdwns = cooldowns.get((Integer) item.get(Constants.ID));
-            speccooldown.setText(cdwns.print());
-        } else {
-            speccooldown.setVisibility(View.GONE);
-            speccooldownTitle.setVisibility(View.GONE);
+                LinearLayout coold_layout = new LinearLayout(context);
+                coold_layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+
+                TextView coold_title = new TextView(context);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+                params.setMargins(0, 0, dpToPx(4), 0);
+                coold_title.setLayoutParams(params);
+                coold_title.setText(getString(R.string.speccooldown));
+                coold_title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                coold_title.setBackgroundColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_bg)));
+                coold_title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+                coold_title.setText(getString(R.string.speccooldown));
+                coold_layout.addView(coold_title);
+
+                TextView coold_content = new TextView(context);
+                coold_content.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
+                Integer maxCD = special.getMaxCooldown();
+                Integer minCD = special.getMinCooldown();
+
+                String maxCDs = "?";
+                if ((maxCD != -1) && (maxCD != 0))
+                    maxCDs = String.valueOf(maxCD);
+
+                String minCDs = "?";
+                if ((minCD != -1) && (minCD != 0))
+                    minCDs = String.valueOf(minCD);
+
+                String coold_s = maxCDs + "/" + minCDs;
+                coold_content.setText(coold_s);
+                coold_content.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+
+                coold_layout.addView(coold_content);
+                coold_layout.setPadding(2, 8, 2, 8);
+
+                specials_container.addView(coold_layout);
+            }
         }
 
         LinearLayout evolutions_content = (LinearLayout) dialog.findViewById(R.id.evolutions_content);
-        Map<String, Object> char_evo = evolutions.get(item.get(Constants.ID));
-        if (char_evo != null) {
-            if (char_evo.get("evolution").getClass().equals(Double.class)) {
-                //ONE EVOLUTION
-                final Integer evo_ID = ((Double) char_evo.get("evolution")).intValue(); //GET EVOLUTION ID
-                HorizontalScrollView evolution_scroll = new HorizontalScrollView(activity);
+        List<CharacterEvolutions> evos = charInfo.getEvolutions();
+
+        if (evos.size() > 0) {
+            //MULTIPLE EVOLUTIONS
+            for (int i = 0; i < evos.size(); i++) {
+                final Integer this_id = evos.get(i).getEvolutionCharacter();
+                HorizontalScrollView evolution_scroll = new HorizontalScrollView(context);
                 evolution_scroll.setLayoutParams(new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
                 ));
@@ -411,20 +494,23 @@ private final static Double APP_VERSION = 2.1;
                 evo_pic.setPadding(0, 0, 0, 0);
                 evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
                 Glide
-                        .with(activity)
-                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evo_ID) + ".png")
+                        .with(context)
+                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(this_id) + ".png")
+                        .dontTransform()
+                        .override(thumbnail_width, thumbnail_height)
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
                         .into(evo_pic); //ADD PIC
                 evo_pic.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         //TODO: Add code to open details of evolved character
-                        launchDialog(evo_ID - 1, true);
+                        launchDialog(this_id - 1, true);
                     }
                 });
                 evolution_row.addView(evo_pic);
 
-                //########### TEXT TO INDICATE EVOLVER MATERIAL ###########
-                TextView evo_text = new TextView(context);
+                //########### TEXT OR IMG TO INDICATE EVOLVER MATERIAL ###########
+                /*TextView evo_text = new TextView(context);
                 LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
                         LinearLayout.LayoutParams.WRAP_CONTENT,
                         LinearLayout.LayoutParams.WRAP_CONTENT
@@ -434,91 +520,23 @@ private final static Double APP_VERSION = 2.1;
                 evo_text.setLayoutParams(params1);
                 evo_text.setGravity(Gravity.CENTER);
                 evo_text.setText(getString(R.string.evolution_text));
+                evolution_row.addView(evo_text);*/
+
+                ImageView evo_text = new ImageView(context);
+                LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                params1.setMargins(dpToPx(5), 5, dpToPx(5), 5);
+                params1.gravity = Gravity.CENTER;
+                evo_text.setLayoutParams(params1);
+                evo_text.setBackgroundResource(R.drawable.ic_left_arrow);
                 evolution_row.addView(evo_text);
 
+                List<Integer> evolvers = evos.get(i).getEvolvers();
                 //########## EVOLVER MATERIAL PICS ###########
-                List<Double> evolution_material = (List<Double>) char_evo.get("evolvers");
-                for (final Double evolver : evolution_material) {
-                    ImageButton evolver_pic = new ImageButton(context); //CREATE EVOLUTION PIC
-                    LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
-                            dpToPx(48), dpToPx(48)
-                    );
-                    params.setMargins(0, 5, 2, 5);
-                    params.gravity = Gravity.CENTER;
-                    evolver_pic.setLayoutParams(params2); // SET WIDTH AND HEIGHT OF PIC
-                    evolver_pic.setPadding(0, 0, 0, 0);
-                    evolver_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                    Glide
-                            .with(activity)
-                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver.intValue()) + ".png")
-                            .into(evolver_pic); //ADD PIC
-                    evolver_pic.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //TODO: Add code to open details of evolver character
-                            launchDialog(evolver.intValue() - 1, true);
-                        }
-                    });
-                    evolution_row.addView(evolver_pic);
-                }
-                evolution_scroll.addView(evolution_row);
-                evolutions_content.addView(evolution_scroll);
-            } else {
-                //MULTIPLE EVOLUTIONS
-                List<Double> evo_IDs = (List<Double>) char_evo.get("evolution"); //GET EVOLUTION IDs
-                List<List> evo_materials = (List<List>) char_evo.get("evolvers"); //GET EVOLVERS IDs
-                for (int i = 0; i < evo_IDs.size(); i++) {
-                    final Integer this_id = evo_IDs.get(i).intValue();
-                    List<Double> this_evos = evo_materials.get(i);
-                    HorizontalScrollView evolution_scroll = new HorizontalScrollView(activity);
-                    evolution_scroll.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
-                    ));
-                    LinearLayout evolution_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
-                    evolution_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
-                    evolution_row.setLayoutParams(new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    )); // SET WIDTH AND HEIGHT
-
-                    //############# EVOLUTION SMALL ICON ###############
-                    ImageButton evo_pic = new ImageButton(context); //CREATE EVOLUTION PIC
-                    LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                            dpToPx(48), dpToPx(48)
-                    );
-                    params.setMargins(2, 5, 2, 5);
-                    params.gravity = Gravity.CENTER;
-                    evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
-                    evo_pic.setPadding(0, 0, 0, 0);
-                    evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                    Glide
-                            .with(activity)
-                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(this_id) + ".png")
-                            .into(evo_pic); //ADD PIC
-                    evo_pic.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            //TODO: Add code to open details of evolved character
-                            launchDialog(this_id - 1, true);
-                        }
-                    });
-                    evolution_row.addView(evo_pic);
-
-                    //########### TEXT TO INDICATE EVOLVER MATERIAL ###########
-                    TextView evo_text = new TextView(context);
-                    LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.WRAP_CONTENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    );
-                    params1.setMargins(dpToPx(5), 5, dpToPx(5), 5);
-                    params1.gravity = Gravity.CENTER;
-                    evo_text.setLayoutParams(params1);
-                    evo_text.setGravity(Gravity.CENTER);
-                    evo_text.setText(getString(R.string.evolution_text));
-                    evolution_row.addView(evo_text);
-
-                    //########## EVOLVER MATERIAL PICS ###########
-                    for (final Double evolver : this_evos) {
+                for (final Integer evolver : evolvers) {
+                    if (evolver != 0) {
                         ImageButton evolver_pic = new ImageButton(context); //CREATE EVOLUTION PIC
                         LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
                                 dpToPx(48), dpToPx(48)
@@ -529,21 +547,24 @@ private final static Double APP_VERSION = 2.1;
                         evolver_pic.setPadding(0, 0, 0, 0);
                         evolver_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
                         Glide
-                                .with(activity)
-                                .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver.intValue()) + ".png")
+                                .with(context)
+                                .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver) + ".png")
+                                .dontTransform()
+                                .override(thumbnail_width, thumbnail_height)
+                                .diskCacheStrategy(DiskCacheStrategy.RESULT)
                                 .into(evolver_pic); //ADD PIC
                         evolver_pic.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
                                 //TODO: Add code to open details of evolver character
-                                launchDialog(evolver.intValue() - 1, true);
+                                launchDialog(evolver - 1, true);
                             }
                         });
                         evolution_row.addView(evolver_pic);
                     }
-                    evolution_scroll.addView(evolution_row);
-                    evolutions_content.addView(evolution_scroll);
                 }
+                evolution_scroll.addView(evolution_row);
+                evolutions_content.addView(evolution_scroll);
             }
             tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
         }
@@ -572,13 +593,16 @@ private final static Double APP_VERSION = 2.1;
     }
 
     public int dpToPx(int dp) {
-        DisplayMetrics displayMetrics = activity.getResources().getDisplayMetrics();
-        int px = Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
-        return px;
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT));
     }
 
     public void showLoading(Context context) {
-        final Dialog loading = new Dialog(context, R.style.AppTheme);
+        try {
+            loading = new Dialog(context, getPackageManager().getActivityInfo(getComponentName(), 0).theme);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         loading.setContentView(R.layout.loading_layout);
         loading.setCanceledOnTouchOutside(false);
         loading.setCancelable(false);
@@ -598,17 +622,37 @@ private final static Double APP_VERSION = 2.1;
         super.onCreate(savedInstanceState);
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
+        SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+        String theme_str = mPrefs.getString(getResources().getString(R.string.theme_pref), "teal");
+        switch (theme_str) {
+            case "teal":
+                setTheme(R.style.AppThemeTeal);
+                break;
+            case "red":
+                setTheme(R.style.AppThemeRed);
+                break;
+            case "amber":
+                setTheme(R.style.AppThemeAmber);
+                break;
+            default:
+                setTheme(R.style.AppThemeTeal);
+                break;
+        }
+
         setContentView(R.layout.activity_main);
-        activity = this;
 
         nsort = tsort = ssort = 0;
 
         sortName = (ImageView) findViewById(R.id.sortName);
         sortType = (ImageView) findViewById(R.id.sortType);
         sortStars = (ImageView) findViewById(R.id.sortStars);
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortName.setBackgroundResource(R.drawable.ic_circle);
+        //sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortType.setBackgroundResource(R.drawable.ic_circle);
+        //sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortStars.setBackgroundResource(R.drawable.ic_circle);
+        //sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
         sortName.setOnClickListener(sortNameOnClick);
         sortType.setOnClickListener(sortTypeOnClick);
         sortStars.setOnClickListener(sortStarsOnClick);
@@ -625,6 +669,27 @@ private final static Double APP_VERSION = 2.1;
                     handled = true;
                 }
                 return handled;
+            }
+        });
+        final LinearLayout F_TEXT = (LinearLayout) findViewById(R.id.filtertext_layout);
+        filterText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View view, boolean b) {
+                try { // try - catch is here to be sure that on older android version, since elevation property is not supported, an error is not raised
+                    if (b) {
+                        ObjectAnimator anim = ObjectAnimator.ofFloat(F_TEXT, "elevation", 2f, 8f);
+                        anim.setInterpolator(new DecelerateInterpolator());
+                        anim.setDuration(300);
+                        anim.start();
+                    } else {
+                        ObjectAnimator anim = ObjectAnimator.ofFloat(F_TEXT, "elevation", 8f, 2f);
+                        anim.setInterpolator(new DecelerateInterpolator());
+                        anim.setDuration(300);
+                        anim.start();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         filterBtn.setOnClickListener(new View.OnClickListener() {
@@ -647,9 +712,6 @@ private final static Double APP_VERSION = 2.1;
 
         //CREATE EMPTY DATABASES
         list = new ArrayList<>();
-        details = new HashMap<>();
-        cooldowns = new ArrayList<>();
-        evolutions = new HashMap<>();
         original_list = new ArrayList<>();
 
         //Add data to navigation drawer
@@ -670,8 +732,65 @@ private final static Double APP_VERSION = 2.1;
             }
         });
 
+        ImageButton resetDb = (ImageButton) findViewById(R.id.reset_db);
+        resetDb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                AlertDialog alert = new AlertDialog.Builder(context)
+                        .setTitle(getString(R.string.reset_db_title))
+                        .setMessage(getString(R.string.reset_db_message))
+                        .setPositiveButton(getString(R.string.reset_db_confirm), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                list = new ArrayList<>();
+                                updateList();
+                                (new DownloadData(true, false)).execute();
+                            }
+                        })
+                        .setNegativeButton(getString(R.string.reset_db_cancel), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                //nothing do to
+                            }
+                        }).create();
+                alert.show();
+            }
+        });
+
+        Button tealBtn = (Button) findViewById(R.id.tealBtn);
+        Button redBtn = (Button) findViewById(R.id.redBtn);
+        Button amberBtn = (Button) findViewById(R.id.amberBtn);
+
+        tealBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setTheme(R.style.AppThemeTeal);
+                SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
+                prefs.edit().putString(getResources().getString(R.string.theme_pref), "teal").commit();
+                recreate();
+            }
+        });
+        redBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setTheme(R.style.AppThemeRed);
+                SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
+                prefs.edit().putString(getResources().getString(R.string.theme_pref), "red").commit();
+                recreate();
+            }
+        });
+        amberBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setTheme(R.style.AppThemeAmber);
+                SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
+                prefs.edit().putString(getResources().getString(R.string.theme_pref), "amber").commit();
+                recreate();
+            }
+        });
+
         // run async task to download or load DB
-        if ((new File(getFilesDir(), LAST_UPDATE_FILE)).isFile()) {
+        if (mPrefs.contains(getString(R.string.lastupdate)) && isDbOn()) {
             //There's cached data, so check if it's old
             Date lastupdateDB = getLastUpdate();
             Date datecachedDB = getSerializedDate();
@@ -683,8 +802,7 @@ private final static Double APP_VERSION = 2.1;
             //if no cached data download new data
         } else (new DownloadData(true, true)).execute();
 
-        SharedPreferences mPrefs = getSharedPreferences("label", 0);
-        Boolean displayedTutorial = mPrefs.getBoolean("displayed_tutorial", false);
+        Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -733,8 +851,8 @@ private final static Double APP_VERSION = 2.1;
     }
 
     private void prepareListData() {
-        explistDataHeader = new ArrayList<String>();
-        explistDataChild = new HashMap<String, LinkedHashMap<String, Boolean>>();
+        explistDataHeader = new ArrayList<>();
+        explistDataChild = new HashMap<>();
 
         // Adding child data
         explistDataHeader.add(getString(R.string.type_title));
@@ -851,9 +969,9 @@ private final static Double APP_VERSION = 2.1;
         adapter = new listViewAdapter(this, list);
         lview.setAdapter(adapter);
         //END
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_up));
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortName.setBackgroundResource(R.drawable.ic_arrow_up);
+        sortType.setBackgroundResource(R.drawable.ic_circle);
+        sortStars.setBackgroundResource(R.drawable.ic_circle);
         nsort = 1;
         tsort = ssort = 0;
     }
@@ -863,9 +981,9 @@ private final static Double APP_VERSION = 2.1;
         adapter = new listViewAdapter(this, list);
         lview.setAdapter(adapter);
         //END
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_down));
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortName.setBackgroundResource(R.drawable.ic_arrow_down);
+        sortType.setBackgroundResource(R.drawable.ic_circle);
+        sortStars.setBackgroundResource(R.drawable.ic_circle);
         nsort = 2;
         tsort = ssort = 0;
     }
@@ -875,9 +993,9 @@ private final static Double APP_VERSION = 2.1;
         adapter = new listViewAdapter(this, list);
         lview.setAdapter(adapter);
         //END
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_up));
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortType.setBackgroundResource(R.drawable.ic_arrow_up);
+        sortName.setBackgroundResource(R.drawable.ic_circle);
+        sortStars.setBackgroundResource(R.drawable.ic_circle);
         tsort = 1;
         nsort = ssort = 0;
     }
@@ -887,9 +1005,9 @@ private final static Double APP_VERSION = 2.1;
         adapter = new listViewAdapter(this, list);
         lview.setAdapter(adapter);
         //END
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_down));
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortType.setBackgroundResource(R.drawable.ic_arrow_down);
+        sortName.setBackgroundResource(R.drawable.ic_circle);
+        sortStars.setBackgroundResource(R.drawable.ic_circle);
         tsort = 2;
         nsort = ssort = 0;
     }
@@ -899,9 +1017,9 @@ private final static Double APP_VERSION = 2.1;
         adapter = new listViewAdapter(this, list);
         lview.setAdapter(adapter);
         //END
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_up));
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortStars.setBackgroundResource(R.drawable.ic_arrow_up);
+        sortType.setBackgroundResource(R.drawable.ic_circle);
+        sortName.setBackgroundResource(R.drawable.ic_circle);
         ssort = 1;
         tsort = nsort = 0;
     }
@@ -911,9 +1029,9 @@ private final static Double APP_VERSION = 2.1;
         adapter = new listViewAdapter(this, list);
         lview.setAdapter(adapter);
         //END
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_arrow_down));
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortStars.setBackgroundResource(R.drawable.ic_arrow_down);
+        sortType.setBackgroundResource(R.drawable.ic_circle);
+        sortName.setBackgroundResource(R.drawable.ic_circle);
         ssort = 2;
         tsort = nsort = 0;
     }
@@ -943,13 +1061,71 @@ private final static Double APP_VERSION = 2.1;
         }
     }
 
-    class DownloadData extends AsyncTask<Void, Void, DwResult> {
+    private class CacheImages extends Thread {
+        public void run() {
+            for (int n = 0; n < original_list.size(); n++) {
+                //WORKAROUND TO PRE-CACHE ICONS
+                try {
+                    FutureTarget<GlideDrawable> future = Glide
+                            .with(context)
+                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(n + 1) + ".png")
+                            .dontTransform()
+                            .override(thumbnail_width, thumbnail_height)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .into(thumbnail_width, thumbnail_height);
+                    GlideDrawable cacheFile = future.get();
+                    Log.d("OK", "#" + n);
+                } catch (Exception e) {
+                    Log.e("404", "Not found #" + n);
+                }
+            }
+        }
+    }
+
+    private Double progress_val = 0.0;
+
+    private void addProgress(String value) {
+        if ((loading != null) && loading.isShowing()) {
+            ArcProgress progress = (ArcProgress) loading.findViewById(R.id.loading_bar);
+            ObjectAnimator anim = ObjectAnimator.ofInt(progress, "progress", progress_val.intValue(), progress_val.intValue() + 12);
+            progress_val = progress_val + 12.5;
+            anim.setInterpolator(new DecelerateInterpolator());
+            anim.setDuration(200);
+            anim.start();
+            TextView progtext = (TextView) loading.findViewById(R.id.loading_text);
+            progtext.setText(value);
+        }
+    }
+
+    class LoadFromDB extends AsyncTask<Void, Void, ArrayList<HashMap>> {
+
+        protected void onPostExecute(ArrayList<HashMap> hashMaps) {
+            list = original_list = hashMaps;
+
+            (new CacheImages()).start();
+
+            adapter = new listViewAdapter(activity, list);
+            lview.setAdapter(adapter);
+            lview.setOnItemClickListener(lvOnClick);
+            lview.requestFocus();
+        }
+
+        protected ArrayList<HashMap> doInBackground(Void... voids) {
+            return getFromDB();
+        }
+    }
+
+    class DownloadData extends AsyncTask<Void, String, Void> {
         boolean doDownload = false;
         boolean updateCheck = true;
         boolean isDownloaded = false;
 
+        protected void onProgressUpdate(String... values) {
+            addProgress(values[0]);
+        }
+
         protected void onPreExecute() {
-            showLoading(context);
+            if (doDownload) showLoading(context);
         }
 
         public DownloadData(boolean doDownload, boolean updateCheck) {
@@ -961,151 +1137,84 @@ private final static Double APP_VERSION = 2.1;
 
         }
 
-        protected DwResult doInBackground(Void... voids) {
+        protected Void doInBackground(Void... voids) {
             //android.os.Process.setThreadPriority(THREAD_PRIORITY_BACKGROUND + THREAD_PRIORITY_MORE_FAVORABLE);
-            DwResult storage = new DwResult();
-            if (!doDownload) {
-
-                //IF YES CHECK IF THERE'S ANY CACHED DATA AND LOAD IT :)
-                if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() &&
-                        (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile() && (new File(getFilesDir(), EVOLUTIONS_CACHED_NAME)).isFile()) {
-                    storage = getFromSerialized();
-                    //IF NO CACHED DATA, TRY TO DOWNLOAD IT :/
-                } else {
-                    //IF CONNECTION IS ON DOWNLOAD :)
-                    if (isNetworkConnected())
-                        storage = downloadData();
-                    //ELSE LIST WILL BE EMPTY (DATA NEVER DOWNLOADED AND NO INTERNET CONNECTION MEANS BAD THINGS WILL HAPPEN) :(
-                }
-            } else {
+            if (doDownload) {
                 //IF CONNECTION IS ON DOWNLOAD DATA :)
                 if (isNetworkConnected())
-                    storage = downloadData();
-                    //ELSE TRY TO GATHER IT FROM CACHED :/
-                else {
-                    if ((new File(getFilesDir(), UNITS_CACHED_NAME)).isFile() && (new File(getFilesDir(), DETAILS_CACHED_NAME)).isFile() && (new File(getFilesDir(), COOLDOWNS_CACHED_NAME)).isFile())
-                        storage = getFromSerialized();
-                    // NO CONNECTION + NO CACHED DATA = USELESS APP :(
-                }
+                    downloadData();
             }
-            return storage;
+            return null;
         }
 
-        protected void onPostExecute(DwResult result) {
-            original_list = list = result.getChars();
-            details = result.getDetails();
-            cooldowns = result.getCooldowns();
-            evolutions = result.getEvolutions();
+        protected void onPostExecute(Void voids) {
+            (new LoadFromDB()).execute();
 
-            adapter = new listViewAdapter(getApplicationContext(), list);
-            lview.setAdapter(adapter);
-            lview.setOnItemClickListener(lvOnClick);
-            lview.requestFocus();
-            if (isDownloaded) {
-                (new SerializeData(result)).run();
-            }
+            if (isDownloaded) serializeDate(getLastUpdate());
             /// UPDATE CHECK
             if (updateCheck) (new CheckUpdates()).execute();
-            hideLoading();
+            if (doDownload) hideLoading();
         }
 
-        private DwResult getFromSerialized() {
-            DwResult storage = new DwResult();
-            try {
-                FileInputStream unitsser = openFileInput(UNITS_CACHED_NAME);
-                FileInputStream detailsser = openFileInput(DETAILS_CACHED_NAME);
-                FileInputStream cooldownsser = openFileInput(COOLDOWNS_CACHED_NAME);
-                FileInputStream evolutionsser = openFileInput(EVOLUTIONS_CACHED_NAME);
+        private void downloadData() {
+            DBHelper db = new DBHelper(context);
 
-                ObjectInputStream units_ser = new ObjectInputStream(unitsser);
-                storage.setChars((ArrayList<HashMap>) units_ser.readObject());
-                unitsser.close();
+            SQLiteDatabase database = db.getWritableDatabase();
+            DBHelper.dropAndCreateTables(database);
 
-                ObjectInputStream details_ser = new ObjectInputStream(detailsser);
-                storage.setDetails((HashMap<Integer, Map>) details_ser.readObject());
-                detailsser.close();
-
-                ObjectInputStream cooldowns_ser = new ObjectInputStream(cooldownsser);
-                storage.setCooldowns((ArrayList<CoolDowns>) cooldowns_ser.readObject());
-                cooldownsser.close();
-
-                ObjectInputStream evolutions_ser = new ObjectInputStream(evolutionsser);
-                storage.setEvolutions((Map<Integer, Map>) evolutions_ser.readObject());
-                evolutionsser.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return storage;
-        }
-
-        private DwResult downloadData() {
-            DwResult storage = new DwResult();
             List<List> characters = (List) parseJScript("https://optc-db.github.io/common/data/units.js", "units");
+            publishProgress(getString(R.string.loading_characters));
+
+            if (characters == null) return;
             int char_size = characters.size();
-            ArrayList<HashMap> chars = new ArrayList<>();
             if (char_size > 0) {
-                for (int i = 0; i < char_size; i++) {
-                    try {
+                database.beginTransaction();
+                try {
+                    for (int i = 0; i < char_size; i++) {
                         List arr_2 = characters.get(i);
                         String name = (arr_2.get(0) == null) ? "" : (String) arr_2.get(0);
                         String type = (arr_2.get(1) == null) ? "" : (String) arr_2.get(1);
                         Integer stars = (arr_2.get(3) == null) ? 1 : ((Double) arr_2.get(3)).intValue();
                         Object classes = (arr_2.get(2) == null) ? null : arr_2.get(2);
-                        String cost = (arr_2.get(4) == null) ? "" : String.valueOf(((Double) arr_2.get(4)).intValue());
-                        String combo = (arr_2.get(5) == null) ? "" : String.valueOf(((Double) arr_2.get(5)).intValue());
-                        String sockets = (arr_2.get(6) == null) ? "" : String.valueOf(((Double) arr_2.get(6)).intValue());
-                        String maxlvl = (arr_2.get(7) == null) ? "" : String.valueOf(((Double) arr_2.get(7)).intValue());
-                        String exptomax = (arr_2.get(8) == null) ? "" : String.valueOf(((Double) arr_2.get(8)).intValue());
-                        String lvl1hp = (arr_2.get(9) == null) ? "" : String.valueOf(((Double) arr_2.get(9)).intValue());
-                        String lvl1atk = (arr_2.get(10) == null) ? "" : String.valueOf(((Double) arr_2.get(10)).intValue());
-                        String lvl1rcv = (arr_2.get(11) == null) ? "" : String.valueOf(((Double) arr_2.get(11)).intValue());
-                        String maxhp = (arr_2.get(12) == null) ? "" : String.valueOf(((Double) arr_2.get(12)).intValue());
-                        String maxatk = (arr_2.get(13) == null) ? "" : String.valueOf(((Double) arr_2.get(13)).intValue());
-                        String maxrcv = (arr_2.get(14) == null) ? "" : String.valueOf(((Double) arr_2.get(14)).intValue());
+                        Integer cost = (arr_2.get(4) == null) ? null : ((Double) arr_2.get(4)).intValue();
+                        Integer combo = (arr_2.get(5) == null) ? null : ((Double) arr_2.get(5)).intValue();
+                        Integer sockets = (arr_2.get(6) == null) ? null : ((Double) arr_2.get(6)).intValue();
+                        Integer maxlvl = (arr_2.get(7) == null) ? null : ((Double) arr_2.get(7)).intValue();
+                        Integer exptomax = (arr_2.get(8) == null) ? null : ((Double) arr_2.get(8)).intValue();
+                        Integer lvl1hp = (arr_2.get(9) == null) ? null : ((Double) arr_2.get(9)).intValue();
+                        Integer lvl1atk = (arr_2.get(10) == null) ? null : ((Double) arr_2.get(10)).intValue();
+                        Integer lvl1rcv = (arr_2.get(11) == null) ? null : ((Double) arr_2.get(11)).intValue();
+                        Integer maxhp = (arr_2.get(12) == null) ? null : ((Double) arr_2.get(12)).intValue();
+                        Integer maxatk = (arr_2.get(13) == null) ? null : ((Double) arr_2.get(13)).intValue();
+                        Integer maxrcv = (arr_2.get(14) == null) ? null : ((Double) arr_2.get(14)).intValue();
 
-                        HashMap temp = new HashMap();
-                        temp.put(Constants.NAME, name);
-                        temp.put(Constants.TYPE, type);
-                        temp.put(Constants.STARS, stars);
-                        temp.put(Constants.ID, i + 1);
-                        temp.put(Constants.CLASSES, classes);
-                        temp.put(Constants.COST, cost);
-                        temp.put(Constants.COMBO, combo);
-                        temp.put(Constants.SOCKETS, sockets);
-                        temp.put(Constants.MAXLVL, maxlvl);
-                        temp.put(Constants.EXPTOMAX, exptomax);
-                        temp.put(Constants.LVL1HP, lvl1hp);
-                        temp.put(Constants.LVL1ATK, lvl1atk);
-                        temp.put(Constants.LVL1RCV, lvl1rcv);
-                        temp.put(Constants.MAXHP, maxhp);
-                        temp.put(Constants.MAXATK, maxatk);
-                        temp.put(Constants.MAXRCV, maxrcv);
-                        chars.add(temp);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Log.d("CYCLE NUM", String.valueOf(i));
+                        String class1, class2;
+                        class1 = class2 = null;
+                        if (classes != null) {
+                            if (classes.getClass().equals(String.class)) {
+                                class1 = (String) classes;
+                                class2 = null;
+                            } else if (classes.getClass().equals(NativeArray.class)) {
+                                List<String> classes_list = (List<String>) classes;
+                                class1 = (classes_list.size() > 0) ? classes_list.get(0) : null;
+                                class2 = (classes_list.size() > 1) ? classes_list.get(1) : null;
+                            }
+                        }
+                        DBHelper.insertIntoUnits(database, i + 1, name, type, class1, class2, stars, cost, combo, sockets,
+                                maxlvl, exptomax, lvl1hp, lvl1atk, lvl1rcv, maxhp, maxatk, maxrcv);
                     }
+                    database.setTransactionSuccessful();
+                } finally {
+                    database.endTransaction();
                 }
             }
-            storage.setChars(chars);
+            publishProgress(getString(R.string.downloading_cooldowns));
+
             ParseAdditionalNotes notes_parser = new ParseAdditionalNotes();
-            Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/details.js", "details");
-            HashMap<Integer, Map> det_tmp = new HashMap<>();
-            if ((details_js != null) && (details_js.size() > 0)) {
-                for (Map.Entry<Integer, Map> entry : details_js.entrySet()) {
-                    Map<String, Object> value = entry.getValue();
-                    HashMap map = new HashMap();
-                    map.put(Constants2.SPECIAL, (value.containsKey("special") ? value.get("special") : ""));
-                    map.put(Constants2.SPECIALNAME, (value.containsKey("specialName") ? value.get("specialName") : ""));
-                    map.put(Constants2.CAPTAIN, (value.containsKey("captain") ? value.get("captain") : ""));
-                    map.put(Constants2.CAPTAINNOTES, notes_parser.parseNotes(value.containsKey("captainNotes") ? (String) value.get("captainNotes") : ""));
-                    map.put(Constants2.SPECIALNOTES, notes_parser.parseNotes(value.containsKey("specialNotes") ? (String) value.get("specialNotes") : ""));
-                    det_tmp.put(entry.getKey(), map);
-                }
-            }
-            storage.setDetails(det_tmp);
 
             List<Object> coolds = (List) parseJScript("https://optc-db.github.io/common/data/cooldowns.js", "cooldowns");
+
+            publishProgress(getString(R.string.loading_cooldowns));
             ArrayList<CoolDowns> cools_tmp = new ArrayList<>();
             if ((coolds != null) && (coolds.size() > 0)) {
                 cools_tmp.add(new CoolDowns());
@@ -1114,80 +1223,112 @@ private final static Double APP_VERSION = 2.1;
                     if (entry == null) cools_tmp.add(new CoolDowns());
                     else if (entry.getClass().equals(Integer.class))
                         cools_tmp.add(new CoolDowns((Integer) coolds.get(i)));
+                    else if (entry.getClass().equals(Double.class))
+                        cools_tmp.add(new CoolDowns(((Double) coolds.get(i)).intValue()));
                     else if (entry.getClass().equals(NativeArray.class)) {
                         List<Double> entry_array = (List<Double>) coolds.get(i);
                         Integer a = entry_array.get(0).intValue();
                         Integer b = entry_array.get(1).intValue();
                         cools_tmp.add(new CoolDowns(a, b));
                     } else {
-                        Log.e("ERR", "Object type determination failed!");
+                        Log.d("DBG", "Object type determination failed!");
                         cools_tmp.add(new CoolDowns());
-                    }
-                    if (i == 905) {
-                        Log.d("", "");
                     }
                 }
             }
-            storage.setCooldowns(cools_tmp);
+            publishProgress(getString(R.string.downloading_abilities));
+
+            Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/details.js", "details");
+            publishProgress(getString(R.string.loading_abilities));
+
+            if ((details_js != null) && (details_js.size() > 0)) {
+                database.beginTransaction();
+                try {
+                    for (Map.Entry<Integer, Map> entry : details_js.entrySet()) {
+                        Map<String, Object> value = entry.getValue();
+
+                        Object special = value.containsKey("special") ? value.get("special") : null;
+                        String specialname = (String) (value.containsKey("specialName") ? value.get("specialName") : "");
+                        String captain = (String) (value.containsKey("captain") ? value.get("captain") : "");
+                        String captainnotes = notes_parser.parseNotes(value.containsKey("captainNotes") ? (String) value.get("captainNotes") : "");
+                        String specialnotes = notes_parser.parseNotes(value.containsKey("specialNotes") ? (String) value.get("specialNotes") : "");
+
+                        DBHelper.insertIntoCaptains(database, entry.getKey(), captain, captainnotes);
+
+                        if ((special != null) && special.getClass().equals(NativeArray.class)) {
+                            List<Map> specmulti = (List<Map>) special;
+                            for (int n = 0; n < specmulti.size(); n++) {
+                                Map<String, Object> currstep = specmulti.get(n);
+                                String currspecial = (String) currstep.get("description");
+                                CoolDowns cd = new CoolDowns(currstep.get("cooldown"));
+                                DBHelper.insertIntoSpecials(database, entry.getKey(), specialname, currspecial, cd.init, cd.max, specialnotes);
+                            }
+                        } else if ((special != null) && special.getClass().equals(NativeObject.class)) {
+                            String txt;
+                            CoolDowns cooldwn = cools_tmp.get(entry.getKey());
+                            Map<String, String> specials_localized = (Map<String, String>) special;
+                            String japan = specials_localized.get("japan");
+                            String global = specials_localized.get("global");
+                            txt = "Jap: " + japan + System.getProperty("line.separator") +
+                                    "Global: " + global;
+                            DBHelper.insertIntoSpecials(database, entry.getKey(), specialname, txt, cooldwn.init, cooldwn.max, specialnotes);
+                        } else if (special != null) {
+                            CoolDowns cooldwn = new CoolDowns();
+                            if (entry.getKey() < cools_tmp.size())
+                                cooldwn = cools_tmp.get(entry.getKey());
+                            DBHelper.insertIntoSpecials(database, entry.getKey(), specialname, (String) special, cooldwn.init, cooldwn.max, specialnotes);
+                        }
+                    }
+                    database.setTransactionSuccessful();
+                } finally {
+                    database.endTransaction();
+                }
+            }
+            publishProgress(getString(R.string.downloading_evolutions));
 
             Map<Integer, Map> evolutions = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/evolutions.js", "evolutions");
-            storage.setEvolutions(evolutions);
-
+            publishProgress(getString(R.string.loading_evolutions));
+            database.beginTransaction();
+            try {
+                for (Map.Entry<Integer, Map> entry : evolutions.entrySet()) {
+                    Map<String, Object> value = entry.getValue();
+                    Object evs = value.get("evolution");
+                    if (evs.getClass().equals(Double.class)) {
+                        //1 evolution
+                        List<Double> evolvers = (List<Double>) value.get("evolvers");
+                        Integer[] evolvers_int = new Integer[5];
+                        for (int i = 0; i < 5; i++) {
+                            if (i < evolvers.size())
+                                evolvers_int[i] = evolvers.get(i).intValue();
+                            else evolvers_int[i] = null;
+                        }
+                        DBHelper.insertIntoEvolutions(database, entry.getKey(), ((Double) evs).intValue(), evolvers_int[0],
+                                evolvers_int[1], evolvers_int[2], evolvers_int[3], evolvers_int[4]);
+                    } else if (evs.getClass().equals(NativeArray.class)) {
+                        //multiple evolutions
+                        List<Double> evs_list = (List<Double>) evs;
+                        List<List<Double>> evolvers_list = (List<List<Double>>) value.get("evolvers");
+                        for (int i = 0; i < evs_list.size(); i++) {
+                            List<Double> evolvers = evolvers_list.get(i);
+                            Integer[] evolvers_int = new Integer[5];
+                            for (int n = 0; n < 5; n++) {
+                                if (n < evolvers.size())
+                                    evolvers_int[n] = evolvers.get(n).intValue();
+                                else evolvers_int[n] = null;
+                            }
+                            DBHelper.insertIntoEvolutions(database, entry.getKey(), evs_list.get(i).intValue(), evolvers_int[0],
+                                    evolvers_int[1], evolvers_int[2], evolvers_int[3], evolvers_int[4]);
+                        }
+                    }
+                }
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
+            database.close();
+            db.close();
             isDownloaded = true;
-            return storage;
-        }
-    }
-
-    private class DwResult {
-        ArrayList<HashMap> this_list;
-        HashMap<Integer, Map> this_details;
-        ArrayList<CoolDowns> this_cooldowns;
-        Map<Integer, Map> this_evolutions;
-
-        public DwResult(ArrayList<HashMap> list, HashMap<Integer, Map> details, ArrayList<CoolDowns> cooldowns, Map<Integer, Map> evolutions) {
-            this_list = list;
-            this_details = details;
-            this_cooldowns = cooldowns;
-            this_evolutions = evolutions;
-        }
-
-        public DwResult() {
-            this_list = new ArrayList<>();
-            this_details = new HashMap<>();
-            this_cooldowns = new ArrayList<>();
-            this_evolutions = new HashMap<>();
-        }
-
-        public void setChars(ArrayList<HashMap> list) {
-            this_list = list;
-        }
-
-        public void setDetails(HashMap<Integer, Map> details) {
-            this_details = details;
-        }
-
-        public void setCooldowns(ArrayList<CoolDowns> cooldowns) {
-            this_cooldowns = cooldowns;
-        }
-
-        public void setEvolutions(Map<Integer, Map> evolutions) {
-            this_evolutions = evolutions;
-        }
-
-        public ArrayList<HashMap> getChars() {
-            return this_list;
-        }
-
-        public HashMap<Integer, Map> getDetails() {
-            return this_details;
-        }
-
-        public ArrayList<CoolDowns> getCooldowns() {
-            return this_cooldowns;
-        }
-
-        public Map<Integer, Map> getEvolutions() {
-            return this_evolutions;
+            publishProgress("");
         }
     }
 
@@ -1202,7 +1343,7 @@ private final static Double APP_VERSION = 2.1;
                     String version = entry.id.replace("tag:github.com,2008:Repository/70237456/", "");
                     Double vrs = Double.valueOf(version);
                     if (vrs > APP_VERSION) {
-                        uri += "https://github.com" + entry.link;
+                        uri += "https://github.com/paolo-optc/optc-mobile-db/releases/download/" + version + "/app-release.apk";
                         break;
                     }
                 }
@@ -1218,13 +1359,14 @@ private final static Double APP_VERSION = 2.1;
 
         protected void onPostExecute(final String result) {
             if (!result.equals("")) {
-                final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), "An update is out! Do you want to know more?", Snackbar.LENGTH_INDEFINITE);
-                msg.setAction("Sure!", new View.OnClickListener() {
+                final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), getString(R.string.update_msg), Snackbar.LENGTH_INDEFINITE);
+                msg.setAction(getString(R.string.update_btn), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        Intent i = new Intent(Intent.ACTION_VIEW);
+                        /*Intent i = new Intent(Intent.ACTION_VIEW);
                         i.setData(Uri.parse(result));
-                        startActivity(i);
+                        startActivity(i);*/
+                        (new DownloadUpdate()).execute(result);
                     }
                 })
                         .setActionTextColor(Color.WHITE).setDuration(8000).show();
@@ -1238,53 +1380,17 @@ private final static Double APP_VERSION = 2.1;
         }
     }
 
-    class SerializeData extends Thread {
-        DwResult data = null;
-
-        public SerializeData(DwResult data) {
-            this.data = data;
-        }
-
-        public void run() {
-            FileOutputStream unitsser;
-            FileOutputStream detailsser;
-            FileOutputStream cooldownsser;
-            FileOutputStream evolutionsser;
-            try {
-                unitsser = openFileOutput(UNITS_CACHED_NAME, MODE_PRIVATE);
-                ObjectOutputStream list_ser = new ObjectOutputStream(unitsser);
-                list_ser.writeObject(data.getChars());
-                unitsser.close();
-
-                detailsser = openFileOutput(DETAILS_CACHED_NAME, MODE_PRIVATE);
-                ObjectOutputStream details_ser = new ObjectOutputStream(detailsser);
-                details_ser.writeObject(data.getDetails());
-                detailsser.close();
-
-                cooldownsser = openFileOutput(COOLDOWNS_CACHED_NAME, MODE_PRIVATE);
-                ObjectOutputStream cooldowns_ser = new ObjectOutputStream(cooldownsser);
-                cooldowns_ser.writeObject(data.getCooldowns());
-                cooldownsser.close();
-
-                evolutionsser = openFileOutput(EVOLUTIONS_CACHED_NAME, MODE_PRIVATE);
-                ObjectOutputStream evolutions_ser = new ObjectOutputStream(evolutionsser);
-                evolutions_ser.writeObject(data.getEvolutions());
-                evolutionsser.close();
-
-                serializeDate(getLastUpdate());
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+    private ArrayList<HashMap> getFromDB() {
+        DBHelper dbh = new DBHelper(context);
+        SQLiteDatabase db = dbh.getReadableDatabase();
+        ArrayList<HashMap> storage = DBHelper.getAllCharacters(db);
+        db.close();
+        dbh.close();
+        return storage;
     }
 
     private Date getLastUpdate() {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, 1900);
-        cal.set(Calendar.MONTH, Calendar.JANUARY);
-        cal.set(Calendar.DAY_OF_MONTH, 1);
-
-        Date lastupdate = cal.getTime();
+        Date lastupdate = new Date(0);
         try {
             FeedParser optc_db_check = new FeedParser(); // 2016-10-08T19:12:23+02:00
             String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("https://github.com/optc-db/optc-db.github.io/commits/master.atom"));
@@ -1297,27 +1403,15 @@ private final static Double APP_VERSION = 2.1;
     }
 
     private void serializeDate(Date value) {
-        try {
-            FileOutputStream out = openFileOutput(LAST_UPDATE_FILE, Context.MODE_PRIVATE);
-            ObjectOutputStream oos = new ObjectOutputStream(out);
-            oos.writeObject(value);
-            out.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+        SharedPreferences.Editor mEditor = mPrefs.edit();
+        mEditor.putLong(getString(R.string.lastupdate), value.getTime()).apply();
     }
 
     private Date getSerializedDate() {
-        Date date = new Date();
-        try {
-            FileInputStream in = openFileInput(LAST_UPDATE_FILE);
-            ObjectInputStream ois = new ObjectInputStream(in);
-            date = (Date) ois.readObject();
-            in.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return date;
+        SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+        Long date_long = mPrefs.getLong(getString(R.string.lastupdate), 0);
+        return new Date(date_long);
     }
 
     ExpandableListView.OnChildClickListener setFlags = new ExpandableListView.OnChildClickListener() {
@@ -1505,19 +1599,143 @@ private final static Double APP_VERSION = 2.1;
 
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
+        lview.requestFocus();
     }
 
     private void rebuildList() {
         list = original_list;
-
-        list = FilterClass.filterByStars(
-                FilterClass.filterByClass(
-                        FilterClass.filterByType(
-                                FilterClass.filterByText(list, FilterText)
-                                , TypeFlags)
-                        , ClassFlags)
-                , StarsFlags);
+        list = FilterClass.filterWithDB(context, TypeFlags, ClassFlags, StarsFlags, FilterText);
         updateList();
+    }
+
+    private boolean isDbOn() {
+        File dbFile = context.getDatabasePath(DBHelper.DB_NAME);
+        return dbFile.exists();
+    }
+
+    public static int getResIdFromAttribute(final Activity activity, final int attr) {
+        if (attr == 0)
+            return 0;
+        final TypedValue typedvalueattr = new TypedValue();
+        activity.getTheme().resolveAttribute(attr, typedvalueattr, true);
+        return typedvalueattr.resourceId;
+    }
+
+    private Integer progress_val_2 = 0;
+
+    private void setProgressInt(Integer value) {
+        if ((loading != null) && loading.isShowing()) {
+            ArcProgress progress = (ArcProgress) loading.findViewById(R.id.loading_bar);
+            ObjectAnimator anim = ObjectAnimator.ofInt(progress, "progress", progress_val_2, value);
+            progress_val_2 = value;
+            anim.setInterpolator(new DecelerateInterpolator());
+            anim.setDuration(200);
+            anim.start();
+        }
+    }
+
+    private boolean isUnknownSourcesEnabled() {
+        boolean result = false;
+        try {
+            result = (Settings.Secure.getInt(getContentResolver(), Settings.Secure.INSTALL_NON_MARKET_APPS) == 1);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private class DownloadUpdate extends AsyncTask<String, Integer, String> {
+
+        protected String doInBackground(String... strings) {
+            String downloadPath = strings[0];
+            String localPath = getExternalFilesDir(null).getAbsolutePath() + "/optcsmartdb_install.apk";
+            File file = new File(localPath);
+            if (file.exists())
+                file.delete();
+
+            try {
+                URL url = new URL(downloadPath);
+                URLConnection connection = url.openConnection();
+                connection.connect();
+
+                int fileLength = connection.getContentLength();
+
+                // download the file
+                InputStream input = new BufferedInputStream(url.openStream());
+                OutputStream output = new FileOutputStream(localPath);
+
+                byte data[] = new byte[1024];
+                long total = 0;
+                int count;
+                while ((count = input.read(data)) != -1) {
+                    total += count;
+                    publishProgress((int) (total * 100 / fileLength));
+                    output.write(data, 0, count);
+                }
+
+                output.flush();
+                output.close();
+                input.close();
+            } catch (Exception e) {
+                Log.e("YourApp", e.getMessage());
+            }
+            return localPath;
+        }
+
+        protected void onPreExecute() {
+            showLoading(context);
+        }
+
+        protected void onPostExecute(String s) {
+            hideLoading();
+            boolean isNonPlayAppAllowed = isUnknownSourcesEnabled();
+            if (!isNonPlayAppAllowed) {
+                apk_file = s;
+                (new AlertDialog.Builder(context)).setMessage(getString(R.string.enable_unknown_sources_first))
+                        .setPositiveButton(getString(R.string.enable_unknown_sources_btn), new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                startActivityForResult(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS), SETTINGS_UNKNOWN_SOURCES);
+                            }
+                        })
+                        .create().show();
+            } else {
+                Intent i = new Intent();
+                i.setAction(Intent.ACTION_VIEW);
+                i.setDataAndType(Uri.fromFile(new File(s)), "application/vnd.android.package-archive");
+                Log.d("Lofting", "About to install new .apk");
+                context.startActivity(i);
+            }
+            Intent i = new Intent();
+            i.setAction(Intent.ACTION_VIEW);
+            i.setDataAndType(Uri.fromFile(new File(s)), "application/vnd.android.package-archive");
+            Log.d("Lofting", "About to install new .apk");
+            context.startActivity(i);
+
+        }
+
+        protected void onProgressUpdate(Integer... values) {
+            setProgressInt(values[0]);
+        }
+    }
+
+    private static final int SETTINGS_UNKNOWN_SOURCES = 101;
+    private String apk_file = "";
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case SETTINGS_UNKNOWN_SOURCES:
+                if (!apk_file.equals("") && (new File(apk_file)).exists()) {
+                    Intent i = new Intent();
+                    i.setAction(Intent.ACTION_VIEW);
+                    i.setDataAndType(Uri.fromFile(new File(apk_file)), "application/vnd.android.package-archive");
+                    Log.d("Lofting", "About to install new .apk");
+                    context.startActivity(i);
+                }
+                break;
+        }
     }
 
     //DONE: Add loading screen when DB updates

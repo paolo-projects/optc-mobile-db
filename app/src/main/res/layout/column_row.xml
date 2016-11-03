@@ -8,20 +8,32 @@
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_gravity="center"
-        android:contentDescription="Small character picture"
+        android:contentDescription="@string/small_char_image"
         android:scaleType="fitCenter" />
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp" />
 
     <TextView
         android:id="@+id/name"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="#fff"
+        android:textColor="?list_text"
         android:textStyle="bold"
         android:layout_marginLeft="5dp"
         android:layout_marginRight="5dp"
         android:layout_gravity="center"
         android:gravity="center_horizontal" />
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp" />
 
     <TextView
         android:id="@+id/type"
@@ -34,14 +46,18 @@
         android:gravity="center_horizontal"
         android:layout_gravity="center" />
 
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp" />
+
     <TextView
         android:id="@+id/stars"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
         android:textAlignment="center"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
         android:gravity="center_horizontal"
         android:layout_gravity="center" />
 

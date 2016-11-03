@@ -9,12 +9,14 @@
         android:layout_height="wrap_content"
         android:text="@string/evolutions"
         android:textStyle="bold"
-        android:gravity="center" />
+        android:gravity="center"
+        android:id="@+id/textView"
+        android:textColor="?char_info_txt" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/evolutions_content"
         android:orientation="vertical"
-        android:padding="3dp"></LinearLayout>
+        android:padding="3dp" />
 </LinearLayout>

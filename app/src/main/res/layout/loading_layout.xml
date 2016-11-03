@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:background="#44000000"
     android:gravity="center">
 
@@ -22,10 +23,20 @@
             android:textSize="24sp"
             android:layout_marginBottom="15dp" />
 
-        <ProgressBar
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:layout_gravity="center" />
+            android:gravity="center"
+            android:text="@string/loadingmsg"
+            android:textSize="18sp"
+            android:id="@+id/loading_text"
+            android:layout_marginBottom="15dp" />
+
+        <com.github.lzyzsd.circleprogress.ArcProgress
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            custom:arc_bottom_text="LOADING"
+            android:layout_gravity="center"
+            android:id="@+id/loading_bar" />
     </LinearLayout>
 </LinearLayout>

@@ -4,9 +4,8 @@ package it.instruman.treasurecruisedatabase;
  * Created by Paolo on 05/10/2016.
  */
 
+import android.app.Activity;
 import android.app.Service;
-import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,16 +14,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class listViewAdapter extends BaseAdapter {
-    Drawable drawable;
     private ArrayList<HashMap> list;
-    private Context activity;
+    private Activity activity;
 
-    public listViewAdapter(Context activity, ArrayList<HashMap> list) {
+    public listViewAdapter(Activity activity, ArrayList<HashMap> list) {
         super();
         this.activity = activity;
         this.list = list;
@@ -55,9 +54,8 @@ public class listViewAdapter extends BaseAdapter {
         // TODO Auto-generated method stub
         ViewHolder holder;
         LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
-
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.column_row, null);
+            convertView = inflater.inflate(R.layout.column_row, parent, false);
             holder = new ViewHolder();
             holder.smallImg = (ImageView) convertView.findViewById(R.id.small_img);
             holder.txtFirst = (TextView) convertView.findViewById(R.id.name);
@@ -73,8 +71,9 @@ public class listViewAdapter extends BaseAdapter {
         Glide
                 .with(activity)
                 .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID((Integer) map.get(Constants.ID)) + ".png")
-                .override(96, 96)
-                .fitCenter()
+                .dontTransform()
+                .override(MainActivity.thumbnail_width, MainActivity.thumbnail_height)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(holder.smallImg);
 
         holder.txtFirst.setText((String) map.get(Constants.NAME));

@@ -18,7 +18,8 @@
             android:text="@string/class1"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -33,7 +34,8 @@
             android:text="@string/class2"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -48,7 +50,8 @@
             android:text="@string/type"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -63,7 +66,8 @@
             android:text="@string/stars"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -78,7 +82,8 @@
             android:text="@string/cost"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
     </LinearLayout>
 
     <LinearLayout
@@ -92,7 +97,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.1"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -106,7 +112,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.1"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -120,7 +127,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -134,7 +142,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -148,7 +157,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
     </LinearLayout>
 
     <LinearLayout
@@ -164,7 +174,8 @@
             android:text="@string/combo"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -179,7 +190,8 @@
             android:text="@string/slots"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -194,7 +206,8 @@
             android:text="@string/maxlevel"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -209,7 +222,8 @@
             android:text="@string/exptomax"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
     </LinearLayout>
 
     <LinearLayout
@@ -223,7 +237,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -237,7 +252,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -251,7 +267,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.9"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -265,7 +282,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:gravity="center_horizontal" />
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
     </LinearLayout>
 
     <View
@@ -288,7 +306,8 @@
             android:text="@string/level"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -303,7 +322,8 @@
             android:text="@string/hp"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -318,7 +338,8 @@
             android:text="@string/atk"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -333,7 +354,8 @@
             android:text="@string/rcv"
             android:textStyle="bold"
             android:gravity="center_horizontal"
-            android:background="#d0d0d0" />
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
     </LinearLayout>
 
     <LinearLayout
@@ -348,7 +370,8 @@
             android:layout_weight="1"
             android:text="@string/lvl1"
             android:gravity="center_horizontal"
-            android:background="#b3e5fc" />
+            android:background="?char_info_stats_min_bg"
+            android:textColor="?char_info_stats_min_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -363,7 +386,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:background="#b3e5fc" />
+            android:background="?char_info_stats_min_bg"
+            android:textColor="?char_info_stats_min_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -378,7 +402,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:background="#b3e5fc" />
+            android:background="?char_info_stats_min_bg"
+            android:textColor="?char_info_stats_min_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -393,7 +418,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:background="#b3e5fc" />
+            android:background="?char_info_stats_min_bg"
+            android:textColor="?char_info_stats_min_txt" />
     </LinearLayout>
 
     <View
@@ -416,7 +442,8 @@
             android:layout_weight="1"
             android:text="@string/lvlmax"
             android:gravity="center_horizontal"
-            android:background="#ffe082" />
+            android:background="?char_info_stats_max_bg"
+            android:textColor="?char_info_stats_max_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -431,7 +458,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:background="#ffe082" />
+            android:background="?char_info_stats_max_bg"
+            android:textColor="?char_info_stats_max_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -446,7 +474,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:background="#ffe082" />
+            android:background="?char_info_stats_max_bg"
+            android:textColor="?char_info_stats_max_txt" />
 
         <View
             android:layout_width="0.5dp"
@@ -461,6 +490,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:background="#ffe082" />
+            android:background="?char_info_stats_max_bg"
+            android:textColor="?char_info_stats_max_txt" />
     </LinearLayout>
 </LinearLayout>

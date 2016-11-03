@@ -17,7 +17,7 @@ public class ParseAdditionalNotes {
         notes.put("captainFixed", "The multiplier is #1 unless #2, in which case it is #3.");
         notes.put("fixed", "Fixed damage means it entirely bypasses the enemy's defense.");
         notes.put("gOrbs", "Characters with [G] orbs will deal 1.5x their normal damage. [G] orbs are affected by orb boosters.");
-        notes.put("noFixedPerc", "Specials that deal fixed damage or cut a percentage of the enemy's HP are not " +
+        notes.put("noFixedPerc", "CharacterSpecials that deal fixed damage or cut a percentage of the enemy's HP are not " +
                 "affected by this captain ability");
         notes.put("orb", "Orb amplification only affects matching and opposite orbs and works both ways: " +
                 "matching orbs will deal #1 more damage and opposite orbs will deal #1 less damage.");
@@ -60,7 +60,7 @@ public class ParseAdditionalNotes {
         if (!value.equals("") && value.replaceAll("^\\s+|\\s+$", "").substring(0, 1).equals("#")) {
             int result = 1;
             int index_start = value.indexOf("}", 0);
-            int index = 0;
+            int index;
             index = value.indexOf("#", index_start);
             if (index != -1) {
                 do {
@@ -87,7 +87,7 @@ public class ParseAdditionalNotes {
             mList.add(value.replaceAll("^\\s+|\\s+$", ""));
         } else {
             mList.add(value.substring(0, index).replaceAll("^\\s+|\\s+$", ""));
-            int index2 = -1;
+            int index2;
             while ((index2 = value.indexOf(":", index + 1)) != -1) {
                 mList.add(value.substring(index + 1, index2).replaceAll("^\\s+|\\s+$", ""));
                 index = index2;
@@ -104,7 +104,7 @@ public class ParseAdditionalNotes {
         tags[0] = value.indexOf("#");
 
         int index_start = value.indexOf("}", 0);
-        int index = 0;
+        int index;
         index = value.indexOf("#", index_start);
 
         if (index != -1) {

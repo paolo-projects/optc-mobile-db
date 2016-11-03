@@ -1,12 +1,79 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppThemeTeal" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <!--<item name="colorAccent">@color/colorAccent</item>-->
-        <item name="colorAccent">#ee4444</item>
+        <item name="colorPrimary">#009688</item>
+        <item name="colorPrimaryDark">#00796B</item>
+        <item name="colorAccent">#00BFA5</item>
+
+        <item name="main_bg">@color/main_bg_teal</item>
+        <item name="filtertext">@color/filtertext_teal</item>
+        <item name="text_icons_searchbox">@color/text_icons_searchbox_teal</item>
+        <item name="list_bg">@color/list_bg_teal</item>
+        <item name="list_text">@color/list_text_teal</item>
+        <item name="list_sort_btn">@color/list_sort_btn_teal</item>
+        <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_teal</item>
+        <item name="drawer_bar_bg">@color/drawer_bar_bg_teal</item>
+        <item name="drawer_bar_btn">@color/drawer_bar_btn_teal</item>
+        <item name="char_info_bg">@color/char_info_bg_teal</item>
+        <item name="char_info_header_bg">@color/char_info_header_bg_teal</item>
+        <item name="char_info_header_txt">@color/char_info_header_txt_teal</item>
+        <item name="char_info_txt">@color/char_info_txt_teal</item>
+        <item name="char_info_stats_min_bg">@color/char_info_stats_min_bg_teal</item>
+        <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_teal</item>
+        <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_teal</item>
+        <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_teal</item>
+    </style>
+
+    <style name="AppThemeRed" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#F44336</item>
+        <item name="colorPrimaryDark">#D32F2F</item>
+        <item name="colorAccent">#D50000</item>
+
+        <item name="main_bg">@color/main_bg_red</item>
+        <item name="filtertext">@color/filtertext_red</item>
+        <item name="text_icons_searchbox">@color/text_icons_searchbox_red</item>
+        <item name="list_bg">@color/list_bg_red</item>
+        <item name="list_text">@color/list_text_red</item>
+        <item name="list_sort_btn">@color/list_sort_btn_red</item>
+        <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_red</item>
+        <item name="drawer_bar_bg">@color/drawer_bar_bg_red</item>
+        <item name="drawer_bar_btn">@color/drawer_bar_btn_red</item>
+        <item name="char_info_bg">@color/char_info_bg_red</item>
+        <item name="char_info_header_bg">@color/char_info_header_bg_red</item>
+        <item name="char_info_header_txt">@color/char_info_header_txt_red</item>
+        <item name="char_info_txt">@color/char_info_txt_red</item>
+        <item name="char_info_stats_min_bg">@color/char_info_stats_min_bg_red</item>
+        <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_red</item>
+        <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_red</item>
+        <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_red</item>
+    </style>
+
+    <style name="AppThemeAmber" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#FFC107</item>
+        <item name="colorPrimaryDark">#FFA000</item>
+        <item name="colorAccent">#FFAB00</item>
+
+        <item name="main_bg">@color/main_bg_amber</item>
+        <item name="filtertext">@color/filtertext_amber</item>
+        <item name="text_icons_searchbox">@color/text_icons_searchbox_amber</item>
+        <item name="list_bg">@color/list_bg_amber</item>
+        <item name="list_text">@color/list_text_amber</item>
+        <item name="list_sort_btn">@color/list_sort_btn_amber</item>
+        <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_amber</item>
+        <item name="drawer_bar_bg">@color/drawer_bar_bg_amber</item>
+        <item name="drawer_bar_btn">@color/drawer_bar_btn_amber</item>
+        <item name="char_info_bg">@color/char_info_bg_amber</item>
+        <item name="char_info_header_bg">@color/char_info_header_bg_amber</item>
+        <item name="char_info_header_txt">@color/char_info_header_txt_amber</item>
+        <item name="char_info_txt">@color/char_info_txt_amber</item>
+        <item name="char_info_stats_min_bg">@color/char_info_stats_min_bg_amber</item>
+        <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_amber</item>
+        <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_amber</item>
+        <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_amber</item>
     </style>
 
     <style name="CustomShowcaseTheme2" parent="ShowcaseView">
@@ -31,9 +98,13 @@
 
     <style name="AppThemeDialog" parent="Theme.AppCompat.Light.Dialog">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorPrimary">#009688</item>
+        <item name="colorPrimaryDark">#00796B</item>
         <!--<item name="colorAccent">@color/colorAccent</item>-->
-        <item name="colorAccent">#ee4444</item>
+        <item name="colorAccent">#00BFA5</item>
+        <!--<item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccent">#ee4444</item>-->
     </style>
 </resources>

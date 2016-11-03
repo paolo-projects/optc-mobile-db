@@ -103,16 +103,22 @@ public class FeedParser {
                 continue;
             }
             String name = parser.getName();
-            if (name.equals("title")) {
-                title = readTitle(parser);
-            } else if (name.equals("summary")) {
-                summary = readSummary(parser);
-            } else if (name.equals("link")) {
-                link = readLink(parser);
-            } else if (name.equals("id")) {
-                id = readId(parser);
-            } else {
-                skip(parser);
+            switch (name) {
+                case "title":
+                    title = readTitle(parser);
+                    break;
+                case "summary":
+                    summary = readSummary(parser);
+                    break;
+                case "link":
+                    link = readLink(parser);
+                    break;
+                case "id":
+                    id = readId(parser);
+                    break;
+                default:
+                    skip(parser);
+                    break;
             }
         }
         return new Entry(title, summary, link, id);

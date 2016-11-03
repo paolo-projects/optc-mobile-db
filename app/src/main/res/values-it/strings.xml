@@ -1,0 +1,106 @@
+<resources>
+    <!-- ### DON'T TRANSLATE ### -->
+    <string name="app_name">OPTC SmartDB</string>
+
+    <string name="backbutton">Back button</string>
+    <string name="big_char_image">Large image of the character</string>
+    <string name="reset_filters">Reset all filters</string>
+    <string name="small_char_image">Small character picture</string>
+    <string name="reset_database">Redownload database</string>
+    <string name="filterBtn_contDesc">Search button pic</string>
+    <string name="resetBtn_contDesc">Reset button pic</string>
+    <string name="sort_contDesc">Sort button pic</string>
+
+    <string name="pref_name">optc_smart_db_setting</string>
+    <string name="tutorial_displayed">displayed_tutorial</string>
+    <string name="lastupdate">date_last_update</string>
+    <string name="theme_pref">theme_preference</string>
+    <!-- ### -->
+
+    <!-- Character info dialog strings -->
+    <string name="class1">Classe 1</string>
+    <string name="class2">Classe 2</string>
+    <string name="type">Tipo</string>
+    <string name="stars">Stelle</string>
+    <string name="cost">Costo</string>
+    <string name="combo">Combo</string>
+    <string name="slots">Socket</string>
+    <string name="maxlevel">Livello Max</string>
+    <string name="exptomax">Exp Max</string>
+    <string name="level">Livello</string>
+    <string name="hp">HP</string>
+    <string name="atk">ATK</string>
+    <string name="rcv">RCV</string>
+    <string name="lvl1">1</string>
+    <string name="lvlmax">MAX</string>
+    <string name="captability">Abilità capitano</string>
+    <string name="specability">Special:</string>
+    <string name="speccooldown">Cooldown (max/min):</string>
+
+    <!-- Filter box hint text -->
+    <string name="filter_hint">Cerca per nome o ID</string>
+
+    <!-- Updates text -->
+    <string name="update_msg">È disponibile un nuovo aggiornamento. Vuoi installarlo?</string>
+    <string name="update_btn">Certo</string>
+
+    //APP LOADING
+    <string name="loadingmsg">Attendi durante il caricamento dati…</string>
+    <string name="loading_characters">Sto impostando la lista personaggi</string>
+    <string name="downloading_cooldowns">Sto scaricando i cooldown</string>
+    <string name="loading_cooldowns">Sto impostando i cooldown</string>
+    <string name="downloading_abilities">Sto scaricando le abilità</string>
+    <string name="loading_abilities">Sto impostando le abilità</string>
+    <string name="downloading_evolutions">Sto scaricando le evoluzioni</string>
+    <string name="loading_evolutions">Sto impostando le evoluzioni</string>
+
+    <string name="evolutions">Evoluzioni personaggio:</string>
+
+    <string name="notes_text">"Note: "</string>
+
+    <string name="tab_maininfo">Principali</string>
+    <string name="tab_abilities">Abilità</string>
+    <string name="tab_evolutions">Evoluzioni</string>
+
+    <string name="reset_db_title">Reset database</string>
+    <string name="reset_db_message">Sei sicuro di voler resettare e scaricare nuovamente il DB?</string>
+    <string name="reset_db_cancel">No</string>
+    <string name="reset_db_confirm">Si</string>
+
+    <string name="enable_unknown_sources_first">Per installare questa app devi prima abilitare le sorgenti sconosciute!</string>
+    <string name="enable_unknown_sources_btn">OK</string>
+
+    <!-- Navigation Drawer List Array -->
+    <string name="type_title">Tipo</string>
+    <string-array name="type_array">
+        <item>STR</item>
+        <item>DEX</item>
+        <item>QCK</item>
+        <item>PSY</item>
+        <item>INT</item>
+    </string-array>
+
+    <string name="class_title">Classe</string>
+    <string-array name="class_array">
+        <item>Fighter</item>
+        <item>Striker</item>
+        <item>Slasher</item>
+        <item>Shooter</item>
+        <item>Free Spirit</item>
+        <item>Cerebral</item>
+        <item>Powerhouse</item>
+        <item>Driven</item>
+        <item>Booster</item>
+        <item>Evolver</item>
+    </string-array>
+
+    <string name="stars_title">Stelle</string>
+    <string-array name="stars_array">
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+    </string-array>
+</resources>

@@ -1,5 +1,21 @@
 <resources>
+    <!-- ### DON'T TRANSLATE -->
     <string name="app_name">OPTC SmartDB</string>
+
+    <string name="backbutton">Back button</string>
+    <string name="big_char_image">Large image of the character</string>
+    <string name="reset_filters">Reset all filters</string>
+    <string name="small_char_image">Small character picture</string>
+    <string name="reset_database">Redownload database</string>
+    <string name="filterBtn_contDesc">Search button pic</string>
+    <string name="resetBtn_contDesc">Reset button pic</string>
+    <string name="sort_contDesc">Sort button pic</string>
+
+    <string name="pref_name">optc_smart_db_setting</string>
+    <string name="tutorial_displayed">displayed_tutorial</string>
+    <string name="lastupdate">date_last_update</string>
+    <string name="theme_pref">theme_preference</string>
+    <!-- ###-->
 
     <!-- Character info dialog strings -->
     <string name="class1">Class 1</string>
@@ -13,25 +29,46 @@
     <string name="exptomax">Max Exp</string>
     <string name="level">Level</string>
     <string name="hp">HP</string>
-    <string name="atk">Atk</string>
-    <string name="rcv">Rcv</string>
+    <string name="atk">ATK</string>
+    <string name="rcv">RCV</string>
     <string name="lvl1">1</string>
-    <string name="lvlmax">Max</string>
+    <string name="lvlmax">MAX</string>
     <string name="captability">Captain Ability</string>
     <string name="specability">Special:</string>
-    <string name="speccooldown">Cooldowns (min/max):</string>
+    <string name="speccooldown">Cooldowns (max/min):</string>
 
     <!-- Filter box hint text -->
-    <string name="filter_hint">Search by name</string>
+    <string name="filter_hint">Search by name or ID</string>
 
-    <string name="filterBtn_contDesc">Search button pic</string>
-    <string name="resetBtn_contDesc">Reset button pic</string>
-    <string name="sort_contDesc">Sort button pic</string>
+    <!-- Updates text -->
+    <string name="update_msg">An update is out! Do you want to install it?</string>
+    <string name="update_btn">Sure</string>
 
+    //APP LOADING
     <string name="loadingmsg">Please wait while loading data…</string>
+    <string name="loading_characters">Updating characters list</string>
+    <string name="downloading_cooldowns">Downloading cooldowns</string>
+    <string name="loading_cooldowns">Updating cooldowns</string>
+    <string name="downloading_abilities">Downloading abilities</string>
+    <string name="loading_abilities">Updating abilities</string>
+    <string name="downloading_evolutions">Downloading evolutions</string>
+    <string name="loading_evolutions">Updating evolutions</string>
 
     <string name="evolutions">Character evolutions:</string>
-    <string name="evolution_text"> Material needed: </string>
+
+    <string name="notes_text">"Notes: "</string>
+
+    <string name="tab_maininfo">Main Info</string>
+    <string name="tab_abilities">Abilities</string>
+    <string name="tab_evolutions">Evolutions</string>
+
+    <string name="reset_db_title">Database reset</string>
+    <string name="reset_db_message">Are you sure you want to reset and download again the DB?</string>
+    <string name="reset_db_cancel">No</string>
+    <string name="reset_db_confirm">Yes</string>
+
+    <string name="enable_unknown_sources_first">To install this app you need to enable unknown sources from your device settings first!</string>
+    <string name="enable_unknown_sources_btn">OK</string>
 
     <!-- Navigation Drawer List Array -->
     <string name="type_title">Type</string>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="main_bg" format="reference|color" />
+    <attr name="filtertext" format="reference|color" />
+    <attr name="text_icons_searchbox" format="reference|color" />
+    <attr name="list_bg" format="reference|color" />
+    <attr name="list_text" format="reference|color" />
+    <attr name="list_sort_btn" format="reference|color" />
+    <attr name="list_sort_btn_disabled" format="reference|color" />
+    <attr name="drawer_bar_bg" format="reference|color" />
+    <attr name="drawer_bar_btn" format="reference|color" />
+    <attr name="char_info_bg" format="reference|color" />
+    <attr name="char_info_header_bg" format="reference|color" />
+    <attr name="char_info_header_txt" format="reference|color" />
+    <attr name="char_info_txt" format="reference|color" />
+    <attr name="char_info_stats_min_bg" format="reference|color" />
+    <attr name="char_info_stats_min_txt" format="reference|color" />
+    <attr name="char_info_stats_max_bg" format="reference|color" />
+    <attr name="char_info_stats_max_txt" format="reference|color" />
+</resources>

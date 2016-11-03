@@ -1,5 +1,10 @@
 package it.instruman.treasurecruisedatabase;
 
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.util.TimingLogger;
+
 import org.mozilla.javascript.NativeArray;
 
 import java.util.ArrayList;
@@ -12,6 +17,161 @@ import java.util.Iterator;
  */
 
 public class FilterClass {
+
+    public static ArrayList<HashMap> filterWithDB(Context context, EnumSet<MainActivity.FL_TYPE> type_filters, EnumSet<MainActivity.FL_CLASS> class_filters,
+                                                  EnumSet<MainActivity.FL_STARS> stars_filters, String filterText) {
+        TimingLogger timing = new TimingLogger("TIME", "Init");
+        DBHelper dbhelper = new DBHelper(context);
+        SQLiteDatabase db = dbhelper.getReadableDatabase();
+        String type_condition = "";
+        ArrayList<String> values = new ArrayList<>();
+        if (type_filters.size() > 0) {
+            type_condition += "( ";
+            if (type_filters.contains(MainActivity.FL_TYPE.STR)) {
+                type_condition += DBHelper.UNITS_TYPE + " = ? OR ";
+                values.add("STR");
+            }
+            if (type_filters.contains(MainActivity.FL_TYPE.DEX)) {
+                type_condition += DBHelper.UNITS_TYPE + " = ? OR ";
+                values.add("DEX");
+            }
+            if (type_filters.contains(MainActivity.FL_TYPE.QCK)) {
+                type_condition += DBHelper.UNITS_TYPE + " = ? OR ";
+                values.add("QCK");
+            }
+            if (type_filters.contains(MainActivity.FL_TYPE.PSY)) {
+                type_condition += DBHelper.UNITS_TYPE + " = ? OR ";
+                values.add("PSY");
+            }
+            if (type_filters.contains(MainActivity.FL_TYPE.INT)) {
+                type_condition += DBHelper.UNITS_TYPE + " = ? OR ";
+                values.add("INT");
+            }
+            type_condition = type_condition.substring(0, type_condition.length() - 3);
+            type_condition += ") AND ";
+        }
+
+        if (stars_filters.size() > 0) {
+            type_condition += "( ";
+            if (stars_filters.contains(MainActivity.FL_STARS.ONE)) {
+                type_condition += DBHelper.UNITS_STARS + " = ? OR ";
+                values.add("1");
+            }
+            if (stars_filters.contains(MainActivity.FL_STARS.TWO)) {
+                type_condition += DBHelper.UNITS_STARS + " = ? OR ";
+                values.add("2");
+            }
+            if (stars_filters.contains(MainActivity.FL_STARS.THREE)) {
+                type_condition += DBHelper.UNITS_STARS + " = ? OR ";
+                values.add("3");
+            }
+            if (stars_filters.contains(MainActivity.FL_STARS.FOUR)) {
+                type_condition += DBHelper.UNITS_STARS + " = ? OR ";
+                values.add("4");
+            }
+            if (stars_filters.contains(MainActivity.FL_STARS.FIVE)) {
+                type_condition += DBHelper.UNITS_STARS + " = ? OR ";
+                values.add("5");
+            }
+            if (stars_filters.contains(MainActivity.FL_STARS.SIX)) {
+                type_condition += DBHelper.UNITS_STARS + " = ? OR ";
+                values.add("6");
+            }
+            type_condition = type_condition.substring(0, type_condition.length() - 3);
+            type_condition += ") AND ";
+        }
+
+        if (class_filters.size() > 0) {
+            type_condition += "( ";
+            if (class_filters.contains(MainActivity.FL_CLASS.FIGHTER)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Fighter");
+                values.add("Fighter");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.SLASHER)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Slasher");
+                values.add("Slasher");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.STRIKER)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Striker");
+                values.add("Striker");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.SHOOTER)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Shooter");
+                values.add("Shooter");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.FREESPIRIT)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Free Spirit");
+                values.add("Free Spirit");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.CEREBRAL)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Cerebral");
+                values.add("Cerebral");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.POWERHOUSE)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Powerhouse");
+                values.add("Powerhouse");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.DRIVEN)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Driven");
+                values.add("Driven");
+            }
+            type_condition = type_condition.substring(0, type_condition.length() - 4);
+            type_condition += " ) AND ";
+        }
+        if (!filterText.equals("")) {
+            if (filterText.matches("\\d+")) {
+                type_condition += DBHelper.UNITS_CHARID + " = ? AND ";
+                values.add(filterText);
+            } else {
+                type_condition += DBHelper.UNITS_NAME + " LIKE ? AND ";
+                values.add("%" + filterText + "%");
+            }
+        }
+        if (type_condition.equals("")) {
+            db.close();
+            dbhelper.close();
+            return new ArrayList<>();
+        }
+        type_condition = type_condition.substring(0, type_condition.length() - 4);
+        String[] values_array = new String[values.size()];
+        values.toArray(values_array);
+        ArrayList<HashMap> filtered = new ArrayList<>();
+        Cursor result = db.query(DBHelper.UNITS_TABLE, new String[]{DBHelper.UNITS_NAME, DBHelper.UNITS_TYPE, DBHelper.UNITS_STARS, DBHelper.UNITS_CHARID}, type_condition, values_array, null, null, null, null);
+
+        result.moveToFirst();
+        while (!result.isAfterLast()) {
+            HashMap element = new HashMap();
+            element.put(Constants.NAME, result.getString(0));
+            element.put(Constants.TYPE, result.getString(1));
+            element.put(Constants.STARS, result.getInt(2));
+            element.put(Constants.ID, result.getInt(3));
+            filtered.add(element);
+            result.moveToNext();
+        }
+        result.close();
+        db.close();
+        dbhelper.close();
+        timing.addSplit("END");
+        timing.dumpToLog();
+        return filtered;
+    }
+
     public static ArrayList<HashMap> filterByType(ArrayList<HashMap> list, EnumSet<MainActivity.FL_TYPE> filters) {
         EnumSet<MainActivity.FL_TYPE> toRemoveT = EnumSet.allOf(MainActivity.FL_TYPE.class);
         toRemoveT.removeAll(filters);

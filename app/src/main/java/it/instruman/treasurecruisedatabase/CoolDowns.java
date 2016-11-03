@@ -63,8 +63,7 @@ class CoolDowns implements Serializable {
             case 1:
                 return init.toString();
             case 2:
-                String o = init + "/" + max;
-                return o;
+                return init + "/" + max;
             default:
                 return "";
         }
