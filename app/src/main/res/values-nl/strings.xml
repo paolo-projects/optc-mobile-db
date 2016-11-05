@@ -1,0 +1,88 @@
+<resources>
+
+    <!-- Character info dialog strings -->
+    <string name="class1">Klasse 1</string>
+    <string name="class2">Klasse 2</string>
+    <string name="type">Type</string>
+    <string name="stars">Sterren</string>
+    <string name="cost">Kost</string>
+    <string name="combo">Combo</string>
+    <string name="slots">Slots</string>
+    <string name="maxlevel">Max Niveau</string>
+    <string name="exptomax">Max Exp</string>
+    <string name="level">Niveau</string>
+    <string name="hp">HP</string>
+    <string name="atk">ATK</string>
+    <string name="rcv">RCV</string>
+    <string name="lvl1">1</string>
+    <string name="lvlmax">MAX</string>
+    <string name="captability">Capitein Vermogen</string>
+    <string name="specability">Speciaal:</string>
+    <string name="speccooldown">Cooldowns (max/min):</string>
+
+    <!-- Filter box hint text -->
+    <string name="filter_hint">Zoek op naam of ID</string>
+
+    <!-- Updates text -->
+    <string name="update_msg">Er is een nieuwe update! Wil je deze installeren?</string>
+    <string name="update_btn">Ja</string>
+
+    <string name="loadingmsg">Een ogenblik geduld aub, terwijl de gegevens worden geladen…</string>
+    <string name="loading_characters">Karakterlijst aan het updaten</string>
+    <string name="downloading_cooldowns">Cooldowns aan het downloaden</string>
+    <string name="loading_cooldowns">Cooldowns aan het updaten</string>
+    <string name="downloading_abilities">Vermogens aan het downloaden</string>
+    <string name="loading_abilities">Vermogens aan het updaten</string>
+    <string name="downloading_evolutions">Evoluties aan het downloaden</string>
+    <string name="loading_evolutions">Evoluties aan het updaten</string>
+
+    <string name="evolutions">Karakter evoluties:</string>
+
+    <string name="notes_text">"Notities: "</string>
+
+    <string name="tab_maininfo">Hoofdinformatie</string>
+    <string name="tab_abilities">Vermogens</string>
+    <string name="tab_evolutions">Evolutions</string>
+
+    <string name="reset_db_title">Database resetten</string>
+    <string name="reset_db_message">Ben je zeker dat je de database wil resetten en deze opnieuw downloaden?</string>
+    <string name="reset_db_cancel">Nee</string>
+    <string name="reset_db_confirm">Ja</string>
+
+    <string name="enable_unknown_sources_first">Om deze app te installeren moet je eerst \'onbekende bronnen\' in de apparaatinstellingen inschakelen!</string>
+    <string name="enable_unknown_sources_btn">OK</string>
+
+    <!-- Navigation Drawer List Array -->
+    <string name="type_title">Type</string>
+    <string-array name="type_array">
+        <item>STR</item>
+        <item>DEX</item>
+        <item>QCK</item>
+        <item>PSY</item>
+        <item>INT</item>
+    </string-array>
+
+    <string name="class_title">Klasse</string>
+    <string-array name="class_array">
+        <item>Fighter</item>
+        <item>Striker</item>
+        <item>Slasher</item>
+        <item>Shooter</item>
+        <item>Free Spirit</item>
+        <item>Cerebral</item>
+        <item>Powerhouse</item>
+        <item>Driven</item>
+        <item>Booster</item>
+        <item>Evolver</item>
+    </string-array>
+
+    <string name="stars_title">Sterren</string>
+    <string-array name="stars_array">
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+    </string-array>
+</resources>

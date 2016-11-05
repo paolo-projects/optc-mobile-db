@@ -1,5 +1,7 @@
 package it.instruman.treasurecruisedatabase;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.app.Activity;
 import android.app.Dialog;
@@ -8,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -44,6 +47,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -52,7 +56,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.FutureTarget;
-import com.bumptech.glide.signature.StringSignature;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
@@ -82,6 +85,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
@@ -90,13 +94,15 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 2.5;
+private final static Double APP_VERSION = 2.6;
 /*
     ##################################################
 */
 
     public static final int thumbnail_width = 96;
     public static final int thumbnail_height = 96;
+
+    private static final String locale_pref = "locale-preference";
 
     ExpandableListAdapter explistAdapter;
     ExpandableListView expListView;
@@ -234,6 +240,11 @@ private final static Double APP_VERSION = 2.5;
     Dialog loadingdlg_hwnd = null;
     ActionBarDrawerToggle mDrawerToggle;
 
+    private String UNITS_JS;
+    private String DETAILS_JS;
+    private String COOLDOWNS_JS;
+    private String EVOLUTIONS_JS;
+
     private ArrayList<HashMap> list, original_list;
     ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
         @Override
@@ -263,14 +274,11 @@ private final static Double APP_VERSION = 2.5;
     ListView.OnItemClickListener lvOnClick = new ListView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            launchDialog(position, false);
+            launchDialog(adapter.getIDfromPosition(position));
         }
     };
 
-    private void launchDialog(int position, boolean sub) {
-        HashMap item;
-        if (!sub) item = (HashMap) adapter.getItem(position);
-        else item = original_list.get(position);
+    private void launchDialog(int id) {
 
         //if((dlg_hwnd!=null)&&(dlg_hwnd.isShowing())) dlg_hwnd.dismiss();
 
@@ -299,16 +307,13 @@ private final static Double APP_VERSION = 2.5;
         tabs.setCurrentTab(0);
 
         TextView title = (TextView) dialog.findViewById(R.id.titleText);
-        title.setText((String) item.get(Constants.NAME));
-        title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
 
         // set the custom dialog components - text, image and button
         ImageView image = (ImageView) dialog.findViewById(R.id.char_img_big);
 
         Glide
                 .with(context)
-                .load("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID((Integer) item.get(Constants.ID)) + ".png")
-                .signature(new StringSignature(convertID((Integer) item.get(Constants.ID))))
+                .load("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID(id) + ".png")
                 .into(image);
 
         dialog.setCanceledOnTouchOutside(true);
@@ -340,9 +345,14 @@ private final static Double APP_VERSION = 2.5;
 
         DBHelper db = new DBHelper(context);
         SQLiteDatabase database = db.getReadableDatabase();
-        CharacterInfo charInfo = DBHelper.getCharacterInfo(database, (Integer) item.get(Constants.ID));
+        CharacterInfo charInfo = DBHelper.getCharacterInfo(database, id);
         database.close();
         db.close();
+
+        if (charInfo == null) return;
+
+        title.setText(charInfo.getName());
+        title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
 
         class1.setText(charInfo.getClass1());
         class2.setText(charInfo.getClass2());
@@ -459,6 +469,13 @@ private final static Double APP_VERSION = 2.5;
                 coold_content.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
 
                 coold_layout.addView(coold_content);
+
+                TextView special_notes = new TextView(context);
+                special_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                special_notes.setText(special.getSpecialNotes());
+                special_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+                specials_container.addView(special_notes);
+
                 coold_layout.setPadding(2, 8, 2, 8);
 
                 specials_container.addView(coold_layout);
@@ -504,23 +521,10 @@ private final static Double APP_VERSION = 2.5;
                     @Override
                     public void onClick(View view) {
                         //TODO: Add code to open details of evolved character
-                        launchDialog(this_id - 1, true);
+                        launchDialog(this_id);
                     }
                 });
                 evolution_row.addView(evo_pic);
-
-                //########### TEXT OR IMG TO INDICATE EVOLVER MATERIAL ###########
-                /*TextView evo_text = new TextView(context);
-                LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-                params1.setMargins(dpToPx(5), 5, dpToPx(5), 5);
-                params1.gravity = Gravity.CENTER;
-                evo_text.setLayoutParams(params1);
-                evo_text.setGravity(Gravity.CENTER);
-                evo_text.setText(getString(R.string.evolution_text));
-                evolution_row.addView(evo_text);*/
 
                 ImageView evo_text = new ImageView(context);
                 LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
@@ -557,7 +561,7 @@ private final static Double APP_VERSION = 2.5;
                             @Override
                             public void onClick(View view) {
                                 //TODO: Add code to open details of evolver character
-                                launchDialog(evolver - 1, true);
+                                launchDialog(evolver);
                             }
                         });
                         evolution_row.addView(evolver_pic);
@@ -568,6 +572,10 @@ private final static Double APP_VERSION = 2.5;
             }
             tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
         }
+
+        HorizontalScrollView scr = (HorizontalScrollView) dialog.findViewById(R.id.tabs_scrollview);
+        scr.invalidate();
+        scr.requestLayout();
 
         ImageButton backbtn = (ImageButton) dialog.findViewById(R.id.backBtn);
         backbtn.setOnClickListener(new View.OnClickListener() {
@@ -640,6 +648,35 @@ private final static Double APP_VERSION = 2.5;
                 break;
         }
 
+        String locale = mPrefs.getString(locale_pref, "");
+        if (!locale.equals("")) {
+            Resources res = context.getResources();
+            // Change locale settings in the app.
+            DisplayMetrics dm = res.getDisplayMetrics();
+            android.content.res.Configuration conf = res.getConfiguration();
+            if (locale.contains("-")) {
+                String[] combined = locale.split("-");
+                conf.locale = new Locale(combined[0].toLowerCase(), combined[1].toLowerCase());
+            } else conf.locale = new Locale(locale.toLowerCase());
+            res.updateConfiguration(conf, dm);
+        }
+
+        switch (locale.toLowerCase()) {
+            case "es":
+                UNITS_JS = "https://optc-sp.github.io/common/data/units.js";
+                COOLDOWNS_JS = "https://optc-sp.github.io/common/data/cooldowns.js";
+                DETAILS_JS = "https://optc-sp.github.io/common/data/details.js";
+                EVOLUTIONS_JS = "https://optc-sp.github.io/common/data/evolutions.js";
+                break;
+
+            default:
+                UNITS_JS = "https://optc-db.github.io/common/data/units.js";
+                COOLDOWNS_JS = "https://optc-db.github.io/common/data/cooldowns.js";
+                DETAILS_JS = "https://optc-db.github.io/common/data/details.js";
+                EVOLUTIONS_JS = "https://optc-db.github.io/common/data/evolutions.js";
+                break;
+        }
+
         setContentView(R.layout.activity_main);
 
         nsort = tsort = ssort = 0;
@@ -705,6 +742,10 @@ private final static Double APP_VERSION = 2.5;
                 filterText.setText("");
                 FilterText = "";
                 rebuildList();
+                //SHOW KEYBOARD
+                filterText.requestFocus();
+                InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                keyboard.showSoftInput(filterText, 0);
             }
         });
 
@@ -767,7 +808,7 @@ private final static Double APP_VERSION = 2.5;
                 setTheme(R.style.AppThemeTeal);
                 SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
                 prefs.edit().putString(getResources().getString(R.string.theme_pref), "teal").commit();
-                recreate();
+                crossfade(300);
             }
         });
         redBtn.setOnClickListener(new Button.OnClickListener() {
@@ -776,7 +817,7 @@ private final static Double APP_VERSION = 2.5;
                 setTheme(R.style.AppThemeRed);
                 SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
                 prefs.edit().putString(getResources().getString(R.string.theme_pref), "red").commit();
-                recreate();
+                crossfade(300);
             }
         });
         amberBtn.setOnClickListener(new Button.OnClickListener() {
@@ -785,7 +826,7 @@ private final static Double APP_VERSION = 2.5;
                 setTheme(R.style.AppThemeAmber);
                 SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
                 prefs.edit().putString(getResources().getString(R.string.theme_pref), "amber").commit();
-                recreate();
+                crossfade(300);
             }
         });
 
@@ -848,6 +889,45 @@ private final static Double APP_VERSION = 2.5;
             // we unexpectedly failed - e.g. if internal implementation of
             // either ViewDragHelper or DrawerLayout changed
         }
+
+        ImageButton lang_selector = (ImageButton) findViewById(R.id.language_selector);
+        lang_selector.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ListAdapter adapter = new ArrayAdapterWithIcon(context, R.array.languages_array, R.array.flags_array);
+
+                new AlertDialog.Builder(context)
+                        .setAdapter(adapter, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int item) {
+                                String[] langs = getResources().getStringArray(R.array.locale_array);
+                                String locale = langs[item];
+                                SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
+                                prefs.edit().putString(locale_pref, locale).commit();
+                                crossfade(300);
+                            }
+                        }).show();
+            }
+        });
+    }
+
+    private void crossfade(int mShortAnimationDuration) {
+
+        // Animate the loading view to 0% opacity. After the animation ends,
+        // set its visibility to GONE as an optimization step (it won't
+        // participate in layout passes, etc.)
+        final View v2 = findViewById(R.id.drawer_layout);
+        v2.animate()
+                .alpha(0f)
+                .translationY(v2.getHeight())
+                .setDuration(mShortAnimationDuration)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        ((DrawerLayout) v2).closeDrawer(Gravity.LEFT);
+                        v2.setVisibility(View.GONE);
+                        activity.recreate();
+                    }
+                });
     }
 
     private void prepareListData() {
@@ -1107,7 +1187,6 @@ private final static Double APP_VERSION = 2.5;
             adapter = new listViewAdapter(activity, list);
             lview.setAdapter(adapter);
             lview.setOnItemClickListener(lvOnClick);
-            lview.requestFocus();
         }
 
         protected ArrayList<HashMap> doInBackground(Void... voids) {
@@ -1162,7 +1241,7 @@ private final static Double APP_VERSION = 2.5;
             SQLiteDatabase database = db.getWritableDatabase();
             DBHelper.dropAndCreateTables(database);
 
-            List<List> characters = (List) parseJScript("https://optc-db.github.io/common/data/units.js", "units");
+            List<List> characters = (List) parseJScript(UNITS_JS, "units");
             publishProgress(getString(R.string.loading_characters));
 
             if (characters == null) return;
@@ -1212,7 +1291,7 @@ private final static Double APP_VERSION = 2.5;
 
             ParseAdditionalNotes notes_parser = new ParseAdditionalNotes();
 
-            List<Object> coolds = (List) parseJScript("https://optc-db.github.io/common/data/cooldowns.js", "cooldowns");
+            List<Object> coolds = (List) parseJScript(COOLDOWNS_JS, "cooldowns");
 
             publishProgress(getString(R.string.loading_cooldowns));
             ArrayList<CoolDowns> cools_tmp = new ArrayList<>();
@@ -1238,7 +1317,7 @@ private final static Double APP_VERSION = 2.5;
             }
             publishProgress(getString(R.string.downloading_abilities));
 
-            Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/details.js", "details");
+            Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript(DETAILS_JS, "details");
             publishProgress(getString(R.string.loading_abilities));
 
             if ((details_js != null) && (details_js.size() > 0)) {
@@ -1286,7 +1365,7 @@ private final static Double APP_VERSION = 2.5;
             }
             publishProgress(getString(R.string.downloading_evolutions));
 
-            Map<Integer, Map> evolutions = (Map<Integer, Map>) parseJScript("https://optc-db.github.io/common/data/evolutions.js", "evolutions");
+            Map<Integer, Map> evolutions = (Map<Integer, Map>) parseJScript(EVOLUTIONS_JS, "evolutions");
             publishProgress(getString(R.string.loading_evolutions));
             database.beginTransaction();
             try {
@@ -1594,12 +1673,13 @@ private final static Double APP_VERSION = 2.5;
         sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
         sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
         nsort = tsort = ssort = 0;
+        /*  UNFOCUS TEXTBOX AND HIDE KEYBOARD
         InputMethodManager inputManager = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
 
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
-        lview.requestFocus();
+        lview.requestFocus();*/
     }
 
     private void rebuildList() {

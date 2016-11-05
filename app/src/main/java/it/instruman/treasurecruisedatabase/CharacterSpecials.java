@@ -7,8 +7,17 @@ package it.instruman.treasurecruisedatabase;
 public class CharacterSpecials {
     private Integer SpecialNumber = null;
     private String SpecialDescription = null;
+    private String SpecialNotes = null;
     private Integer MaxCooldown = null;
     private Integer MinCooldown = null;
+
+    public String getSpecialNotes() {
+        return SpecialNotes;
+    }
+
+    public void setSpecialNotes(String specialNotes) {
+        SpecialNotes = specialNotes;
+    }
 
     public Integer getMaxCooldown() {
         return MaxCooldown;
@@ -42,11 +51,12 @@ public class CharacterSpecials {
         SpecialNumber = specialNumber;
     }
 
-    public CharacterSpecials(Integer maxCooldown, Integer minCooldown, String specialDescription, Integer specialNumber) {
+    public CharacterSpecials(Integer maxCooldown, Integer minCooldown, String specialDescription, Integer specialNumber, String specialNotes) {
         MaxCooldown = maxCooldown;
         MinCooldown = minCooldown;
         SpecialDescription = specialDescription;
         SpecialNumber = specialNumber;
+        SpecialNotes = specialNotes;
     }
 
     public CharacterSpecials() {

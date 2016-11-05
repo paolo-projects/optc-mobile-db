@@ -291,7 +291,7 @@ public class DBHelper extends SQLiteOpenHelper {
         String special_notes = "";
         int i = 1;
         while (!specials_cursor.isAfterLast()) {
-            CharacterSpecials char_spec = new CharacterSpecials(specials_cursor.getInt(2), specials_cursor.getInt(3), specials_cursor.getString(1), i);
+            CharacterSpecials char_spec = new CharacterSpecials(specials_cursor.getInt(2), specials_cursor.getInt(3), specials_cursor.getString(1), i, specials_cursor.getString(4));
             specials_data.add(char_spec);
             special_name = specials_cursor.getString(0);
             special_notes = specials_cursor.getString(4);

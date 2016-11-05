@@ -41,6 +41,10 @@ public class listViewAdapter extends BaseAdapter {
         return list.get(position);
     }
 
+    public Integer getIDfromPosition(int position) {
+        return (Integer) list.get(position).get(Constants.ID);
+    }
+
     @Override
     public long getItemId(int position) {
         // TODO Auto-generated method stub

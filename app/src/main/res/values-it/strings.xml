@@ -1,21 +1,4 @@
 <resources>
-    <!-- ### DON'T TRANSLATE ### -->
-    <string name="app_name">OPTC SmartDB</string>
-
-    <string name="backbutton">Back button</string>
-    <string name="big_char_image">Large image of the character</string>
-    <string name="reset_filters">Reset all filters</string>
-    <string name="small_char_image">Small character picture</string>
-    <string name="reset_database">Redownload database</string>
-    <string name="filterBtn_contDesc">Search button pic</string>
-    <string name="resetBtn_contDesc">Reset button pic</string>
-    <string name="sort_contDesc">Sort button pic</string>
-
-    <string name="pref_name">optc_smart_db_setting</string>
-    <string name="tutorial_displayed">displayed_tutorial</string>
-    <string name="lastupdate">date_last_update</string>
-    <string name="theme_pref">theme_preference</string>
-    <!-- ### -->
 
     <!-- Character info dialog strings -->
     <string name="class1">Classe 1</string>
@@ -44,7 +27,6 @@
     <string name="update_msg">È disponibile un nuovo aggiornamento. Vuoi installarlo?</string>
     <string name="update_btn">Certo</string>
 
-    //APP LOADING
     <string name="loadingmsg">Attendi durante il caricamento dati…</string>
     <string name="loading_characters">Sto impostando la lista personaggi</string>
     <string name="downloading_cooldowns">Sto scaricando i cooldown</string>

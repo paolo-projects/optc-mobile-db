@@ -13,7 +13,7 @@
         android:orientation="vertical"
         android:gravity="center"
         android:layout_gravity="center"
-        android:background="@drawable/char_info_bg">
+        android:background="?char_info_bg">
 
         <TextView
             android:layout_width="wrap_content"

@@ -26,7 +26,7 @@
             android:id="@+id/filtertext_layout"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="@drawable/allround_bg"
+            android:background="?filtertext"
             android:orientation="horizontal"
             android:paddingRight="10dp"
             android:paddingLeft="10dp"
@@ -73,7 +73,7 @@
             android:layout_width="match_parent"
             android:layout_height="26dp"
             android:layout_marginTop="6dp"
-            android:background="@drawable/sort_selector_bg"
+            android:background="?list_bg"
             android:orientation="horizontal"
             android:paddingBottom="4dp"
             android:paddingRight="10dp"
@@ -161,7 +161,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@drawable/list_bg"
+            android:background="?list_bg"
             android:padding="10dp"
             android:elevation="2dp">
 
@@ -170,7 +170,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:animationCache="true"
-                android:scrollingCache="true" />
+                android:scrollingCache="true"
+                android:fastScrollEnabled="true" />
         </LinearLayout>
     </LinearLayout>
     <!-- NAVIGATION DRAWER -->
@@ -191,59 +192,15 @@
             android:background="#fff"
             android:layout_weight="1" />
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="240dp"
-            android:layout_height="wrap_content"
+            android:layout_height="60dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
             android:background="?drawer_bar_bg"
-            android:elevation="2dp">
-
-            <ImageButton
-                android:id="@+id/reset_filters"
-                android:layout_width="25dp"
-                android:layout_height="25dp"
-                android:layout_marginEnd="10dp"
-                android:layout_marginRight="10dp"
-                android:background="@drawable/ic_reset_bar"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:scaleType="fitCenter"
-                android:contentDescription="@string/reset_filters"
-                style="?android:attr/buttonBarButtonStyle" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:gravity="center"
-                android:orientation="horizontal"
-                style="?android:attr/buttonBarButtonStyle">
-
-                <Button
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:background="#80CBC4"
-                    android:id="@+id/tealBtn"
-                    android:layout_marginRight="5dp" />
-
-                <Button
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:background="#EF9A9A"
-                    android:id="@+id/redBtn"
-                    android:layout_marginRight="5dp" />
-
-                <Button
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    style="?android:attr/buttonBarButtonStyle"
-                    android:background="#FFE082"
-                    android:id="@+id/amberBtn" />
-            </LinearLayout>
+            android:gravity="center"
+            android:elevation="2dp"
+            android:orientation="horizontal">
 
             <ImageButton
                 android:id="@+id/reset_db"
@@ -251,13 +208,58 @@
                 android:layout_height="25dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_centerVertical="true"
                 android:background="@drawable/ic_cloud"
                 android:scaleType="fitCenter"
-                android:contentDescription="@string/reset_database"
+                android:contentDescription="@string/reset_database" />
+
+            <ImageButton
+                android:id="@+id/language_selector"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/ic_translate"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />
-        </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:layout_weight="1">
+
+                <Button
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="#80CBC4"
+                    android:id="@+id/tealBtn"
+                    android:layout_marginRight="5dp" />
+
+                <Button
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="#EF9A9A"
+                    android:id="@+id/redBtn"
+                    android:layout_marginRight="5dp" />
+
+                <Button
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="#FFE082"
+                    android:id="@+id/amberBtn" />
+            </LinearLayout>
+            <ImageButton
+                android:id="@+id/reset_filters"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginEnd="10dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/ic_reset_bar"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/reset_filters"
+                style="?android:attr/buttonBarButtonStyle" />
+        </LinearLayout>
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

@@ -1,20 +1,20 @@
 <resources>
     <!-- ### DON'T TRANSLATE -->
-    <string name="app_name">OPTC SmartDB</string>
+    <string name="app_name" translatable="false">OPTC SmartDB</string>
 
-    <string name="backbutton">Back button</string>
-    <string name="big_char_image">Large image of the character</string>
-    <string name="reset_filters">Reset all filters</string>
-    <string name="small_char_image">Small character picture</string>
-    <string name="reset_database">Redownload database</string>
-    <string name="filterBtn_contDesc">Search button pic</string>
-    <string name="resetBtn_contDesc">Reset button pic</string>
-    <string name="sort_contDesc">Sort button pic</string>
+    <string name="backbutton" translatable="false">Back button</string>
+    <string name="big_char_image" translatable="false">Large image of the character</string>
+    <string name="reset_filters" translatable="false">Reset all filters</string>
+    <string name="small_char_image" translatable="false">Small character picture</string>
+    <string name="reset_database" translatable="false">Redownload database</string>
+    <string name="filterBtn_contDesc" translatable="false">Search button pic</string>
+    <string name="resetBtn_contDesc" translatable="false">Reset button pic</string>
+    <string name="sort_contDesc" translatable="false">Sort button pic</string>
 
-    <string name="pref_name">optc_smart_db_setting</string>
-    <string name="tutorial_displayed">displayed_tutorial</string>
-    <string name="lastupdate">date_last_update</string>
-    <string name="theme_pref">theme_preference</string>
+    <string name="pref_name" translatable="false">optc_smart_db_setting</string>
+    <string name="tutorial_displayed" translatable="false">displayed_tutorial</string>
+    <string name="lastupdate" translatable="false">date_last_update</string>
+    <string name="theme_pref" translatable="false">theme_preference</string>
     <!-- ###-->
 
     <!-- Character info dialog strings -->
@@ -102,5 +102,35 @@
         <item>3</item>
         <item>2</item>
         <item>1</item>
+    </string-array>
+
+    <string-array name="languages_array" translatable="false">
+        <item>English</item>
+        <item>Italian</item>
+        <item>German</item>
+        <item>Spanish</item>
+        <item>Dutch</item>
+        <item>Portuguese</item>
+        <item>Brazilian</item>
+    </string-array>
+
+    <string-array name="locale_array" translatable="false">
+        <item>English</item>
+        <item>it</item>
+        <item>de</item>
+        <item>es</item>
+        <item>nl</item>
+        <item>pt-pt</item>
+        <item>pt-br</item>
+    </string-array>
+
+    <string-array name="flags_array" translatable="false">
+        <item>@drawable/ic_gb</item>
+        <item>@drawable/ic_it</item>
+        <item>@drawable/ic_de</item>
+        <item>@drawable/ic_es</item>
+        <item>@drawable/ic_nl</item>
+        <item>@drawable/ic_pt</item>
+        <item>@drawable/ic_br</item>
     </string-array>
 </resources>
