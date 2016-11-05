@@ -19,3 +19,11 @@ Either download source code and compile with your own android compiler to build 
 # Credits
 
 Most of the work done for this app is from the people at optc-db.github.io, cause they created the database with all characters and attributes.
+
+Thanks to all reddit users who contributed to app translations:
+
+* Spanish: joseic1998 + pesaher
+* German: Mondfischer
+* Dutch: Bloodstrife
+* Portuguese (Portugal): GolDenBoY16
+* Portuguese (Brazilian): JustAnotherDevGuy
