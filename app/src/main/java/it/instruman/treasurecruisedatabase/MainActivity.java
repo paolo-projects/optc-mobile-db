@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 2.7;
+private final static Double APP_VERSION = 2.8;
 /*
     ##################################################
 */

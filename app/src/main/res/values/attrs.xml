@@ -17,4 +17,5 @@
     <attr name="char_info_stats_min_txt" format="reference|color" />
     <attr name="char_info_stats_max_bg" format="reference|color" />
     <attr name="char_info_stats_max_txt" format="reference|color" />
+    <attr name="hint_txt" format="reference|color" />
 </resources>
