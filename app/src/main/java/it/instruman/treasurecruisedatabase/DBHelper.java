@@ -153,14 +153,17 @@ public class DBHelper extends SQLiteOpenHelper {
 
     public static ArrayList<HashMap> getAllCharacters(SQLiteDatabase db) {
         ArrayList<HashMap> result = new ArrayList<>();
-        Cursor entry = db.query(UNITS_TABLE, new String[]{UNITS_CHARID, UNITS_NAME, UNITS_TYPE, UNITS_STARS}, null, null, null, null, null, null);
+        Cursor entry = db.query(UNITS_TABLE, new String[]{UNITS_CHARID, UNITS_NAME, UNITS_TYPE, UNITS_STARS, UNITS_MAXATK, UNITS_MAXHP, UNITS_MAXRCV}, null, null, null, null, null, null);
         entry.moveToFirst();
         while (!entry.isAfterLast()) {
-            HashMap tmp = new HashMap();
+            HashMap<String, Object> tmp = new HashMap();
             tmp.put(Constants.ID, entry.getInt(0));
             tmp.put(Constants.NAME, entry.getString(1));
             tmp.put(Constants.TYPE, entry.getString(2));
             tmp.put(Constants.STARS, entry.getInt(3));
+            tmp.put(Constants.MAXATK, entry.getInt(4));
+            tmp.put(Constants.MAXHP, entry.getInt(5));
+            tmp.put(Constants.MAXRCV, entry.getInt(6));
             result.add(tmp);
             entry.moveToNext();
         }

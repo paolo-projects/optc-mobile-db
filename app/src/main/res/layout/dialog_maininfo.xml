@@ -14,7 +14,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.1"
+            android:layout_weight="1"
             android:text="@string/class1"
             android:textStyle="bold"
             android:gravity="center_horizontal"
@@ -30,7 +30,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1.1"
+            android:layout_weight="1"
             android:text="@string/class2"
             android:textStyle="bold"
             android:gravity="center_horizontal"
@@ -46,19 +46,68 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.6"
+            android:layout_weight="0.7"
             android:text="@string/type"
             android:textStyle="bold"
             android:gravity="center_horizontal"
             android:background="?char_info_header_bg"
             android:textColor="?char_info_header_txt" />
 
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <TextView
+            android:id="@+id/class1Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
+
         <View
             android:layout_width="0.5dp"
             android:layout_height="match_parent"
             android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp" />
+            android:layout_marginRight="2dp"
+            android:background="@android:color/darker_gray" />
 
+        <TextView
+            android:id="@+id/class2Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/typeText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp">
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -74,12 +123,27 @@
             android:layout_height="match_parent"
             android:layout_marginLeft="2dp"
             android:layout_marginRight="2dp" />
-
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
             android:text="@string/cost"
+            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:background="?char_info_header_bg"
+            android:textColor="?char_info_header_txt" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:text="@string/combo"
             android:textStyle="bold"
             android:gravity="center_horizontal"
             android:background="?char_info_header_bg"
@@ -91,51 +155,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="2dp">
-
-        <TextView
-            android:id="@+id/class1Text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.1"
-            android:gravity="center_horizontal"
-            android:textColor="?char_info_txt" />
-
-        <View
-            android:layout_width="0.5dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp"
-            android:background="@android:color/darker_gray" />
-
-        <TextView
-            android:id="@+id/class2Text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.1"
-            android:gravity="center_horizontal"
-            android:textColor="?char_info_txt" />
-
-        <View
-            android:layout_width="0.5dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp"
-            android:background="@android:color/darker_gray" />
-
-        <TextView
-            android:id="@+id/typeText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:gravity="center_horizontal"
-            android:textColor="?char_info_txt" />
-
-        <View
-            android:layout_width="0.5dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp"
-            android:background="@android:color/darker_gray" />
 
         <TextView
             android:id="@+id/starsText"
@@ -151,9 +170,23 @@
             android:layout_marginLeft="2dp"
             android:layout_marginRight="2dp"
             android:background="@android:color/darker_gray" />
-
         <TextView
             android:id="@+id/costText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:gravity="center_horizontal"
+            android:textColor="?char_info_txt" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/comboText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
@@ -166,22 +199,6 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="2dp">
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:text="@string/combo"
-            android:textStyle="bold"
-            android:gravity="center_horizontal"
-            android:background="?char_info_header_bg"
-            android:textColor="?char_info_header_txt" />
-
-        <View
-            android:layout_width="0.5dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp" />
 
         <TextView
             android:layout_width="0dp"
@@ -202,7 +219,7 @@
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.9"
+            android:layout_weight="0.8"
             android:text="@string/maxlevel"
             android:textStyle="bold"
             android:gravity="center_horizontal"
@@ -233,21 +250,6 @@
         android:padding="2dp">
 
         <TextView
-            android:id="@+id/comboText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.6"
-            android:gravity="center_horizontal"
-            android:textColor="?char_info_txt" />
-
-        <View
-            android:layout_width="0.5dp"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="2dp"
-            android:layout_marginRight="2dp"
-            android:background="@android:color/darker_gray" />
-
-        <TextView
             android:id="@+id/slotsText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -266,7 +268,7 @@
             android:id="@+id/maxlevelText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="0.9"
+            android:layout_weight="0.8"
             android:gravity="center_horizontal"
             android:textColor="?char_info_txt" />
 

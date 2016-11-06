@@ -78,7 +78,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
@@ -94,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 2.6;
+private final static Double APP_VERSION = 2.7;
 /*
     ##################################################
 */
@@ -231,8 +230,7 @@ private final static Double APP_VERSION = 2.6;
     public String FilterText = "";
     private Activity activity = this;
 
-    ImageView sortName, sortType, sortStars;
-    Integer nsort, tsort, ssort;
+    ImageView sortName, sortType, sortStars, sortAtk, sortHP, sortRCV;
     ListView lview;
     listViewAdapter adapter;
     EditText filterText;
@@ -245,29 +243,49 @@ private final static Double APP_VERSION = 2.6;
     private String COOLDOWNS_JS;
     private String EVOLUTIONS_JS;
 
+    private void sortList(View v) {
+        ListSortUtility utils = new ListSortUtility();
+        list = utils.sortList(activity, v, list);
+        adapter = new listViewAdapter(activity, list);
+        lview.setAdapter(adapter);
+        hideKeyboard();
+    }
+
     private ArrayList<HashMap> list, original_list;
     ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (nsort == 0) sortNameAscending();
-            else if (nsort == 1) sortNameDescending();
-            else sortNameAscending();
+            sortList(v);
         }
     };
     ImageView.OnClickListener sortTypeOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (tsort == 0) sortTypeAscending();
-            else if (tsort == 1) sortTypeDescending();
-            else sortTypeAscending();
+            sortList(v);
         }
     };
     ImageView.OnClickListener sortStarsOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            if (ssort == 0) sortStarsAscending();
-            else if (ssort == 1) sortStarsDescending();
-            else sortStarsAscending();
+            sortList(v);
+        }
+    };
+    ImageView.OnClickListener sortAtkOnClick = new ImageView.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            sortList(v);
+        }
+    };
+    ImageView.OnClickListener sortHPOnClick = new ImageView.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            sortList(v);
+        }
+    };
+    ImageView.OnClickListener sortRCVOnClick = new ImageView.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            sortList(v);
         }
     };
 
@@ -281,8 +299,14 @@ private final static Double APP_VERSION = 2.6;
     private void launchDialog(int id) {
 
         //if((dlg_hwnd!=null)&&(dlg_hwnd.isShowing())) dlg_hwnd.dismiss();
+        Integer theme_id = R.style.AppThemeTeal;
+        try {
+            theme_id = getPackageManager().getActivityInfo(getComponentName(), 0).theme;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        final Dialog dialog = new Dialog(context, R.style.AppThemeDialog);
+        final Dialog dialog = new Dialog(context, theme_id);
         dialog.setContentView(R.layout.dialog_main);//dialog.setContentView(R.layout.character_info);
 
         TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
@@ -305,6 +329,11 @@ private final static Double APP_VERSION = 2.6;
         tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
 
         tabs.setCurrentTab(0);
+
+        for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
+            TextView tv = (TextView) tabs.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
+            tv.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+        }
 
         TextView title = (TextView) dialog.findViewById(R.id.titleText);
 
@@ -520,7 +549,6 @@ private final static Double APP_VERSION = 2.6;
                 evo_pic.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        //TODO: Add code to open details of evolved character
                         launchDialog(this_id);
                     }
                 });
@@ -560,7 +588,6 @@ private final static Double APP_VERSION = 2.6;
                         evolver_pic.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                //TODO: Add code to open details of evolver character
                                 launchDialog(evolver);
                             }
                         });
@@ -643,6 +670,12 @@ private final static Double APP_VERSION = 2.6;
             case "amber":
                 setTheme(R.style.AppThemeAmber);
                 break;
+            case "light":
+                setTheme(R.style.AppThemeLight);
+                break;
+            case "dark":
+                setTheme(R.style.AppThemeDark);
+                break;
             default:
                 setTheme(R.style.AppThemeTeal);
                 break;
@@ -669,6 +702,12 @@ private final static Double APP_VERSION = 2.6;
                 EVOLUTIONS_JS = "https://optc-sp.github.io/common/data/evolutions.js";
                 break;
 
+            case "it":
+                UNITS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/units.js";
+                COOLDOWNS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/cooldowns.js";
+                DETAILS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/details.js";
+                EVOLUTIONS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/evolutions.js";
+                break;
             default:
                 UNITS_JS = "https://optc-db.github.io/common/data/units.js";
                 COOLDOWNS_JS = "https://optc-db.github.io/common/data/cooldowns.js";
@@ -679,20 +718,44 @@ private final static Double APP_VERSION = 2.6;
 
         setContentView(R.layout.activity_main);
 
-        nsort = tsort = ssort = 0;
-
         sortName = (ImageView) findViewById(R.id.sortName);
         sortType = (ImageView) findViewById(R.id.sortType);
         sortStars = (ImageView) findViewById(R.id.sortStars);
+        sortAtk = (ImageView) findViewById(R.id.sortAtk);
+        sortHP = (ImageView) findViewById(R.id.sortHp);
+        sortRCV = (ImageView) findViewById(R.id.sortRcv);
+
+
         sortName.setBackgroundResource(R.drawable.ic_circle);
-        //sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortName.setTag(R.id.TAG_SORT_ID, R.id.sortName);
+        sortName.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
         sortType.setBackgroundResource(R.drawable.ic_circle);
-        //sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortType.setTag(R.id.TAG_SORT_ID, R.id.sortType);
+        sortType.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
         sortStars.setBackgroundResource(R.drawable.ic_circle);
-        //sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
+        sortStars.setTag(R.id.TAG_SORT_ID, R.id.sortStars);
+        sortStars.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortAtk.setBackgroundResource(R.drawable.ic_circle);
+        sortAtk.setTag(R.id.TAG_SORT_ID, R.id.sortAtk);
+        sortAtk.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortHP.setBackgroundResource(R.drawable.ic_circle);
+        sortHP.setTag(R.id.TAG_SORT_ID, R.id.sortHp);
+        sortHP.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortRCV.setBackgroundResource(R.drawable.ic_circle);
+        sortRCV.setTag(R.id.TAG_SORT_ID, R.id.sortRcv);
+        sortRCV.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
         sortName.setOnClickListener(sortNameOnClick);
         sortType.setOnClickListener(sortTypeOnClick);
         sortStars.setOnClickListener(sortStarsOnClick);
+        sortAtk.setOnClickListener(sortAtkOnClick);
+        sortHP.setOnClickListener(sortHPOnClick);
+        sortRCV.setOnClickListener(sortRCVOnClick);
 
         final ImageButton filterBtn = (ImageButton) findViewById(R.id.filterBtn);
         ImageButton resetBtn = (ImageButton) findViewById(R.id.resetBtn);
@@ -734,6 +797,7 @@ private final static Double APP_VERSION = 2.6;
             public void onClick(View v) {
                 FilterText = filterText.getText().toString();
                 rebuildList();
+                hideKeyboard();
             }
         });
         resetBtn.setOnClickListener(new View.OnClickListener() {
@@ -742,10 +806,7 @@ private final static Double APP_VERSION = 2.6;
                 filterText.setText("");
                 FilterText = "";
                 rebuildList();
-                //SHOW KEYBOARD
-                filterText.requestFocus();
-                InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                keyboard.showSoftInput(filterText, 0);
+                showKeyboard();
             }
         });
 
@@ -801,6 +862,8 @@ private final static Double APP_VERSION = 2.6;
         Button tealBtn = (Button) findViewById(R.id.tealBtn);
         Button redBtn = (Button) findViewById(R.id.redBtn);
         Button amberBtn = (Button) findViewById(R.id.amberBtn);
+        Button lightBtn = (Button) findViewById(R.id.lightBtn);
+        Button darkBtn = (Button) findViewById(R.id.darkBtn);
 
         tealBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -826,6 +889,24 @@ private final static Double APP_VERSION = 2.6;
                 setTheme(R.style.AppThemeAmber);
                 SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
                 prefs.edit().putString(getResources().getString(R.string.theme_pref), "amber").commit();
+                crossfade(300);
+            }
+        });
+        lightBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setTheme(R.style.AppThemeLight);
+                SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
+                prefs.edit().putString(getResources().getString(R.string.theme_pref), "light").commit();
+                crossfade(300);
+            }
+        });
+        darkBtn.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                setTheme(R.style.AppThemeDark);
+                SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_name), 0);
+                prefs.edit().putString(getResources().getString(R.string.theme_pref), "dark").commit();
                 crossfade(300);
             }
         });
@@ -973,6 +1054,7 @@ private final static Double APP_VERSION = 2.6;
         // setting list adapter
         expListView.setAdapter(explistAdapter);
         expListView.setOnChildClickListener(setFlags);
+        hideKeyboard();
     }
 
     @Override
@@ -1044,78 +1126,6 @@ private final static Double APP_VERSION = 2.6;
         return cm.getActiveNetworkInfo() != null;
     }
 
-    public void sortNameAscending() {
-        Collections.sort(list, new MapComparator(Constants.NAME));
-        adapter = new listViewAdapter(this, list);
-        lview.setAdapter(adapter);
-        //END
-        sortName.setBackgroundResource(R.drawable.ic_arrow_up);
-        sortType.setBackgroundResource(R.drawable.ic_circle);
-        sortStars.setBackgroundResource(R.drawable.ic_circle);
-        nsort = 1;
-        tsort = ssort = 0;
-    }
-
-    public void sortNameDescending() {
-        Collections.sort(list, Collections.reverseOrder(new MapComparator(Constants.NAME)));
-        adapter = new listViewAdapter(this, list);
-        lview.setAdapter(adapter);
-        //END
-        sortName.setBackgroundResource(R.drawable.ic_arrow_down);
-        sortType.setBackgroundResource(R.drawable.ic_circle);
-        sortStars.setBackgroundResource(R.drawable.ic_circle);
-        nsort = 2;
-        tsort = ssort = 0;
-    }
-
-    public void sortTypeAscending() {
-        Collections.sort(list, new MapComparator(Constants.TYPE));
-        adapter = new listViewAdapter(this, list);
-        lview.setAdapter(adapter);
-        //END
-        sortType.setBackgroundResource(R.drawable.ic_arrow_up);
-        sortName.setBackgroundResource(R.drawable.ic_circle);
-        sortStars.setBackgroundResource(R.drawable.ic_circle);
-        tsort = 1;
-        nsort = ssort = 0;
-    }
-
-    public void sortTypeDescending() {
-        Collections.sort(list, Collections.reverseOrder(new MapComparator(Constants.TYPE)));
-        adapter = new listViewAdapter(this, list);
-        lview.setAdapter(adapter);
-        //END
-        sortType.setBackgroundResource(R.drawable.ic_arrow_down);
-        sortName.setBackgroundResource(R.drawable.ic_circle);
-        sortStars.setBackgroundResource(R.drawable.ic_circle);
-        tsort = 2;
-        nsort = ssort = 0;
-    }
-
-    public void sortStarsAscending() {
-        Collections.sort(list, new MapComparator(Constants.STARS));
-        adapter = new listViewAdapter(this, list);
-        lview.setAdapter(adapter);
-        //END
-        sortStars.setBackgroundResource(R.drawable.ic_arrow_up);
-        sortType.setBackgroundResource(R.drawable.ic_circle);
-        sortName.setBackgroundResource(R.drawable.ic_circle);
-        ssort = 1;
-        tsort = nsort = 0;
-    }
-
-    public void sortStarsDescending() {
-        Collections.sort(list, Collections.reverseOrder(new MapComparator(Constants.STARS)));
-        adapter = new listViewAdapter(this, list);
-        lview.setAdapter(adapter);
-        //END
-        sortStars.setBackgroundResource(R.drawable.ic_arrow_down);
-        sortType.setBackgroundResource(R.drawable.ic_circle);
-        sortName.setBackgroundResource(R.drawable.ic_circle);
-        ssort = 2;
-        tsort = nsort = 0;
-    }
-
     public String convertID(Integer ID) {
         if (ID < 10) return ("000" + ID.toString());
         else if (ID < 100) return ("00" + ID.toString());
@@ -1123,7 +1133,7 @@ private final static Double APP_VERSION = 2.6;
         else return ID.toString();
     }
 
-    class MapComparator implements Comparator<HashMap> {
+    public static class MapComparator implements Comparator<HashMap> {
         private final String key;
 
         public MapComparator(String key) {
@@ -1133,9 +1143,13 @@ private final static Double APP_VERSION = 2.6;
         public int compare(HashMap first,
                            HashMap second) {
             if ((first != null) && (second != null)) {
-                String firstValue = String.valueOf((first.get(key) == null) ? "" : first.get(key));
-                String secondValue = String.valueOf((second.get(key) == null) ? "" : second.get(key));
-                return firstValue.compareTo(secondValue);
+                if (first.get(key).getClass().equals(Integer.class)) {
+                    return (int) second.get(key) - (int) first.get(key);
+                } else {
+                    String firstValue = String.valueOf((first.get(key) == null) ? "" : first.get(key));
+                    String secondValue = String.valueOf((second.get(key) == null) ? "" : second.get(key));
+                    return firstValue.compareTo(secondValue);
+                }
             }
             return "".compareTo("");
         }
@@ -1328,7 +1342,18 @@ private final static Double APP_VERSION = 2.6;
 
                         Object special = value.containsKey("special") ? value.get("special") : null;
                         String specialname = (String) (value.containsKey("specialName") ? value.get("specialName") : "");
-                        String captain = (String) (value.containsKey("captain") ? value.get("captain") : "");
+
+                        String captain = "";
+                        if (value.containsKey("captain")) {
+                            Object captainObj = value.get("captain");
+                            if (captainObj.getClass().equals(String.class))
+                                captain = (String) value.get("captain");
+                            else if (captainObj.getClass().equals(NativeObject.class)) {
+                                Map<String, String> captainMap = (Map<String, String>) captainObj;
+                                captain += "Global: " + captainMap.get("global") + System.getProperty("line.separator") +
+                                        "Japan: " + captainMap.get("japan");
+                            }
+                        }
                         String captainnotes = notes_parser.parseNotes(value.containsKey("captainNotes") ? (String) value.get("captainNotes") : "");
                         String specialnotes = notes_parser.parseNotes(value.containsKey("specialNotes") ? (String) value.get("specialNotes") : "");
 
@@ -1662,6 +1687,8 @@ private final static Double APP_VERSION = 2.6;
                 explistAdapter.setChildValue(groupPosition, childPosition, !remove);
                 rebuildList();
             }
+
+            hideKeyboard();
             return false;
         }
     };
@@ -1669,17 +1696,34 @@ private final static Double APP_VERSION = 2.6;
     private void updateList() {
         adapter = new listViewAdapter(activity, list);
         lview.setAdapter(adapter);
-        sortName.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortType.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        sortStars.setImageDrawable(getResources().getDrawable(R.drawable.ic_circle));
-        nsort = tsort = ssort = 0;
-        /*  UNFOCUS TEXTBOX AND HIDE KEYBOARD
+
+        sortName.setBackgroundResource(R.drawable.ic_circle);
+        sortName.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortType.setBackgroundResource(R.drawable.ic_circle);
+        sortType.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortStars.setBackgroundResource(R.drawable.ic_circle);
+        sortStars.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortAtk.setBackgroundResource(R.drawable.ic_circle);
+        sortAtk.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortHP.setBackgroundResource(R.drawable.ic_circle);
+        sortHP.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+
+        sortRCV.setBackgroundResource(R.drawable.ic_circle);
+        sortRCV.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
+    }
+
+    private void hideKeyboard() {
+        //  UNFOCUS TEXTBOX AND HIDE KEYBOARD
         InputMethodManager inputManager = (InputMethodManager)
                 getSystemService(Context.INPUT_METHOD_SERVICE);
 
         inputManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
-        lview.requestFocus();*/
+        lview.requestFocus();
     }
 
     private void rebuildList() {
@@ -1799,6 +1843,13 @@ private final static Double APP_VERSION = 2.6;
         }
     }
 
+    private void showKeyboard() {
+        //SHOW KEYBOARD
+        filterText.requestFocus();
+        InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        keyboard.showSoftInput(filterText, 0);
+    }
+
     private static final int SETTINGS_UNKNOWN_SOURCES = 101;
     private String apk_file = "";
 
@@ -1824,6 +1875,6 @@ private final static Double APP_VERSION = 2.6;
     //DONE: Custom filters
     //DONE: List type and stars need a custom background and text color (to improve readability)
     //TODO: Improve custom filters
+    //TODO: Add more columns to list
     //DONE: Add evolutions and evolvers
-    //TODO: Maybe a white theme is better?
 }

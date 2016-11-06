@@ -152,7 +152,7 @@ public class FilterClass {
         String[] values_array = new String[values.size()];
         values.toArray(values_array);
         ArrayList<HashMap> filtered = new ArrayList<>();
-        Cursor result = db.query(DBHelper.UNITS_TABLE, new String[]{DBHelper.UNITS_NAME, DBHelper.UNITS_TYPE, DBHelper.UNITS_STARS, DBHelper.UNITS_CHARID}, type_condition, values_array, null, null, null, null);
+        Cursor result = db.query(DBHelper.UNITS_TABLE, new String[]{DBHelper.UNITS_NAME, DBHelper.UNITS_TYPE, DBHelper.UNITS_STARS, DBHelper.UNITS_CHARID, DBHelper.UNITS_MAXATK, DBHelper.UNITS_MAXHP, DBHelper.UNITS_MAXRCV,}, type_condition, values_array, null, null, null, null);
 
         result.moveToFirst();
         while (!result.isAfterLast()) {
@@ -161,6 +161,9 @@ public class FilterClass {
             element.put(Constants.TYPE, result.getString(1));
             element.put(Constants.STARS, result.getInt(2));
             element.put(Constants.ID, result.getInt(3));
+            element.put(Constants.MAXATK, result.getInt(4));
+            element.put(Constants.MAXHP, result.getInt(5));
+            element.put(Constants.MAXRCV, result.getInt(6));
             filtered.add(element);
             result.moveToNext();
         }

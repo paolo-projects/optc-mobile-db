@@ -61,4 +61,49 @@
         android:gravity="center_horizontal"
         android:layout_gravity="center" />
 
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp" />
+
+    <TextView
+        android:id="@+id/hp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:textAlignment="center"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center" />
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp" />
+
+    <TextView
+        android:id="@+id/atk"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:textAlignment="center"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center" />
+
+    <View
+        android:layout_width="0.5dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="2dp"
+        android:layout_marginRight="2dp" />
+
+    <TextView
+        android:id="@+id/rcv"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.4"
+        android:textAlignment="center"
+        android:gravity="center_horizontal"
+        android:layout_gravity="center" />
+
 </LinearLayout>

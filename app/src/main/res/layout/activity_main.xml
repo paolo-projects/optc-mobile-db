@@ -69,112 +69,219 @@
                 android:scaleType="fitCenter" />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="26dp"
-            android:layout_marginTop="6dp"
-            android:background="?list_bg"
-            android:orientation="horizontal"
-            android:paddingBottom="4dp"
-            android:paddingRight="10dp"
-            android:paddingEnd="10dp"
-            android:paddingLeft="10dp"
-            android:paddingStart="10dp"
-            android:paddingTop="4dp"
-            android:elevation="2dp">
-
-            <TextView
-                android:layout_width="48dp"
-                android:layout_height="match_parent" />
-
-            <View
-                android:layout_width="0.5dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp">
-
-                <ImageView
-                    android:id="@+id/sortName"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/sort_contDesc"
-                    android:textAlignment="center" />
-            </LinearLayout>
-            <View
-                android:layout_width="1.5dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="1.5dp"
-                android:layout_marginRight="1.5dp"
-                android:background="@color/div_color" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.2"
-                android:gravity="center"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp">
-
-                <ImageView
-                    android:id="@+id/sortType"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/sort_contDesc" />
-            </LinearLayout>
-            <View
-                android:layout_width="1.5dp"
-                android:layout_height="match_parent"
-                android:layout_marginLeft="1.5dp"
-                android:layout_marginRight="1.5dp"
-                android:background="@color/div_color" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="0.2"
-                android:gravity="center"
-                android:layout_marginLeft="5dp">
-
-                <ImageView
-                    android:id="@+id/sortStars"
-                    android:layout_width="14dp"
-                    android:layout_height="14dp"
-                    android:scaleType="fitCenter"
-                    android:contentDescription="@string/sort_contDesc" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <View
-            android:layout_height="4dp"
-            android:layout_width="match_parent" />
-
-        <LinearLayout
+        <HorizontalScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?list_bg"
-            android:padding="10dp"
-            android:elevation="2dp">
+            android:fillViewport="false"
+            android:id="@+id/listScrollView">
 
-            <ListView
-                android:id="@+id/listView1"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:animationCache="true"
-                android:scrollingCache="true"
-                android:fastScrollEnabled="true" />
-        </LinearLayout>
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="550dp"
+                    android:layout_height="26dp"
+                    android:layout_marginTop="6dp"
+                    android:background="?list_bg"
+                    android:orientation="horizontal"
+                    android:paddingBottom="4dp"
+                    android:paddingRight="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingLeft="100dp"
+                    android:paddingStart="100dp"
+                    android:paddingTop="4dp"
+                    android:elevation="2dp">
+
+                    <View
+                        android:layout_width="0.5dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="2dp"
+                        android:layout_marginRight="2dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+
+                        <ImageView
+                            android:id="@+id/sortName"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/sort_contDesc"
+                            android:textAlignment="center" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1.5dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="1.5dp"
+                        android:layout_marginRight="1.5dp"
+                        android:background="@color/div_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.2"
+                        android:gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+
+                        <ImageView
+                            android:id="@+id/sortType"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/sort_contDesc" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1.5dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="1.5dp"
+                        android:layout_marginRight="1.5dp"
+                        android:background="@color/div_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.2"
+                        android:gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+
+                        <ImageView
+                            android:id="@+id/sortStars"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/sort_contDesc" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1.5dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="1.5dp"
+                        android:layout_marginRight="1.5dp"
+                        android:background="@color/div_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.4"
+                        android:gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="HP"
+                            android:textColor="?list_sort_btn"
+                            android:layout_marginRight="5dp" />
+
+                        <ImageView
+                            android:id="@+id/sortHp"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/sort_contDesc" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1.5dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="1.5dp"
+                        android:layout_marginRight="1.5dp"
+                        android:background="@color/div_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.4"
+                        android:gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="ATK"
+                            android:textColor="?list_sort_btn"
+                            android:layout_marginRight="5dp" />
+
+                        <ImageView
+                            android:id="@+id/sortAtk"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/sort_contDesc" />
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="1.5dp"
+                        android:layout_height="match_parent"
+                        android:layout_marginLeft="1.5dp"
+                        android:layout_marginRight="1.5dp"
+                        android:background="@color/div_color" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0.4"
+                        android:gravity="center"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginRight="5dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:text="RCV"
+                            android:textColor="?list_sort_btn"
+                            android:layout_marginRight="5dp" />
+
+                        <ImageView
+                            android:id="@+id/sortRcv"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="@string/sort_contDesc" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <View
+                    android:layout_height="4dp"
+                    android:layout_width="match_parent" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="?list_bg"
+                    android:padding="10dp"
+                    android:elevation="2dp">
+
+                    <ListView
+                        android:id="@+id/listView1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:animationCache="true"
+                        android:scrollingCache="true"
+                        android:fastScrollEnabled="true"
+                        android:scrollbarStyle="outsideInset"
+                        android:verticalScrollbarPosition="left" />
+                </LinearLayout>
+            </LinearLayout>
+        </HorizontalScrollView>
     </LinearLayout>
+
     <!-- NAVIGATION DRAWER -->
+
     <LinearLayout
         android:id="@+id/left_drawer"
         android:layout_width="240dp"
@@ -192,9 +299,9 @@
             android:background="#fff"
             android:layout_weight="1" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="240dp"
-            android:layout_height="60dp"
+            android:layout_height="40dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
             android:background="?drawer_bar_bg"
@@ -208,6 +315,8 @@
                 android:layout_height="25dp"
                 android:layout_marginLeft="10dp"
                 android:layout_marginStart="10dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:background="@drawable/ic_cloud"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_database" />
@@ -218,48 +327,70 @@
                 android:layout_height="25dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
+                android:layout_toEndOf="@id/reset_db"
+                android:layout_toRightOf="@id/reset_db"
                 android:background="@drawable/ic_translate"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:orientation="horizontal"
-                android:layout_weight="1">
-
-                <Button
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="#80CBC4"
-                    android:id="@+id/tealBtn"
-                    android:layout_marginRight="5dp" />
-
-                <Button
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="#EF9A9A"
-                    android:id="@+id/redBtn"
-                    android:layout_marginRight="5dp" />
-
-                <Button
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:background="#FFE082"
-                    android:id="@+id/amberBtn" />
-            </LinearLayout>
             <ImageButton
                 android:id="@+id/reset_filters"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_marginEnd="10dp"
                 android:layout_marginRight="10dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:background="@drawable/ic_reset_bar"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="240dp"
+            android:layout_height="40dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="?drawer_bar_bg"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:elevation="2dp">
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="#80CBC4"
+                android:id="@+id/tealBtn"
+                android:layout_marginRight="5dp" />
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="#EF9A9A"
+                android:id="@+id/redBtn"
+                android:layout_marginRight="5dp" />
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="#FFE082"
+                android:id="@+id/amberBtn"
+                android:layout_marginRight="5dp" />
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="#f3f3f3"
+                android:id="@+id/lightBtn"
+                android:layout_marginRight="5dp" />
+
+            <Button
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:background="#444"
+                android:id="@+id/darkBtn" />
         </LinearLayout>
     </LinearLayout>
 </android.support.v4.widget.DrawerLayout>

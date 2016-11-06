@@ -31,13 +31,11 @@ public class listViewAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        // TODO Auto-generated method stub
         return list.size();
     }
 
     @Override
     public Object getItem(int position) {
-        // TODO Auto-generated method stub
         return list.get(position);
     }
 
@@ -47,24 +45,23 @@ public class listViewAdapter extends BaseAdapter {
 
     @Override
     public long getItemId(int position) {
-        // TODO Auto-generated method stub
         return 0;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        // TODO Auto-generated method stub
-
-        // TODO Auto-generated method stub
         ViewHolder holder;
         LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.column_row, parent, false);
             holder = new ViewHolder();
             holder.smallImg = (ImageView) convertView.findViewById(R.id.small_img);
-            holder.txtFirst = (TextView) convertView.findViewById(R.id.name);
-            holder.txtSecond = (TextView) convertView.findViewById(R.id.type);
-            holder.txtThird = (TextView) convertView.findViewById(R.id.stars);
+            holder.txtName = (TextView) convertView.findViewById(R.id.name);
+            holder.txtType = (TextView) convertView.findViewById(R.id.type);
+            holder.txtStars = (TextView) convertView.findViewById(R.id.stars);
+            holder.txtAtk = (TextView) convertView.findViewById(R.id.atk);
+            holder.txtHP = (TextView) convertView.findViewById(R.id.hp);
+            holder.txtRCV = (TextView) convertView.findViewById(R.id.rcv);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -80,54 +77,57 @@ public class listViewAdapter extends BaseAdapter {
                 .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .into(holder.smallImg);
 
-        holder.txtFirst.setText((String) map.get(Constants.NAME));
+        holder.txtName.setText((String) map.get(Constants.NAME));
         String SEC_COL = (String) map.get(Constants.TYPE);
-        holder.txtSecond.setText(SEC_COL);
+        holder.txtType.setText(SEC_COL);
         switch (SEC_COL) {
             case "STR":
-                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.str_bg));
-                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.str_txt));
+                holder.txtType.setBackgroundColor(activity.getResources().getColor(R.color.str_bg));
+                holder.txtType.setTextColor(activity.getResources().getColor(R.color.str_txt));
                 break;
             case "QCK":
-                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.qck_bg));
-                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.qck_txt));
+                holder.txtType.setBackgroundColor(activity.getResources().getColor(R.color.qck_bg));
+                holder.txtType.setTextColor(activity.getResources().getColor(R.color.qck_txt));
                 break;
             case "DEX":
-                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.dex_bg));
-                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.dex_txt));
+                holder.txtType.setBackgroundColor(activity.getResources().getColor(R.color.dex_bg));
+                holder.txtType.setTextColor(activity.getResources().getColor(R.color.dex_txt));
                 break;
             case "PSY":
-                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.psy_bg));
-                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.psy_txt));
+                holder.txtType.setBackgroundColor(activity.getResources().getColor(R.color.psy_bg));
+                holder.txtType.setTextColor(activity.getResources().getColor(R.color.psy_txt));
                 break;
             case "INT":
-                holder.txtSecond.setBackgroundColor(activity.getResources().getColor(R.color.int_bg));
-                holder.txtSecond.setTextColor(activity.getResources().getColor(R.color.int_txt));
+                holder.txtType.setBackgroundColor(activity.getResources().getColor(R.color.int_bg));
+                holder.txtType.setTextColor(activity.getResources().getColor(R.color.int_txt));
                 break;
             default:
                 break;
         }
-        holder.txtThird.setText(map.get(Constants.STARS).toString());
+        holder.txtStars.setText(map.get(Constants.STARS).toString());
         switch ((Integer) map.get(Constants.STARS)) {
             case 1:
             case 2:
-                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.bronze_bg));
-                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.bronze_txt));
+                holder.txtStars.setBackgroundColor(activity.getResources().getColor(R.color.bronze_bg));
+                holder.txtStars.setTextColor(activity.getResources().getColor(R.color.bronze_txt));
                 break;
             case 3:
-                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.silver_bg));
-                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.silver_txt));
+                holder.txtStars.setBackgroundColor(activity.getResources().getColor(R.color.silver_bg));
+                holder.txtStars.setTextColor(activity.getResources().getColor(R.color.silver_txt));
                 break;
             case 4:
             case 5:
-                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.gold_bg));
-                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.gold_txt));
+                holder.txtStars.setBackgroundColor(activity.getResources().getColor(R.color.gold_bg));
+                holder.txtStars.setTextColor(activity.getResources().getColor(R.color.gold_txt));
                 break;
             case 6:
-                holder.txtThird.setBackgroundColor(activity.getResources().getColor(R.color.red_bg));
-                holder.txtThird.setTextColor(activity.getResources().getColor(R.color.red_txt));
+                holder.txtStars.setBackgroundColor(activity.getResources().getColor(R.color.red_bg));
+                holder.txtStars.setTextColor(activity.getResources().getColor(R.color.red_txt));
                 break;
         }
+        holder.txtAtk.setText(map.containsKey(Constants.MAXATK) ? String.valueOf(map.get(Constants.MAXATK)) : "");
+        holder.txtHP.setText(map.containsKey(Constants.MAXHP) ? String.valueOf(map.get(Constants.MAXHP)) : "");
+        holder.txtRCV.setText(map.containsKey(Constants.MAXRCV) ? String.valueOf(map.get(Constants.MAXRCV)) : "");
         return convertView;
     }
 
@@ -140,8 +140,11 @@ public class listViewAdapter extends BaseAdapter {
 
     private class ViewHolder {
         ImageView smallImg;
-        TextView txtFirst;
-        TextView txtSecond;
-        TextView txtThird;
+        TextView txtName;
+        TextView txtType;
+        TextView txtStars;
+        TextView txtAtk;
+        TextView txtHP;
+        TextView txtRCV;
     }
 }

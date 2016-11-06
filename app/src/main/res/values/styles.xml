@@ -55,7 +55,7 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">#FFC107</item>
         <item name="colorPrimaryDark">#FFA000</item>
-        <item name="colorAccent">#FFAB00</item>
+        <item name="colorAccent">#FFFF00</item>
 
         <item name="main_bg">@color/main_bg_amber</item>
         <item name="filtertext">@color/filtertext_amber</item>
@@ -74,6 +74,56 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_amber</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_amber</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_amber</item>
+    </style>
+
+    <style name="AppThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#000</item>
+        <item name="colorPrimaryDark">#DE000000</item>
+        <item name="colorAccent">#a2a2a2</item>
+
+        <item name="main_bg">@color/main_bg_light</item>
+        <item name="filtertext">@color/filtertext_light</item>
+        <item name="text_icons_searchbox">@color/text_icons_searchbox_light</item>
+        <item name="list_bg">@color/list_bg_light</item>
+        <item name="list_text">@color/list_text_light</item>
+        <item name="list_sort_btn">@color/list_sort_btn_light</item>
+        <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_light</item>
+        <item name="drawer_bar_bg">@color/drawer_bar_bg_light</item>
+        <item name="drawer_bar_btn">@color/drawer_bar_btn_light</item>
+        <item name="char_info_bg">@color/char_info_bg_light</item>
+        <item name="char_info_header_bg">@color/char_info_header_bg_light</item>
+        <item name="char_info_header_txt">@color/char_info_header_txt_light</item>
+        <item name="char_info_txt">@color/char_info_txt_light</item>
+        <item name="char_info_stats_min_bg">@color/char_info_stats_min_bg_light</item>
+        <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_light</item>
+        <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_light</item>
+        <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_light</item>
+    </style>
+
+    <style name="AppThemeDark" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#FFF</item>
+        <item name="colorPrimaryDark">#DE000000</item>
+        <item name="colorAccent">#FFAB00</item>
+
+        <item name="main_bg">@color/main_bg_dark</item>
+        <item name="filtertext">@color/filtertext_dark</item>
+        <item name="text_icons_searchbox">@color/text_icons_searchbox_dark</item>
+        <item name="list_bg">@color/list_bg_dark</item>
+        <item name="list_text">@color/list_text_dark</item>
+        <item name="list_sort_btn">@color/list_sort_btn_dark</item>
+        <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_dark</item>
+        <item name="drawer_bar_bg">@color/drawer_bar_bg_dark</item>
+        <item name="drawer_bar_btn">@color/drawer_bar_btn_dark</item>
+        <item name="char_info_bg">@color/char_info_bg_dark</item>
+        <item name="char_info_header_bg">@color/char_info_header_bg_dark</item>
+        <item name="char_info_header_txt">@color/char_info_header_txt_dark</item>
+        <item name="char_info_txt">@color/char_info_txt_dark</item>
+        <item name="char_info_stats_min_bg">@color/char_info_stats_min_bg_dark</item>
+        <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_dark</item>
+        <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_dark</item>
+        <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_dark</item>
     </style>
 
     <style name="CustomShowcaseTheme2" parent="ShowcaseView">

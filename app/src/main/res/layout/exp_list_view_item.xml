@@ -14,6 +14,7 @@
         android:paddingTop="5dp"
         android:paddingBottom="5dp"
         android:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft"
-        android:checkMark="?android:attr/listChoiceIndicatorMultiple" />
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"
+        android:textColor="#DE000000" />
 
 </LinearLayout>

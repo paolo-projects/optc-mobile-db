@@ -23,7 +23,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/capt_notes"
-        android:visibility="gone" />
+        android:visibility="gone"
+        android:textColor="?char_info_header_txt" />
 
     <View
         android:layout_width="match_parent"
@@ -63,11 +64,4 @@
         android:id="@+id/specials_container"
         android:orientation="vertical">
     </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/spec_notes"
-        android:textColor="?char_info_header_txt"
-        android:visibility="gone" />
 </LinearLayout>

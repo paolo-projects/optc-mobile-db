@@ -7,15 +7,15 @@
     <color name="str_txt">#ffffff</color>
 
     <!-- DEX -->
-    <color name="dex_bg">#64dd17</color>
-    <color name="dex_txt">#000000</color>
+    <color name="dex_bg">#008000</color>
+    <color name="dex_txt">#ffffff</color>
 
     <!-- QCK -->
-    <color name="qck_bg">#0d47a1</color>
+    <color name="qck_bg">#3e3efd</color>
     <color name="qck_txt">#ffffff</color>
 
     <!-- INT -->
-    <color name="int_bg">#4a148c</color>
+    <color name="int_bg">#9932cc</color>
     <color name="int_txt">#ffffff</color>
 
     <!-- PSY -->
@@ -97,4 +97,42 @@
     <color name="char_info_stats_min_txt_amber">#DE000000</color>
     <color name="char_info_stats_max_bg_amber">#FFC400</color>
     <color name="char_info_stats_max_txt_amber">#DE000000</color>
+
+    <!-- LIGHT THEME -->
+    <color name="main_bg_light">#FFF</color>
+    <color name="filtertext_light">#f3f3f3</color>
+    <color name="text_icons_searchbox_light">#DE000000</color>
+    <color name="list_bg_light">#f3f3f3</color>
+    <color name="list_text_light">#DE000000</color>
+    <color name="list_sort_btn_light">#a2a2a2</color>
+    <color name="list_sort_btn_disabled_light">#a2a2a2</color>
+    <color name="drawer_bar_bg_light">#f3f3f3</color>
+    <color name="drawer_bar_btn_light">#000000</color>
+    <color name="char_info_bg_light">#DDDDDD</color>
+    <color name="char_info_header_bg_light">#c9c9c9</color>
+    <color name="char_info_header_txt_light">#99000000</color>
+    <color name="char_info_txt_light">#DE000000</color>
+    <color name="char_info_stats_min_bg_light">#00FFFFFF</color>
+    <color name="char_info_stats_min_txt_light">#DE000000</color>
+    <color name="char_info_stats_max_bg_light">#f6f6f6</color>
+    <color name="char_info_stats_max_txt_light">#DE000000</color>
+
+    <!-- DARK THEME -->
+    <color name="main_bg_dark">#111</color>
+    <color name="filtertext_dark">#444</color>
+    <color name="text_icons_searchbox_dark">#FFF</color>
+    <color name="list_bg_dark">#333</color>
+    <color name="list_text_dark">#DEf1f1f1</color>
+    <color name="list_sort_btn_dark">#f3f3f3</color>
+    <color name="list_sort_btn_disabled_dark">#99f3f3f3</color>
+    <color name="drawer_bar_bg_dark">#333</color>
+    <color name="drawer_bar_btn_dark">#F9F9F9</color>
+    <color name="char_info_bg_dark">#333</color>
+    <color name="char_info_header_bg_dark">#33f6f6f6</color>
+    <color name="char_info_header_txt_dark">#99FFFFFF</color>
+    <color name="char_info_txt_dark">#DED1D1D1</color>
+    <color name="char_info_stats_min_bg_dark">#00000000</color>
+    <color name="char_info_stats_min_txt_dark">#DED1D1D1</color>
+    <color name="char_info_stats_max_bg_dark">#c9c9c9</color>
+    <color name="char_info_stats_max_txt_dark">#222</color>
 </resources>
