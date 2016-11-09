@@ -8,8 +8,8 @@ android {
         applicationId "it.instruman.treasurecruisedatabase"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        versionCode 14
+        versionName "2.9"
     }
     buildTypes {
         release {
@@ -29,3 +29,4 @@ dependencies {
     compile 'com.github.amlcurran.showcaseview:library:5.4.3'
     compile 'com.github.lzyzsd:circleprogress:1.1.0'
 }
+

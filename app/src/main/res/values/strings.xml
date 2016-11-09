@@ -12,7 +12,7 @@
     <string name="sort_contDesc" translatable="false">Sort button pic</string>
 
     <string name="pref_name" translatable="false">optc_smart_db_setting</string>
-    <string name="tutorial_displayed" translatable="false">displayed_tutorial</string>
+    <string name="tutorial_displayed" translatable="false">displayed_drawermoved</string>
     <string name="lastupdate" translatable="false">date_last_update</string>
     <string name="theme_pref" translatable="false">theme_preference</string>
     <!-- ###-->
@@ -115,7 +115,7 @@
     </string-array>
 
     <string-array name="locale_array" translatable="false">
-        <item>English</item>
+        <item>en</item>
         <item>it</item>
         <item>de</item>
         <item>es</item>

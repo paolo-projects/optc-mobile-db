@@ -35,6 +35,7 @@ import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.view.inputmethod.EditorInfo;
@@ -59,6 +60,8 @@ import com.bumptech.glide.request.FutureTarget;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
@@ -93,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 2.8;
+private final static Double APP_VERSION = 2.9;
 /*
     ##################################################
 */
@@ -233,6 +236,7 @@ private final static Double APP_VERSION = 2.8;
     ImageView sortName, sortType, sortStars, sortAtk, sortHP, sortRCV;
     ListView lview;
     listViewAdapter adapter;
+    Map<String, String> directives;
     EditText filterText;
     Dialog dlg_hwnd = null;
     Dialog loadingdlg_hwnd = null;
@@ -242,6 +246,7 @@ private final static Double APP_VERSION = 2.8;
     private String DETAILS_JS;
     private String COOLDOWNS_JS;
     private String EVOLUTIONS_JS;
+    private String DIRECTIVES_JS;
 
     private void sortList(View v) {
         ListSortUtility utils = new ListSortUtility();
@@ -252,40 +257,89 @@ private final static Double APP_VERSION = 2.8;
     }
 
     private ArrayList<HashMap> list, original_list;
-    ImageView.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
+    LinearLayout.OnClickListener sortNameOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            sortList(v);
+            ViewGroup vg = (ViewGroup) v;
+            View u = null;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+
+                View child = vg.getChildAt(i);
+
+                if (child instanceof ImageView) u = child;
+            }
+            sortList(u);
         }
     };
-    ImageView.OnClickListener sortTypeOnClick = new ImageView.OnClickListener() {
+    LinearLayout.OnClickListener sortTypeOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            sortList(v);
+
+            ViewGroup vg = (ViewGroup) v;
+            View u = null;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+
+                View child = vg.getChildAt(i);
+
+                if (child instanceof ImageView) u = child;
+            }
+            sortList(u);
         }
     };
-    ImageView.OnClickListener sortStarsOnClick = new ImageView.OnClickListener() {
+    LinearLayout.OnClickListener sortStarsOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            sortList(v);
+            ViewGroup vg = (ViewGroup) v;
+            View u = null;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+
+                View child = vg.getChildAt(i);
+
+                if (child instanceof ImageView) u = child;
+            }
+            sortList(u);
         }
     };
-    ImageView.OnClickListener sortAtkOnClick = new ImageView.OnClickListener() {
+    LinearLayout.OnClickListener sortAtkOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            sortList(v);
+            ViewGroup vg = (ViewGroup) v;
+            View u = null;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+
+                View child = vg.getChildAt(i);
+
+                if (child instanceof ImageView) u = child;
+            }
+            sortList(u);
         }
     };
-    ImageView.OnClickListener sortHPOnClick = new ImageView.OnClickListener() {
+    LinearLayout.OnClickListener sortHPOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            sortList(v);
+            ViewGroup vg = (ViewGroup) v;
+            View u = null;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+
+                View child = vg.getChildAt(i);
+
+                if (child instanceof ImageView) u = child;
+            }
+            sortList(u);
         }
     };
-    ImageView.OnClickListener sortRCVOnClick = new ImageView.OnClickListener() {
+    LinearLayout.OnClickListener sortRCVOnClick = new ImageView.OnClickListener() {
         @Override
         public void onClick(View v) {
-            sortList(v);
+            ViewGroup vg = (ViewGroup) v;
+            View u = null;
+            for (int i = 0; i < vg.getChildCount(); i++) {
+
+                View child = vg.getChildAt(i);
+
+                if (child instanceof ImageView) u = child;
+            }
+            sortList(u);
         }
     };
 
@@ -295,6 +349,13 @@ private final static Double APP_VERSION = 2.8;
             launchDialog(adapter.getIDfromPosition(position));
         }
     };
+
+    private String replaceBr(String input) {
+        String output = input.replace(" <br> ", System.getProperty("line.separator"));
+        output = output.replace("<br> ", System.getProperty("line.separator"));
+        output = output.replace("<br>", System.getProperty("line.separator"));
+        return output;
+    }
 
     private void launchDialog(int id) {
 
@@ -380,6 +441,7 @@ private final static Double APP_VERSION = 2.8;
 
         if (charInfo == null) return;
 
+
         title.setText(charInfo.getName());
         title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
 
@@ -452,6 +514,7 @@ private final static Double APP_VERSION = 2.8;
         captability.setText(charInfo.getCaptainDescription());
         String capt_notes = charInfo.getCaptainNotes();
         if (!capt_notes.equals("")) {
+            capt_notes = replaceBr(capt_notes);
             captnotes.setText(getString(R.string.notes_text) + capt_notes);
             captnotes.setVisibility(View.VISIBLE);
         }
@@ -499,11 +562,15 @@ private final static Double APP_VERSION = 2.8;
 
                 coold_layout.addView(coold_content);
 
-                TextView special_notes = new TextView(context);
-                special_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                special_notes.setText(special.getSpecialNotes());
-                special_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-                specials_container.addView(special_notes);
+                String specialnotes = special.getSpecialNotes();
+                if (!specialnotes.equals("")) {
+                    specialnotes = replaceBr(specialnotes);
+                    TextView special_notes = new TextView(context);
+                    special_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                    special_notes.setText(getString(R.string.notes_text) + specialnotes);
+                    special_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+                    specials_container.addView(special_notes);
+                }
 
                 coold_layout.setPadding(2, 8, 2, 8);
 
@@ -680,6 +747,15 @@ private final static Double APP_VERSION = 2.8;
                 setTheme(R.style.AppThemeTeal);
                 break;
         }
+        if (!mPrefs.contains(locale_pref)) {
+            Locale lan = Locale.getDefault();
+            String locale = lan.getLanguage().toLowerCase();
+            String country = lan.getCountry();
+            if (!country.equals("")) {
+                locale += "-" + country.toLowerCase();
+            }
+            mPrefs.edit().putString(locale_pref, locale).commit();
+        }
 
         String locale = mPrefs.getString(locale_pref, "");
         if (!locale.equals("")) {
@@ -700,23 +776,26 @@ private final static Double APP_VERSION = 2.8;
                 COOLDOWNS_JS = "https://optc-sp.github.io/common/data/cooldowns.js";
                 DETAILS_JS = "https://optc-sp.github.io/common/data/details.js";
                 EVOLUTIONS_JS = "https://optc-sp.github.io/common/data/evolutions.js";
+                DIRECTIVES_JS = "https://optc-sp.github.io/common/js/directives.js";
                 break;
-
             case "it":
                 UNITS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/units.js";
                 COOLDOWNS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/cooldowns.js";
                 DETAILS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/details.js";
                 EVOLUTIONS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/evolutions.js";
+                DIRECTIVES_JS = "http://www.one-piece-treasure-cruise-italia.org/common/js/directives.js";
                 break;
             default:
                 UNITS_JS = "https://optc-db.github.io/common/data/units.js";
                 COOLDOWNS_JS = "https://optc-db.github.io/common/data/cooldowns.js";
                 DETAILS_JS = "https://optc-db.github.io/common/data/details.js";
                 EVOLUTIONS_JS = "https://optc-db.github.io/common/data/evolutions.js";
+                DIRECTIVES_JS = "https://optc-db.github.io/common/js/directives.js";
                 break;
         }
 
         setContentView(R.layout.activity_main);
+
 
         sortName = (ImageView) findViewById(R.id.sortName);
         sortType = (ImageView) findViewById(R.id.sortType);
@@ -750,12 +829,19 @@ private final static Double APP_VERSION = 2.8;
         sortRCV.setTag(R.id.TAG_SORT_ID, R.id.sortRcv);
         sortRCV.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortName.setOnClickListener(sortNameOnClick);
-        sortType.setOnClickListener(sortTypeOnClick);
-        sortStars.setOnClickListener(sortStarsOnClick);
-        sortAtk.setOnClickListener(sortAtkOnClick);
-        sortHP.setOnClickListener(sortHPOnClick);
-        sortRCV.setOnClickListener(sortRCVOnClick);
+        LinearLayout sortNamel = (LinearLayout) findViewById(R.id.sortName_l);
+        LinearLayout sortTypel = (LinearLayout) findViewById(R.id.sortType_l);
+        LinearLayout sortStarsl = (LinearLayout) findViewById(R.id.sortStars_l);
+        LinearLayout sortAtkl = (LinearLayout) findViewById(R.id.sortAtk_l);
+        LinearLayout sortHPl = (LinearLayout) findViewById(R.id.sortHp_l);
+        LinearLayout sortRCVl = (LinearLayout) findViewById(R.id.sortRcv_l);
+
+        sortNamel.setOnClickListener(sortNameOnClick);
+        sortTypel.setOnClickListener(sortTypeOnClick);
+        sortStarsl.setOnClickListener(sortStarsOnClick);
+        sortAtkl.setOnClickListener(sortAtkOnClick);
+        sortHPl.setOnClickListener(sortHPOnClick);
+        sortRCVl.setOnClickListener(sortRCVOnClick);
 
         final ImageButton filterBtn = (ImageButton) findViewById(R.id.filterBtn);
         ImageButton resetBtn = (ImageButton) findViewById(R.id.resetBtn);
@@ -811,6 +897,8 @@ private final static Double APP_VERSION = 2.8;
         });
 
         lview = (ListView) findViewById(R.id.listView1);
+
+        directives = new HashMap<>();
 
         //CREATE EMPTY DATABASES
         list = new ArrayList<>();
@@ -930,18 +1018,18 @@ private final static Double APP_VERSION = 2.8;
         display.getSize(size);
         int height = size.y;
         TextView placeholder = (TextView) findViewById(R.id.placeholder);
-        placeholder.setX(0);
+        placeholder.setX(getScreenWidth());
         placeholder.setY(height / 2);
         if (!displayedTutorial) {
             new ShowcaseView.Builder(this)
                     .setTarget(new ViewTarget(placeholder))
-                    .setContentTitle("New features!")
-                    .setContentText("Try the new custom filters by swiping from the left side of screen!")
+                    .setContentTitle("Drawer position changed!")
+                    .setContentText("Drawer now moved to the right edge of the screen!")
                     .setStyle(R.style.CustomShowcaseTheme2)
                     .hideOnTouchOutside()
                     .build();
             SharedPreferences.Editor mEditor = mPrefs.edit();
-            mEditor.putBoolean("displayed_tutorial", true).apply();
+            mEditor.putBoolean(getString(R.string.tutorial_displayed), true).apply();
         }
 
         DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -951,7 +1039,7 @@ private final static Double APP_VERSION = 2.8;
         try {
 
             // get dragger responsible for the dragging of the left drawer
-            Field draggerField = DrawerLayout.class.getDeclaredField("mLeftDragger");
+            Field draggerField = DrawerLayout.class.getDeclaredField("mRightDragger");
             draggerField.setAccessible(true);
             ViewDragHelper vdh = (ViewDragHelper) draggerField.get(mDrawerLayout);
 
@@ -991,6 +1079,33 @@ private final static Double APP_VERSION = 2.8;
         });
     }
 
+    private int getScreenWidth() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.x;
+    }
+
+    private int getSideTotalMargin() {
+        LinearLayout main = (LinearLayout) findViewById(R.id.maincontent);
+        int left = main.getPaddingLeft();
+        int right = main.getPaddingRight();
+        return left + right;
+    }
+
+    protected void onResume() {
+        super.onResume();
+        int width = getScreenWidth();
+
+        LinearLayout list_size = (LinearLayout) findViewById(R.id.list_size_layout);
+
+        if (width > dpToPx(600))
+            params.width = width - getSideTotalMargin();
+        else params.width = dpToPx(550);
+        list_size.setLayoutParams(params);
+
+    }
+
     private void crossfade(int mShortAnimationDuration) {
 
         // Animate the loading view to 0% opacity. After the animation ends,
@@ -1004,7 +1119,7 @@ private final static Double APP_VERSION = 2.8;
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        ((DrawerLayout) v2).closeDrawer(Gravity.LEFT);
+                        ((DrawerLayout) v2).closeDrawer(Gravity.RIGHT);
                         v2.setVisibility(View.GONE);
                         activity.recreate();
                     }
@@ -1060,6 +1175,7 @@ private final static Double APP_VERSION = 2.8;
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        this.onResume();
         if ((dlg_hwnd != null) && (dlg_hwnd.isShowing())) {
             int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
             int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
@@ -1168,9 +1284,8 @@ private final static Double APP_VERSION = 2.8;
                             .diskCacheStrategy(DiskCacheStrategy.RESULT)
                             .into(thumbnail_width, thumbnail_height);
                     GlideDrawable cacheFile = future.get();
-                    Log.d("OK", "#" + n);
                 } catch (Exception e) {
-                    Log.e("404", "Not found #" + n);
+                    Log.e("ERR", "Pic not found");
                 }
             }
         }
@@ -1303,7 +1418,9 @@ private final static Double APP_VERSION = 2.8;
             }
             publishProgress(getString(R.string.downloading_cooldowns));
 
-            ParseAdditionalNotes notes_parser = new ParseAdditionalNotes();
+            Map<String, String> directives_js = (Map<String, String>) parseDirectives(DIRECTIVES_JS, "notes");
+
+            ParseAdditionalNotes notes_parser = new ParseAdditionalNotes(directives_js);
 
             List<Object> coolds = (List) parseJScript(COOLDOWNS_JS, "cooldowns");
 
@@ -1429,6 +1546,7 @@ private final static Double APP_VERSION = 2.8;
             } finally {
                 database.endTransaction();
             }
+
             database.close();
             db.close();
             isDownloaded = true;
@@ -1482,6 +1600,58 @@ private final static Double APP_VERSION = 2.8;
                 });
             }
         }
+    }
+
+    private String getFileURLD(String uri) {
+        try {
+            URL url = new URL(uri);
+            InputStream is = url.openStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            String line;
+            StringBuilder bdr = new StringBuilder();
+            String endLine = System.getProperty("line.separator");
+            br.readLine();
+            while ((line = br.readLine()) != null) {
+                bdr.append(line + endLine);
+                if (line.equals("};")) break;
+            }
+
+            br.close();
+            is.close();
+            return bdr.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    private Object parseDirectives(String uri, String objname) {
+
+        String dump = getFileURLD(uri);
+
+        // Every Rhino VM begins with the enter()
+        // This Context is not Android's Context
+
+        org.mozilla.javascript.Context rhino = org.mozilla.javascript.Context.enter();
+
+        // Turn off optimization to make Rhino Android compatible
+
+        rhino.setOptimizationLevel(-1);
+
+        try {
+            Scriptable scope = rhino.initStandardObjects();
+
+            // Note the forth argument is 1, which means the JavaScript source has
+            // been compressed to only one line using something like YUI
+            rhino.evaluateString(scope, dump, "JavaScript", 1, null);
+            // Get the functionName defined in JavaScriptCode
+            return scope.get(objname, scope);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            org.mozilla.javascript.Context.exit();
+        }
+        return null;
     }
 
     private ArrayList<HashMap> getFromDB() {
@@ -1812,8 +1982,7 @@ private final static Double APP_VERSION = 2.8;
 
         protected void onPostExecute(String s) {
             hideLoading();
-            boolean isNonPlayAppAllowed = isUnknownSourcesEnabled();
-            if (!isNonPlayAppAllowed) {
+            /*if (!isUnknownSourcesEnabled()) {
                 apk_file = s;
                 (new AlertDialog.Builder(context)).setMessage(getString(R.string.enable_unknown_sources_first))
                         .setPositiveButton(getString(R.string.enable_unknown_sources_btn), new DialogInterface.OnClickListener() {
@@ -1829,11 +1998,11 @@ private final static Double APP_VERSION = 2.8;
                 i.setDataAndType(Uri.fromFile(new File(s)), "application/vnd.android.package-archive");
                 Log.d("Lofting", "About to install new .apk");
                 context.startActivity(i);
-            }
+            } ### Android should handle by himself asking user to enable unknown sources   */
+
             Intent i = new Intent();
             i.setAction(Intent.ACTION_VIEW);
             i.setDataAndType(Uri.fromFile(new File(s)), "application/vnd.android.package-archive");
-            Log.d("Lofting", "About to install new .apk");
             context.startActivity(i);
 
         }
@@ -1868,13 +2037,4 @@ private final static Double APP_VERSION = 2.8;
                 break;
         }
     }
-
-    //DONE: Add loading screen when DB updates
-    //DONE: Avoid downloading db every time app starts. Need to check RSS or something else to see if DB has been updated, and then ask user if he wants to update
-    //DONE: Add update notification for this app
-    //DONE: Custom filters
-    //DONE: List type and stars need a custom background and text color (to improve readability)
-    //TODO: Improve custom filters
-    //TODO: Add more columns to list
-    //DONE: Add evolutions and evolvers
 }
