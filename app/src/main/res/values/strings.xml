@@ -133,4 +133,10 @@
         <item>@drawable/ic_pt</item>
         <item>@drawable/ic_br</item>
     </string-array>
+    <string name="drop_locations">Drop locations:</string>
+    <string name="tab_drops">Drop locations</string>
+    <string name="drops_global">global only</string>
+    <string name="drops_japan">jap only</string>
+    <string name="downloading_drops">Downloading drops</string>
+    <string name="loading_drops">Parsing and updating drops</string>
 </resources>

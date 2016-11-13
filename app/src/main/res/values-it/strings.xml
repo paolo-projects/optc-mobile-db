@@ -85,4 +85,10 @@
         <item>2</item>
         <item>1</item>
     </string-array>
+    <string name="drops_global">solo nel global</string>
+    <string name="drops_japan">solo nel jap</string>
+    <string name="tab_drops">Drop</string>
+    <string name="drop_locations">Missioni per droppare il personaggio:</string>
+    <string name="loading_drops">Sto processando e impostando i drop</string>
+    <string name="downloading_drops">Downloading drops</string>
 </resources>

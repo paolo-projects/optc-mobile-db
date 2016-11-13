@@ -36,6 +36,7 @@
         android:layout_height="match_parent">
 
         <LinearLayout
+            android:id="@+id/dialog_maincontent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
@@ -94,6 +95,12 @@
                         <include
                             android:id="@+id/tab_evolutions"
                             layout="@layout/dialog_evolvers"
+                            android:layout_height="match_parent"
+                            android:layout_width="match_parent" />
+
+                        <include
+                            android:id="@+id/tab_drops"
+                            layout="@layout/dialog_drops"
                             android:layout_height="match_parent"
                             android:layout_width="match_parent" />
                     </FrameLayout>

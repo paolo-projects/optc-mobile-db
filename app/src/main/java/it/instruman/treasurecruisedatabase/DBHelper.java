@@ -73,12 +73,24 @@ public class DBHelper extends SQLiteOpenHelper {
     private final static String EVOLUTIONS_EV4 = "evolver_4";
     private final static String EVOLUTIONS_EV5 = "evolver_5";
 
+    // Table drop locations
+    private final static String DROPS_TABLE = "drop_locations";
+    // Columns
+    private final static String DROPS_ID = "_id";
+    private final static String DROPS_CHARID = "char_id";
+    private final static String DROPS_LOCATIONS = "drop_location";
+    private final static String DROPS_CHAPDIFF = "chapter_or_difficulty";
+    private final static String DROPS_GLOBAL = "global";
+    private final static String DROPS_JAPAN = "japan";
+    private final static String DROPS_THUMB = "thumbnail";
+
     // Custom SQL
     //Drop tables
     private final static String DROP_UNITS = "DROP TABLE IF EXISTS " + UNITS_TABLE;
     private final static String DROP_SPECIALS = "DROP TABLE IF EXISTS " + SPECIALS_TABLE;
     private final static String DROP_CAPTAINS = "DROP TABLE IF EXISTS " + CAPTAINS_TABLE;
     private final static String DROP_EVOLUTIONS = "DROP TABLE IF EXISTS " + EVOLUTIONS_TABLE;
+    private final static String DROP_DROPS = "DROP TABLE IF EXISTS " + DROPS_TABLE;
 
     // Create tables
     private final static String CREATE_TABLE_UNITS =
@@ -130,6 +142,16 @@ public class DBHelper extends SQLiteOpenHelper {
                     EVOLUTIONS_EV4 + " INT, " +
                     EVOLUTIONS_EV5 + " INT, " +
                     "PRIMARY KEY ( " + EVOLUTIONS_ID + " ))";
+    private final static String CREATE_TABLE_DROPS =
+            "CREATE TABLE " + DROPS_TABLE + " (" +
+                    DROPS_ID + " INTEGER, " +
+                    DROPS_CHARID + " INT, " +
+                    DROPS_LOCATIONS + " TEXT, " +
+                    DROPS_CHAPDIFF + " TEXT, " +
+                    DROPS_GLOBAL + " INT, " +
+                    DROPS_JAPAN + " INT, " +
+                    DROPS_THUMB + " INT, " +
+                    "PRIMARY KEY ( " + DROPS_ID + " ))";
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -142,12 +164,14 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_SPECIALS);
         db.execSQL(DROP_CAPTAINS);
         db.execSQL(DROP_EVOLUTIONS);
+        db.execSQL(DROP_DROPS);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
         db.execSQL(CREATE_TABLE_SPECIALS);
         db.execSQL(CREATE_TABLE_CAPTAINS);
         db.execSQL(CREATE_TABLE_EVOLUTIONS);
+        db.execSQL(CREATE_TABLE_DROPS);
         db.close();
     }
 
@@ -177,12 +201,39 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_SPECIALS);
         db.execSQL(DROP_CAPTAINS);
         db.execSQL(DROP_EVOLUTIONS);
+        db.execSQL(DROP_DROPS);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
         db.execSQL(CREATE_TABLE_SPECIALS);
         db.execSQL(CREATE_TABLE_CAPTAINS);
         db.execSQL(CREATE_TABLE_EVOLUTIONS);
+        db.execSQL(CREATE_TABLE_DROPS);
+    }
+
+    public static void insertIntoDrops(SQLiteDatabase db, Integer char_id, String drop_location, String chap_or_difficulty, boolean is_global, boolean is_japan, Integer thumbnail)
+    {
+        Cursor drops_cursor = db.query(DROPS_TABLE, new String[] {DROPS_ID,DROPS_CHAPDIFF}, DROPS_CHARID + " = ? AND " + DROPS_LOCATIONS
+                + " = ? AND " + DROPS_GLOBAL + " = ? AND " + DROPS_JAPAN + " = ? AND " + DROPS_THUMB + " = ?",
+                new String[] {String.valueOf(char_id), drop_location, String.valueOf(is_global?1:0), String.valueOf(is_japan?1:0), String.valueOf(thumbnail)}, null, null, null, null);
+
+        if (drops_cursor.getCount()>0)
+        {
+            drops_cursor.moveToFirst();
+            ContentValues values = new ContentValues();
+            values.put(DROPS_CHAPDIFF, drops_cursor.getString(1)+", "+chap_or_difficulty);
+            db.update(DROPS_TABLE, values, DROPS_ID + " = ?", new String[] {String.valueOf(drops_cursor.getInt(0))});
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(DROPS_CHARID, char_id);
+            values.put(DROPS_LOCATIONS, drop_location);
+            values.put(DROPS_CHAPDIFF, chap_or_difficulty);
+            values.put(DROPS_GLOBAL, is_global ? 1 : 0);
+            values.put(DROPS_JAPAN, is_japan ? 1 : 0);
+            values.put(DROPS_THUMB, thumbnail);
+            db.insert(DROPS_TABLE, null, values);
+        }
+        drops_cursor.close();
     }
 
     public static void insertIntoUnits(SQLiteDatabase db, Integer id, String name, String type, String class1, String class2,
@@ -289,6 +340,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 EVOLUTIONS_CHARID + " = ?", new String[]{String.valueOf(CharId)}, null, null, null, null);
         evolutions_cursor.moveToFirst();
 
+        Cursor drops_cursor = db.query(DROPS_TABLE, new String[]{DROPS_LOCATIONS, DROPS_CHAPDIFF,
+                        DROPS_GLOBAL, DROPS_JAPAN, DROPS_THUMB},
+                DROPS_CHARID + " = ?", new String[]{String.valueOf(CharId)}, null, null, null, null);
+        drops_cursor.moveToFirst();
+
         ArrayList<CharacterSpecials> specials_data = new ArrayList<>();
         String special_name = "";
         String special_notes = "";
@@ -320,14 +376,43 @@ public class DBHelper extends SQLiteOpenHelper {
             evolutions_cursor.moveToNext();
         }
 
+        ArrayList<DropInfo> dropInfos = new ArrayList<>();
+        while(!drops_cursor.isAfterLast()) {
+            DropInfo dropInfo = new DropInfo(CharId, drops_cursor.getString(1), drops_cursor.getString(0), drops_cursor.getInt(4), (drops_cursor.getInt(2)==1), (drops_cursor.getInt(3)==1));
+            dropInfos.add(dropInfo);
+            drops_cursor.moveToNext();
+        }
+
         units_cursor.close();
         specials_cursor.close();
         captain_cursor.close();
         evolutions_cursor.close();
+        drops_cursor.close();
+
         return new CharacterInfo(captain_description, captain_notes, char_class1, char_class2, char_combo,
                 char_cost, id, char_evos, char_exptomax, CharId, char_lvl1atk, char_lvl1hp, char_lvl1rcv,
                 char_maxatk, char_maxhp, char_maxlvl, char_maxrcv, char_name, char_sockets, special_name, special_notes,
-                specials_data, char_stars, char_type);
+                specials_data, char_stars, char_type, dropInfos);
+    }
+
+    public static ArrayList<CharacterEvolutions> getEvolutions(SQLiteDatabase db, Integer charID)
+    {
+        Cursor evolutions_cursor = db.query(EVOLUTIONS_TABLE, new String[]{EVOLUTIONS_EVOID, EVOLUTIONS_EV1,
+                        EVOLUTIONS_EV2, EVOLUTIONS_EV3, EVOLUTIONS_EV4, EVOLUTIONS_EV5},
+                EVOLUTIONS_CHARID + " = ?", new String[]{String.valueOf(charID)}, null, null, null, null);
+        evolutions_cursor.moveToFirst();
+
+        ArrayList<CharacterEvolutions> char_evos = new ArrayList<>();
+        while (!evolutions_cursor.isAfterLast()) {
+            ArrayList<Integer> evolvers = new ArrayList<>();
+            for (int n = 1; n <= 5; n++) {
+                evolvers.add(evolutions_cursor.getInt(n));
+            }
+            CharacterEvolutions evos = new CharacterEvolutions(evolutions_cursor.getInt(0), evolvers);
+            char_evos.add(evos);
+            evolutions_cursor.moveToNext();
+        }
+        return char_evos;
     }
 
     @Override

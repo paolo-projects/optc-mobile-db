@@ -86,4 +86,10 @@
         <item>2</item>
         <item>1</item>
     </string-array>
+    <string name="drop_locations">Localizaciones de recompensas:</string>
+    <string name="drops_global">solo global</string>
+    <string name="drops_japan">solo jap</string>
+    <string name="loading_drops">Analizando y actualizando recompensas</string>
+    <string name="tab_drops">Localizaciones de recompensas</string>
+    <string name="downloading_drops">Descargando recompensas</string>
 </resources>

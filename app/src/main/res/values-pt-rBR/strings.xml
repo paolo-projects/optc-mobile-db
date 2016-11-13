@@ -85,4 +85,10 @@
         <item>2</item>
         <item>1</item>
     </string-array>
+    <string name="loading_drops">Parsing and updating drops</string>
+    <string name="drops_japan">jap only</string>
+    <string name="drops_global">global only</string>
+    <string name="drop_locations">Drop locations:</string>
+    <string name="downloading_drops">Downloading drops</string>
+    <string name="tab_drops">Drop locations</string>
 </resources>

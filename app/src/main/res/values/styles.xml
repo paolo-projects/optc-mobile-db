@@ -59,7 +59,7 @@
         <!-- Customize your theme here. -->
         <item name="colorPrimary">#FFC107</item>
         <item name="colorPrimaryDark">#FFA000</item>
-        <item name="colorAccent">#FFFF00</item>
+        <item name="colorAccent">#FFAB00</item>
 
         <item name="hint_txt">#61000000</item>
 

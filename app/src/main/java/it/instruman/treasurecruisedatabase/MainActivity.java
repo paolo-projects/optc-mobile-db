@@ -60,8 +60,6 @@ import com.bumptech.glide.request.FutureTarget;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
-import com.google.android.gms.analytics.HitBuilders;
-import com.google.android.gms.analytics.Tracker;
 
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
@@ -89,6 +87,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
     private final Context context = this;
@@ -96,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 2.9;
+private final static Double APP_VERSION = 3.0;
 /*
     ##################################################
 */
@@ -247,6 +246,16 @@ private final static Double APP_VERSION = 2.9;
     private String COOLDOWNS_JS;
     private String EVOLUTIONS_JS;
     private String DIRECTIVES_JS;
+    private String DROPS_JS;
+
+    private String DROPS_STORY = "Story Island";
+    private String DROPS_WEEKLY = "Weekly Island";
+    private String DROPS_FORTNIGHT = "Fortnight";
+    private String DROPS_RAID = "Raid";
+    private String DROPS_SPECIAL = "Special";
+
+    private String DROP_COMPLETION = "Completion Units";
+    private String DROP_ALLDIFFS = "All Difficulties";
 
     private void sortList(View v) {
         ListSortUtility utils = new ListSortUtility();
@@ -370,7 +379,7 @@ private final static Double APP_VERSION = 2.9;
         final Dialog dialog = new Dialog(context, theme_id);
         dialog.setContentView(R.layout.dialog_main);//dialog.setContentView(R.layout.character_info);
 
-        TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
+        final TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
         tabs.setup();
 
         TabHost.TabSpec main_info = tabs.newTabSpec("MAIN_INFO");
@@ -388,6 +397,12 @@ private final static Double APP_VERSION = 2.9;
         evolutions_tab.setContent(R.id.tab_evolutions);
         tabs.addTab(evolutions_tab);
         tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
+
+        TabHost.TabSpec drops_tab = tabs.newTabSpec("DROPS");
+        drops_tab.setIndicator(getString(R.string.tab_drops));
+        drops_tab.setContent(R.id.tab_drops);
+        tabs.addTab(drops_tab);
+        tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.GONE);
 
         tabs.setCurrentTab(0);
 
@@ -667,6 +682,85 @@ private final static Double APP_VERSION = 2.9;
             tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
         }
 
+        LinearLayout drops_content = (LinearLayout) dialog.findViewById(R.id.drops_content);
+        List<DropInfo> drops = charInfo.getDropInfo();
+
+        if (drops.size() > 0) {
+            //MULTIPLE EVOLUTIONS
+            for (int i = 0; i < drops.size(); i++) {
+                DropInfo this_drops = drops.get(i);
+
+                LinearLayout drops_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
+                drops_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
+                drops_row.setLayoutParams(new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                )); // SET WIDTH AND HEIGHT
+                drops_row.setGravity(Gravity.CENTER_VERTICAL);
+
+                //############# EVOLUTION SMALL ICON ###############
+                ImageButton evo_pic = new ImageButton(context); //CREATE EVOLUTION PIC
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        dpToPx(48), dpToPx(48)
+                );
+                params.setMargins(2, 5, 2, 5);
+                params.gravity = Gravity.CENTER;
+                evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
+                evo_pic.setPadding(0, 0, 0, 0);
+                evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+                Integer cont_id = this_drops.getDropThumbnail();
+                Glide
+                        .with(context)
+                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
+                        .dontTransform()
+                        .override(thumbnail_width, thumbnail_height)
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                        .into(evo_pic); //ADD PIC
+                drops_row.addView(evo_pic);
+
+                TextView drop_name = new TextView(context);
+                LinearLayout.LayoutParams txt_params =  new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1
+                );
+                txt_params.setMargins(dpToPx(10), 0, 5, 0);
+                drop_name.setLayoutParams(txt_params);
+                drop_name.setText(this_drops.getDropLocation());
+                drop_name.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+                drop_name.setGravity(Gravity.CENTER);
+
+                drops_row.addView(drop_name);
+
+                TextView drop_det = new TextView(context);
+                LinearLayout.LayoutParams txt2_params =  new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1
+                );
+                txt2_params.setMargins(5, 0, 5, 0);
+                drop_det.setLayoutParams(txt2_params);
+                drop_det.setText(this_drops.getDropChapterOrDifficulty());
+                drop_det.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+                drop_det.setGravity(Gravity.CENTER);
+
+                drops_row.addView(drop_det);
+
+                TextView drop_notes = new TextView(context);
+                drop_notes.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                drop_notes.setGravity(Gravity.CENTER);
+                drop_notes.setTypeface(drop_notes.getTypeface(), Typeface.BOLD);
+                drop_det.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+
+                if(this_drops.isGlobal() && !this_drops.isJapan())
+                    drop_notes.setText(getString(R.string.drops_global));
+                else if(!this_drops.isGlobal() && this_drops.isJapan())
+                    drop_notes.setText(getString(R.string.drops_japan));
+
+                drops_content.addView(drops_row);
+                if(!drop_notes.getText().equals("")) drops_content.addView(drop_notes);
+            }
+            tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.VISIBLE);
+        }
+
         HorizontalScrollView scr = (HorizontalScrollView) dialog.findViewById(R.id.tabs_scrollview);
         scr.invalidate();
         scr.requestLayout();
@@ -777,6 +871,7 @@ private final static Double APP_VERSION = 2.9;
                 DETAILS_JS = "https://optc-sp.github.io/common/data/details.js";
                 EVOLUTIONS_JS = "https://optc-sp.github.io/common/data/evolutions.js";
                 DIRECTIVES_JS = "https://optc-sp.github.io/common/js/directives.js";
+                DROPS_JS = "https://optc-sp.github.io/common/data/drops.js";
                 break;
             case "it":
                 UNITS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/units.js";
@@ -784,6 +879,16 @@ private final static Double APP_VERSION = 2.9;
                 DETAILS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/details.js";
                 EVOLUTIONS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/evolutions.js";
                 DIRECTIVES_JS = "http://www.one-piece-treasure-cruise-italia.org/common/js/directives.js";
+                DROPS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/drops.js";
+
+                DROPS_STORY = "Isole della Storia";
+                DROPS_WEEKLY = "Isole Settimanali";
+                DROPS_FORTNIGHT = "Fortnight";
+                DROPS_RAID = "Raid";
+                DROPS_SPECIAL = "Isole Speciali";
+
+                DROP_COMPLETION = "Dopo completamento";
+                DROP_ALLDIFFS = "Tutte le difficoltà";
                 break;
             default:
                 UNITS_JS = "https://optc-db.github.io/common/data/units.js";
@@ -791,6 +896,7 @@ private final static Double APP_VERSION = 2.9;
                 DETAILS_JS = "https://optc-db.github.io/common/data/details.js";
                 EVOLUTIONS_JS = "https://optc-db.github.io/common/data/evolutions.js";
                 DIRECTIVES_JS = "https://optc-db.github.io/common/js/directives.js";
+                DROPS_JS = "https://optc-db.github.io/common/data/drops.js";
                 break;
         }
 
@@ -1296,8 +1402,8 @@ private final static Double APP_VERSION = 2.9;
     private void addProgress(String value) {
         if ((loading != null) && loading.isShowing()) {
             ArcProgress progress = (ArcProgress) loading.findViewById(R.id.loading_bar);
-            ObjectAnimator anim = ObjectAnimator.ofInt(progress, "progress", progress_val.intValue(), progress_val.intValue() + 12);
-            progress_val = progress_val + 12.5;
+            ObjectAnimator anim = ObjectAnimator.ofInt(progress, "progress", progress_val.intValue(), progress_val.intValue() + 100/10);
+            progress_val = progress_val + 100/10;
             anim.setInterpolator(new DecelerateInterpolator());
             anim.setDuration(200);
             anim.start();
@@ -1543,6 +1649,207 @@ private final static Double APP_VERSION = 2.9;
                     }
                 }
                 database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
+
+            publishProgress(getString(R.string.downloading_drops));
+            Map<String, List<Map>> drops = (Map<String, List<Map>>) parseJScript(DROPS_JS, "drops");
+            publishProgress(getString(R.string.loading_drops));
+            Pattern pattern = Pattern.compile("-?[0-9]+");
+            database.beginTransaction();
+            try {
+                List<Map> story_entries = drops.get(DROPS_STORY);
+                for (Map<String, Object> element : story_entries)
+                {
+                    String location = (String)element.get("name");
+                    Integer thumb = ((Double)element.get("thumb")).intValue();
+                    Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
+                    Boolean isJapan = true;
+                    for (Map.Entry<String, Object> entry : element.entrySet())
+                    {
+                        if (pattern.matcher(String.valueOf(entry.getKey())).matches()) {
+                            // it's a chapter
+                            List<Double> charIds = (List<Double>) entry.getValue();
+                            for(Double charId : charIds)
+                            {
+                                if(charId>0)
+                                    DBHelper.insertIntoDrops(database, charId.intValue(), location, String.valueOf(entry.getKey()), isGlobal, isJapan, thumb);
+                            }
+                        }
+                    }
+                    if(element.containsKey(DROP_COMPLETION))
+                    {
+                        List<Double> compl_units = (List<Double>)element.get(DROP_COMPLETION);
+                        for(Double i : compl_units)
+                        {
+                            if(i>0)
+                                DBHelper.insertIntoDrops(database, i.intValue(), location, DROP_COMPLETION, isGlobal, isJapan, thumb);
+                        }
+                    }
+                }
+
+                List<Map> weekly_entries = drops.get(DROPS_WEEKLY);
+                for(Map<String, Object> element : weekly_entries)
+                {
+                    List<Double> charIds = (List<Double>)element.get(" ");
+                    String drop_name = (String)element.get("name");
+                    Integer drop_thumb = ((Double)element.get("thumb")).intValue();
+                    Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
+                    Boolean isJapan = true;
+                    for(Double charId : charIds)
+                    {
+                        if(charId>0)
+                            DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "", isGlobal, isJapan, drop_thumb);
+                    }
+                }
+
+                List<Map> forts_entries = drops.get(DROPS_FORTNIGHT);
+                for(Map<String, Object> element : forts_entries)
+                {
+                    String drop_name = (String)element.get("name");
+                    Integer drop_thumb = ((Double)element.get("thumb")).intValue();
+                    Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
+                    Boolean isJapan = true;
+                    if(element.containsKey("Elite"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Elite");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Elite", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Expert"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Expert");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Expert", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey(DROP_ALLDIFFS))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get(DROP_ALLDIFFS);
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Global"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Global");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, DROP_ALLDIFFS, true, false, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Japan"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Japan");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, DROP_ALLDIFFS, false, true, drop_thumb);
+                        }
+                    }
+                }
+
+                List<Map> raid_entries = drops.get(DROPS_RAID);
+                for(Map<String, Object> element : raid_entries)
+                {
+                    String drop_name = (String)element.get("name");
+                    Integer drop_thumb = ((Double)element.get("thumb")).intValue();
+                    Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
+                    Boolean isJapan = true;
+                    if(element.containsKey("Master"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Master");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Master", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Expert"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Expert");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Expert", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Ultimate"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Ultimate");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Ultimate", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                }
+
+                List<Map> special_entries = drops.get(DROPS_SPECIAL);
+                for(Map<String, Object> element : special_entries)
+                {
+                    String drop_name = (String)element.get("name");
+                    Integer drop_thumb = element.containsKey("thumb") ? ((element.get("thumb")==null) ? 0 : ((Double)element.get("thumb")).intValue()) : 0;
+                    Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
+                    Boolean isJapan = true;
+                    if(element.containsKey(DROP_ALLDIFFS))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get(DROP_ALLDIFFS);
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey(DROP_COMPLETION))
+                    {
+                        List<Double> compl_units = (List<Double>)element.get(DROP_COMPLETION);
+                        for(Double i : compl_units)
+                        {
+                            if(i>0)
+                                DBHelper.insertIntoDrops(database, i.intValue(), drop_name, DROP_COMPLETION, isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Exhibition"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Exhibition");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Exhibition", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Underground"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Underground");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Underground", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                    if(element.containsKey("Chaos"))
+                    {
+                        List<Double> eliteDrops = (List<Double>)element.get("Chaos");
+                        for(Double charId : eliteDrops)
+                        {
+                            if(charId>0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, "Chaos", isGlobal, isJapan, drop_thumb);
+                        }
+                    }
+                }
+                database.setTransactionSuccessful();
+            } catch (Exception e) {
+              e.printStackTrace();
             } finally {
                 database.endTransaction();
             }

@@ -32,6 +32,7 @@ public class CharacterInfo {
     private String CaptainDescription = null;
     private String CaptainNotes = null;
     private List<CharacterEvolutions> Evolutions = new ArrayList<>();
+    private ArrayList<DropInfo> dropInfos = new ArrayList<>();
 
     public CharacterInfo(String captainDescription, String captainNotes, String class1,
                          String class2, Integer combo, Integer cost, Integer DB_ID,
@@ -39,7 +40,7 @@ public class CharacterInfo {
                          Integer lvl1ATK, Integer lvl1HP, Integer lvl1RCV, Integer maxATK,
                          Integer maxHP, Integer maxLvl, Integer maxRCV, String name, Integer sockets,
                          String specialName, String specialNotes, List<CharacterSpecials> specials,
-                         Integer stars, String type) {
+                         Integer stars, String type, ArrayList<DropInfo> DropInfos) {
         CaptainDescription = captainDescription;
         CaptainNotes = captainNotes;
         Class1 = class1;
@@ -64,9 +65,18 @@ public class CharacterInfo {
         Specials = specials;
         Stars = stars;
         Type = type;
+        dropInfos = DropInfos;
     }
 
     public CharacterInfo() {
+    }
+
+    public ArrayList<DropInfo> getDropInfo() {
+        return dropInfos;
+    }
+
+    public void setDropInfo(ArrayList<DropInfo> dropInfos) {
+        this.dropInfos = dropInfos;
     }
 
     public String getCaptainDescription() {
