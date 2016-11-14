@@ -24,7 +24,7 @@
     <string name="filter_hint">Perquisa por nome ou ID</string>
 
     <!-- Updates text -->
-    <string name="update_msg">Uma atualização está disponível! Deseja instalar?</string>
+    <string name="update_msg">Uma atualização está disponível! Deseja instalar? (v%1$s)</string>
     <string name="update_btn">Claro</string>
 
     <string name="loadingmsg">Por favor espere pelo carregamento de dados...</string>

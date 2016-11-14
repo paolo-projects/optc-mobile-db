@@ -342,6 +342,19 @@
                 style="?android:attr/buttonBarButtonStyle" />
 
             <ImageButton
+                android:id="@+id/dmg_calculator"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_toEndOf="@id/language_selector"
+                android:layout_toRightOf="@id/language_selector"
+                android:background="@drawable/ic_calculator"
+                android:scaleType="fitCenter"
+                android:contentDescription="@string/reset_filters"
+                style="?android:attr/buttonBarButtonStyle" />
+
+            <ImageButton
                 android:id="@+id/reset_filters"
                 android:layout_width="25dp"
                 android:layout_height="25dp"

@@ -95,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.0;
+private final static Double APP_VERSION = 3.1;
 /*
     ##################################################
 */
@@ -239,7 +239,6 @@ private final static Double APP_VERSION = 3.0;
     EditText filterText;
     Dialog dlg_hwnd = null;
     Dialog loadingdlg_hwnd = null;
-    ActionBarDrawerToggle mDrawerToggle;
 
     private String UNITS_JS;
     private String DETAILS_JS;
@@ -819,7 +818,7 @@ private final static Double APP_VERSION = 3.0;
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
-        SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+        final SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
         String theme_str = mPrefs.getString(getResources().getString(R.string.theme_pref), "teal");
         switch (theme_str) {
             case "teal":
@@ -851,7 +850,7 @@ private final static Double APP_VERSION = 3.0;
             mPrefs.edit().putString(locale_pref, locale).commit();
         }
 
-        String locale = mPrefs.getString(locale_pref, "");
+        final String locale = mPrefs.getString(locale_pref, "");
         if (!locale.equals("")) {
             Resources res = context.getResources();
             // Change locale settings in the app.
@@ -901,6 +900,7 @@ private final static Double APP_VERSION = 3.0;
         }
 
         setContentView(R.layout.activity_main);
+
 
 
         sortName = (ImageView) findViewById(R.id.sortName);
@@ -1053,6 +1053,18 @@ private final static Double APP_VERSION = 3.0;
             }
         });
 
+        ImageButton dmgCalc = (ImageButton) findViewById(R.id.dmg_calculator);
+        dmgCalc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(MainActivity.this, DmgCalcActivity.class);
+                Bundle b = new Bundle();
+                b.putString("lan", locale.toLowerCase());
+                intent.putExtras(b);
+                startActivity(intent);
+            }
+        });
+
         Button tealBtn = (Button) findViewById(R.id.tealBtn);
         Button redBtn = (Button) findViewById(R.id.redBtn);
         Button amberBtn = (Button) findViewById(R.id.amberBtn);
@@ -1105,18 +1117,23 @@ private final static Double APP_VERSION = 3.0;
             }
         });
 
-        // run async task to download or load DB
-        if (mPrefs.contains(getString(R.string.lastupdate)) && isDbOn()) {
-            //There's cached data, so check if it's old
-            Date lastupdateDB = getLastUpdate();
-            Date datecachedDB = getSerializedDate();
-            if (lastupdateDB.after(datecachedDB)) {
-                //if last db update is earlier than cached data then download new data
-                (new DownloadData(true, true)).execute();
-                //else load cached data
-            } else (new DownloadData(false, true)).execute();
-            //if no cached data download new data
-        } else (new DownloadData(true, true)).execute();
+        if(!mPrefs.getBoolean(getString(R.string.rebuild_db), true)) {
+            // run async task to download or load DB
+            if (mPrefs.contains(getString(R.string.lastupdate)) && isDbOn()) {
+                //There's cached data, so check if it's old
+                Date lastupdateDB = getLastUpdate();
+                Date datecachedDB = getSerializedDate();
+                if (lastupdateDB.after(datecachedDB)) {
+                    //if last db update is earlier than cached data then download new data
+                    (new DownloadData(true, true)).execute();
+                    //else load cached data
+                } else (new DownloadData(false, true)).execute();
+                //if no cached data download new data
+            } else (new DownloadData(true, true)).execute();
+        } else {
+            (new DownloadData(true, true)).execute();
+            mPrefs.edit().putBoolean(getString(R.string.rebuild_db), false).commit();
+        }
 
         Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
         Display display = getWindowManager().getDefaultDisplay();
@@ -1140,7 +1157,38 @@ private final static Double APP_VERSION = 3.0;
 
         DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-        mDrawerLayout.addDrawerListener(mDrawerToggle);
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                Boolean displayed_dmgcalc = mPrefs.getBoolean(getString(R.string.dmgcalc_displayed), false);
+                if(!displayed_dmgcalc) {
+                    new ShowcaseView.Builder(activity)
+                            .setTarget(new ViewTarget(findViewById(R.id.dmg_calculator)))
+                            .setContentTitle("Try the Damage Calculator!")
+                            .setContentText("Web interface to damage calculator added, try it!")
+                            .setStyle(R.style.CustomShowcaseTheme2)
+                            .hideOnTouchOutside()
+                            .build();
+                    SharedPreferences.Editor mEditor = mPrefs.edit();
+                    mEditor.putBoolean(getString(R.string.dmgcalc_displayed), true).apply();
+                }
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
 
         try {
 
@@ -1861,15 +1909,16 @@ private final static Double APP_VERSION = 3.0;
         }
     }
 
-    class CheckUpdates extends AsyncTask<Void, Void, String> {
-        protected String doInBackground(Void... voids) {
+    class CheckUpdates extends AsyncTask<Void, Void, String[]> {
+        protected String[] doInBackground(Void... voids) {
             FeedParser parser = new FeedParser();
             String uri = "";
+            String version = "";
             try {
                 InputStream releases = FeedParser.downloadUrl("https://github.com/paolo-optc/optc-mobile-db/releases.atom");
                 List<FeedParser.Entry> feed = parser.parse(releases);
                 for (FeedParser.Entry entry : feed) {
-                    String version = entry.id.replace("tag:github.com,2008:Repository/70237456/", "");
+                    version = entry.id.replace("tag:github.com,2008:Repository/70237456/", "");
                     Double vrs = Double.valueOf(version);
                     if (vrs > APP_VERSION) {
                         uri += "https://github.com/paolo-optc/optc-mobile-db/releases/download/" + version + "/app-release.apk";
@@ -1879,16 +1928,16 @@ private final static Double APP_VERSION = 3.0;
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return uri;
+            return new String[] {uri, version};
         }
 
         protected void onPreExecute() {
             super.onPreExecute();
         }
 
-        protected void onPostExecute(final String result) {
-            if (!result.equals("")) {
-                final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), getString(R.string.update_msg), Snackbar.LENGTH_INDEFINITE);
+        protected void onPostExecute(final String[] result) {
+            if (!result[0].equals("")) {
+                final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), String.format(getString(R.string.update_msg), result[1]), Snackbar.LENGTH_INDEFINITE);
                 msg.setAction(getString(R.string.update_btn), new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {

@@ -24,7 +24,7 @@
     <string name="filter_hint">Zoek op naam of ID</string>
 
     <!-- Updates text -->
-    <string name="update_msg">Er is een nieuwe update! Wil je deze installeren?</string>
+    <string name="update_msg">Er is een nieuwe update! Wil je deze installeren? (v%1$s)</string>
     <string name="update_btn">Ja</string>
 
     <string name="loadingmsg">Een ogenblik geduld aub, terwijl de gegevens worden geladen…</string>

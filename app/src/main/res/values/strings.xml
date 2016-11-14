@@ -13,6 +13,7 @@
 
     <string name="pref_name" translatable="false">optc_smart_db_setting</string>
     <string name="tutorial_displayed" translatable="false">displayed_drawermoved</string>
+    <string name="dmgcalc_displayed" translatable="false">displayed_dmgcalc</string>
     <string name="lastupdate" translatable="false">date_last_update</string>
     <string name="theme_pref" translatable="false">theme_preference</string>
     <!-- ###-->
@@ -41,7 +42,7 @@
     <string name="filter_hint">Search by name or ID</string>
 
     <!-- Updates text -->
-    <string name="update_msg">An update is out! Do you want to install it?</string>
+    <string name="update_msg">An update is out! Do you want to install it? (v%1$s)</string>
     <string name="update_btn">Sure</string>
 
     //APP LOADING
@@ -139,4 +140,5 @@
     <string name="drops_japan">jap only</string>
     <string name="downloading_drops">Downloading drops</string>
     <string name="loading_drops">Parsing and updating drops</string>
+    <string name="rebuild_db" translatable="false">pref_db_rebuild</string>
 </resources>
