@@ -20,10 +20,18 @@ Either download source code and compile with your own android compiler to build 
 
 Most of the work done for this app is from the people at optc-db.github.io, cause they created the database with all characters and attributes.
 
-Thanks to all reddit users who contributed to app translations:
+*Thanks to all reddit users who contributed to app translations:*
 
 * Spanish: joseic1998 + pesaher
 * German: Mondfischer
 * Dutch: Bloodstrife
 * Portuguese (Portugal): GolDenBoY16
 * Portuguese (Brazilian): JustAnotherDevGuy
+* French: Kiddycarus
+
+*Thanks to reddit mod Anton who created light and dark themes*
+
+*Also thanks to:*
+
+* one-piece-treasure-cruise-italia.forumfree.it and user _CannotDoThat_ for the DB italian translation
+* reddit user joseic1998 who is translating the DB in spanish
