@@ -8,8 +8,8 @@ android {
         applicationId "it.instruman.treasurecruisedatabase"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 16
-        versionName "3.1"
+        versionCode 17
+        versionName "3.2"
     }
     buildTypes {
         release {
@@ -21,12 +21,13 @@ android {
 
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:25.0.0'
     compile files('libs/rhino-1.7.7.1.jar')
+    compile 'com.android.support:appcompat-v7:25.0.0'
     compile 'com.github.bumptech.glide:glide:3.5.2'
     compile 'com.android.support:design:25.0.0'
     compile 'com.github.amlcurran.showcaseview:library:5.4.3'
     compile 'com.github.lzyzsd:circleprogress:1.1.0'
+    compile 'com.android.support:support-v4:25.0.0'
+    compile 'com.android.support:support-vector-drawable:25.0.0'
 }
 

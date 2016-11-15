@@ -45,7 +45,6 @@
     <string name="update_msg">An update is out! Do you want to install it? (v%1$s)</string>
     <string name="update_btn">Sure</string>
 
-    //APP LOADING
     <string name="loadingmsg">Please wait while loading data…</string>
     <string name="loading_characters">Updating characters list</string>
     <string name="downloading_cooldowns">Downloading cooldowns</string>
@@ -109,6 +108,7 @@
         <item>English</item>
         <item>Italian</item>
         <item>German</item>
+        <item>French</item>
         <item>Spanish</item>
         <item>Dutch</item>
         <item>Portuguese</item>
@@ -119,6 +119,7 @@
         <item>en</item>
         <item>it</item>
         <item>de</item>
+        <item>fr</item>
         <item>es</item>
         <item>nl</item>
         <item>pt-pt</item>
@@ -129,6 +130,7 @@
         <item>@drawable/ic_gb</item>
         <item>@drawable/ic_it</item>
         <item>@drawable/ic_de</item>
+        <item>@drawable/ic_fr</item>
         <item>@drawable/ic_es</item>
         <item>@drawable/ic_nl</item>
         <item>@drawable/ic_pt</item>
@@ -141,4 +143,22 @@
     <string name="downloading_drops">Downloading drops</string>
     <string name="loading_drops">Parsing and updating drops</string>
     <string name="rebuild_db" translatable="false">pref_db_rebuild</string>
+    <string name="title_activity_settings" translatable="false">Settings</string>
+
+    <string name="download_db" translatable="false">download_database_pref</string>
+    <string name="check_update" translatable="false">check_updates_pref</string>
+    <string name="pref_language" translatable="false">preference_language</string>
+    <string name="pref_update_app" translatable="false">preferences_update_app</string>
+    <string name="no_updates">No updates available</string>
+
+    <string name="prefs_cat_appsettings">App Settings</string>
+        <string name="prefs_update_db">Update database</string>
+        <string name="prefs_update_db_desc">Automatically update database</string>
+
+        <string name="prefs_check_updates">Check for updates</string>
+        <string name="prefs_check_updates_desc">Notify user when app update is available</string>
+    <string name="prefs_localization_cat">Localization</string>
+        <string name="prefs_localization">Language</string>
+    <string name="prefs_extra_cat">Extra</string>
+        <string name="prefs_download_update">Download update</string>
 </resources>

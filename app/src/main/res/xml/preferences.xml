@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/it.instruman.treasurecruisedatabase">
+
+    <PreferenceCategory android:title="@string/prefs_cat_appsettings">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:title="@string/prefs_update_db"
+            android:key="@string/download_db"
+            android:summary="@string/prefs_update_db_desc"
+            android:icon="@drawable/ic_cloud_black"/>
+        <SwitchPreference
+            android:defaultValue="true"
+            android:title="@string/prefs_check_updates"
+            android:key="@string/check_update"
+            android:summary="@string/prefs_check_updates_desc"
+            android:icon="@drawable/ic_update_black"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/prefs_localization_cat">
+        <it.instruman.treasurecruisedatabase.ImageListPreference
+            android:defaultValue="en"
+            android:title="@string/prefs_localization"
+            android:entries="@array/languages_array"
+            android:entryValues="@array/locale_array"
+            android:key="@string/pref_language"
+            android:summary="%s"
+            custom:entryImages="@array/flags_array"
+            android:icon="@drawable/ic_translate_black"/>
+    </PreferenceCategory>
+    <PreferenceCategory android:title="@string/prefs_extra_cat">
+        <Preference android:title="OPTC SmartDB project page"
+            android:icon="@drawable/ic_web_black">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://github.com/paolo-optc/optc-mobile-db" />
+        </Preference>
+        <Preference android:title="OPTC SmartDB Reddit page"
+            android:icon="@drawable/ic_web_black">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://www.reddit.com/r/OnePieceTC/comments/5b9xpa/optc_smartdb_app_masterthread/" />
+        </Preference>
+        <Preference android:title="@string/prefs_download_update"
+            android:icon="@drawable/ic_download_black"
+            android:key="@string/pref_update_app">
+        </Preference>
+    </PreferenceCategory>
+</PreferenceScreen>

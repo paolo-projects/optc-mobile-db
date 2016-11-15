@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:padding="6dip">
+
+    <ImageView
+        android:id="@+id/lanpref_image"
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_marginRight="6dip" />
+
+    <CheckedTextView
+        android:id="@+id/lanpref_check"
+        android:checkMark="@android:drawable/btn_radio"
+        android:layout_width="fill_parent"
+        android:layout_height="48dip"
+        android:layout_toRightOf="@id/lanpref_image"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical"
+        android:textColor="@android:color/black"
+        android:textSize="20dip" />
+
+</RelativeLayout>

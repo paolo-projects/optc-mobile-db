@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Character info dialog strings -->
+<resources>4
+<string name="class1">Classe 1</string>
+<string name="class2">Classe 2</string>
+<string name="type">Type</string>
+    <string name="stars">Étoiles</string>
+    <string name="cost">Coût</string>
+    <string name="combo">Combo</string>
+    <string name="slots">Slots</string>
+    <string name="maxlevel">Niveau Max</string>
+    <string name="exptomax">Exp Max</string>
+    <string name="level">Niveau</string>
+    <string name="hp">HP</string>
+    <string name="atk">ATK</string>
+    <string name="rcv">RCV</string>
+    <string name="lvl1">1</string>
+    <string name="lvlmax">MAX</string>
+    <string name="captability">Captain Ability</string>
+    <string name="specability">Special:</string>
+    <string name="speccooldown">Temps de chargement (max/min):</string>
+    <!-- Filter box hint text -->
+    <string name="filter_hint">Chercher par nom ou ID</string>
+    <!-- Updates text -->
+    <string name="update_msg">Une maj est sortie! Veux-tu l\'installer ? (v%1$s)</string>
+    <string name="update_btn">Bien sûr</string>
+<string name="loadingmsg">Veuiller patienter pendant le chargment des données...</string>
+    <string name="loading_characters">Mise à jour de la liste des persos</string>
+    <string name="downloading_cooldowns">Téléchargement des comptes à rebours</string>
+    <string name="loading_cooldowns">Mise à jour des comptes à rebours</string>
+    <string name="downloading_abilities">Téléchargement des capacités</string>
+    <string name="loading_abilities">Mise à jour des capacités</string>
+    <string name="downloading_evolutions">Téléchargement des évolutions</string>
+    <string name="loading_evolutions">Mise à jour des évolutions</string>
+<string name="evolutions">Évolution des personnages:</string>
+<string name="notes_text">"Notes: "</string>
+<string name="tab_maininfo">Info principales</string>
+    <string name="tab_abilities">Capacités</string>
+    <string name="tab_evolutions">Evolutions</string>
+<string name="reset_db_title">Remise à zéro de la database</string>
+    <string name="reset_db_message">Êtes-vous sûr de vouloir remettre à zéro et retélécharger la DB ?</string>
+    <string name="reset_db_cancel">Non</string>
+    <string name="reset_db_confirm">Oui</string>
+<string name="enable_unknown_sources_first">Pour installer cette app, vous devez autoriser les sources inconnues dans les paramètres de votre appareil</string>
+    <string name="enable_unknown_sources_btn">OK</string>
+    <!-- Navigation Drawer List Array -->
+    <string name="type_title">Type</string>
+    <string-array name="type_array">
+        <item>STR</item>
+        <item>DEX</item>
+        <item>QCK</item>
+        <item>PSY</item>
+        <item>INT</item>
+    </string-array>
+<string name="class_title">Classe</string>
+    <string-array name="class_array">
+        <item>Cogneur</item>
+        <item>Ravageur</item>
+        <item>Sabreur</item>
+        <item>Tireur</item>
+        <item>Libre</item>
+        <item>Intellectuel</item>
+        <item>Tenace</item>
+        <item>Ambitieux</item>
+        <item>Boosteur</item>
+        <item>Évolueur</item>
+    </string-array>
+<string name="stars_title">Stars</string>
+    <string-array name="stars_array">
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+    </string-array>
+    <string name="drop_locations">Locations des drops:</string>
+    <string name="tab_drops">Locations des drops</string>
+    <string name="drops_global">Global seulement</string>
+    <string name="drops_japan">Jap seulement</string>
+    <string name="downloading_drops">Téléchargement des drops</string>
+    <string name="loading_drops">Analyse et mise à jour des drops</string>
+    <string name="no_updates">No updates available</string>
+    <string name="prefs_cat_appsettings">App Settings</string>
+    <string name="prefs_check_updates">Check for updates</string>
+    <string name="prefs_check_updates_desc">Notify user when app update is available</string>
+    <string name="prefs_download_update">Download update</string>
+    <string name="prefs_extra_cat">Extra</string>
+    <string name="prefs_localization">Language</string>
+    <string name="prefs_localization_cat">Localization</string>
+    <string name="prefs_update_db">Update database</string>
+    <string name="prefs_update_db_desc">Automatically update database</string>
+</resources>

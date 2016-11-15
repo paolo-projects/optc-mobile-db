@@ -1,13 +1,18 @@
 package it.instruman.treasurecruisedatabase;
 
+import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 
 
@@ -50,6 +55,42 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
         final WebView webView = (WebView) findViewById(R.id.web_view);
 
         WebSettings webSettings = webView.getSettings();
+
+        webView.setWebViewClient(new WebViewClient() {
+            @SuppressWarnings("deprecation")
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                final Uri uri = Uri.parse(url);
+                return handleUri(uri);
+            }
+
+            @TargetApi(Build.VERSION_CODES.N)
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                final Uri uri = request.getUrl();
+                return handleUri(uri);
+            }
+
+            private boolean handleUri(final Uri uri) {
+                final String host = uri.getHost();
+                final String scheme = uri.getScheme();
+                final Uri dmg_url = Uri.parse(DMGCALC_URL);
+                // Based on some condition you need to determine if you are going to load the url
+                // in your web view itself or in a browser.
+                // You can use `host` or `scheme` or any part of the `uri` to decide.
+                if (dmg_url.getHost().equals(host)) {
+                    // Returning false means that you are going to load this url in the webView itself
+                    return false;
+                } else {
+                    // Returning true means that you need to handle what to do with the url
+                    // e.g. open web page in a Browser
+                    final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                    return true;
+                }
+            }
+        });
+
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);

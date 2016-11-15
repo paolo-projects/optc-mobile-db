@@ -38,7 +38,7 @@
                 android:id="@+id/resetBtn"
                 android:layout_width="28dp"
                 android:layout_height="28dp"
-                android:layout_gravity="center_vertical|center_horizontal"
+                android:layout_gravity="center"
                 android:background="@drawable/ic_reset_btn"
                 android:contentDescription="@string/resetBtn_contDesc"
                 android:scaleType="fitCenter"
@@ -297,7 +297,8 @@
         android:layout_gravity="end"
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
-        android:dividerHeight="0dp">
+        android:dividerHeight="0dp"
+        android:clickable="true">
 
         <ExpandableListView
             android:id="@+id/left_drawer_list"
@@ -329,27 +330,27 @@
                 android:contentDescription="@string/reset_database" />
 
             <ImageButton
-                android:id="@+id/language_selector"
+                android:id="@+id/dmg_calculator"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
                 android:layout_toEndOf="@id/reset_db"
                 android:layout_toRightOf="@id/reset_db"
-                android:background="@drawable/ic_translate"
+                android:background="@drawable/ic_calculator"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />
 
             <ImageButton
-                android:id="@+id/dmg_calculator"
+                android:id="@+id/settings_btn"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginLeft="10dp"
-                android:layout_toEndOf="@id/language_selector"
-                android:layout_toRightOf="@id/language_selector"
-                android:background="@drawable/ic_calculator"
+                android:layout_toEndOf="@id/dmg_calculator"
+                android:layout_toRightOf="@id/dmg_calculator"
+                android:background="@drawable/ic_settings"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />

@@ -84,8 +84,8 @@
 
     <style name="AppThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">#000</item>
-        <item name="colorPrimaryDark">#DE000000</item>
+        <item name="colorPrimary">#fff</item>
+        <item name="colorPrimaryDark">#000000</item>
         <item name="colorAccent">#a2a2a2</item>
 
         <item name="hint_txt">#61000000</item>
@@ -111,7 +111,7 @@
 
     <style name="AppThemeDark" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">#FFF</item>
+        <item name="colorPrimary">#333333</item>
         <item name="colorPrimaryDark">#DE000000</item>
         <item name="colorAccent">#CF4950</item>
 

@@ -1,5 +1,6 @@
 package it.instruman.treasurecruisedatabase;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -9,6 +10,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
@@ -19,13 +21,18 @@ import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
@@ -48,10 +55,10 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TabHost;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -95,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.1;
+private final static Double APP_VERSION = 3.2;
 /*
     ##################################################
 */
@@ -103,7 +110,7 @@ private final static Double APP_VERSION = 3.1;
     public static final int thumbnail_width = 96;
     public static final int thumbnail_height = 96;
 
-    private static final String locale_pref = "locale-preference";
+    private static final String locale_pref = "locale-set";
 
     ExpandableListAdapter explistAdapter;
     ExpandableListView expListView;
@@ -803,6 +810,7 @@ private final static Double APP_VERSION = 3.1;
         loading.setCancelable(false);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
         loading.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        loading.getWindow().setLayout(getScreenWidth(),getScreenHeight());
         loading.show();
         loadingdlg_hwnd = loading;
     }
@@ -818,39 +826,55 @@ private final static Double APP_VERSION = 3.1;
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
 
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        int currTheme = R.style.AppThemeTeal;
         final SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
         String theme_str = mPrefs.getString(getResources().getString(R.string.theme_pref), "teal");
         switch (theme_str) {
             case "teal":
-                setTheme(R.style.AppThemeTeal);
+                currTheme = R.style.AppThemeTeal;
+                setTheme(currTheme);
                 break;
             case "red":
-                setTheme(R.style.AppThemeRed);
+                currTheme = R.style.AppThemeRed;
+                setTheme(currTheme);
                 break;
             case "amber":
-                setTheme(R.style.AppThemeAmber);
+                currTheme = R.style.AppThemeAmber;
+                setTheme(currTheme);
                 break;
             case "light":
-                setTheme(R.style.AppThemeLight);
+                currTheme = R.style.AppThemeLight;
+                setTheme(currTheme);
                 break;
             case "dark":
-                setTheme(R.style.AppThemeDark);
+                currTheme = R.style.AppThemeDark;
+                setTheme(currTheme);
                 break;
             default:
-                setTheme(R.style.AppThemeTeal);
+                currTheme = R.style.AppThemeTeal;
+                setTheme(currTheme);
                 break;
         }
-        if (!mPrefs.contains(locale_pref)) {
+        boolean firstLocaleSet = mPrefs.getBoolean(locale_pref, false);
+        if (!firstLocaleSet) {
             Locale lan = Locale.getDefault();
             String locale = lan.getLanguage().toLowerCase();
             String country = lan.getCountry();
-            if (!country.equals("")) {
+            if (locale.contains("-"))
+            {
+                String[] els = locale.split("-");
+                if(!(els[1].toLowerCase().equals("pt") || els[1].toLowerCase().equals("br")))
+                    locale = els[0];
+            } else if (country.toLowerCase().equals("pt")||country.toLowerCase().equals("br")) {
                 locale += "-" + country.toLowerCase();
             }
-            mPrefs.edit().putString(locale_pref, locale).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putString(getString(R.string.pref_language), locale).commit();
+            mPrefs.edit().putBoolean(locale_pref, true).apply();
         }
 
-        final String locale = mPrefs.getString(locale_pref, "");
+        final String locale = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.pref_language), "");
         if (!locale.equals("")) {
             Resources res = context.getResources();
             // Change locale settings in the app.
@@ -900,6 +924,9 @@ private final static Double APP_VERSION = 3.1;
         }
 
         setContentView(R.layout.activity_main);
+
+        boolean isDownloadEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true);
+        boolean isUpdatesCheckEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true);
 
 
 
@@ -1065,6 +1092,19 @@ private final static Double APP_VERSION = 3.1;
             }
         });
 
+        ImageButton settBtn = (ImageButton) findViewById(R.id.settings_btn);
+        final int currThemeGlobal = currTheme;
+        settBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(context, SettingsActivity.class);
+                Bundle b = new Bundle();
+                b.putInt("appTheme", currThemeGlobal);
+                intent.putExtras(b);
+                startActivityForResult(intent, PREFERENCES_ACTIVITY);
+            }
+        });
+
         Button tealBtn = (Button) findViewById(R.id.tealBtn);
         Button redBtn = (Button) findViewById(R.id.redBtn);
         Button amberBtn = (Button) findViewById(R.id.amberBtn);
@@ -1117,7 +1157,7 @@ private final static Double APP_VERSION = 3.1;
             }
         });
 
-        if(!mPrefs.getBoolean(getString(R.string.rebuild_db), true)) {
+        if(!mPrefs.getBoolean(getString(R.string.rebuild_db), isUpdatesCheckEnabled)) {
             // run async task to download or load DB
             if (mPrefs.contains(getString(R.string.lastupdate)) && isDbOn()) {
                 //There's cached data, so check if it's old
@@ -1125,11 +1165,11 @@ private final static Double APP_VERSION = 3.1;
                 Date datecachedDB = getSerializedDate();
                 if (lastupdateDB.after(datecachedDB)) {
                     //if last db update is earlier than cached data then download new data
-                    (new DownloadData(true, true)).execute();
+                    (new DownloadData(isDownloadEnabled, isUpdatesCheckEnabled)).execute();
                     //else load cached data
-                } else (new DownloadData(false, true)).execute();
+                } else (new DownloadData(false, isUpdatesCheckEnabled)).execute();
                 //if no cached data download new data
-            } else (new DownloadData(true, true)).execute();
+            } else (new DownloadData(true, isUpdatesCheckEnabled)).execute();
         } else {
             (new DownloadData(true, true)).execute();
             mPrefs.edit().putBoolean(getString(R.string.rebuild_db), false).commit();
@@ -1213,7 +1253,7 @@ private final static Double APP_VERSION = 3.1;
             // either ViewDragHelper or DrawerLayout changed
         }
 
-        ImageButton lang_selector = (ImageButton) findViewById(R.id.language_selector);
+        /*ImageButton lang_selector = (ImageButton) findViewById(R.id.language_selector);
         lang_selector.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1230,7 +1270,7 @@ private final static Double APP_VERSION = 3.1;
                             }
                         }).show();
             }
-        });
+        });*/
     }
 
     private int getScreenWidth() {
@@ -1239,6 +1279,14 @@ private final static Double APP_VERSION = 3.1;
         display.getSize(size);
         return size.x;
     }
+
+    private int getScreenHeight() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size.y;
+    }
+
 
     private int getSideTotalMargin() {
         LinearLayout main = (LinearLayout) findViewById(R.id.maincontent);
@@ -1711,7 +1759,7 @@ private final static Double APP_VERSION = 3.1;
                 for (Map<String, Object> element : story_entries)
                 {
                     String location = (String)element.get("name");
-                    Integer thumb = ((Double)element.get("thumb")).intValue();
+                    Integer thumb = element.containsKey("thumb")? (element.get("thumb")!=null?((Double)element.get("thumb")).intValue():0) : 0;
                     Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
                     Boolean isJapan = true;
                     for (Map.Entry<String, Object> entry : element.entrySet())
@@ -1742,7 +1790,7 @@ private final static Double APP_VERSION = 3.1;
                 {
                     List<Double> charIds = (List<Double>)element.get(" ");
                     String drop_name = (String)element.get("name");
-                    Integer drop_thumb = ((Double)element.get("thumb")).intValue();
+                    Integer drop_thumb = element.containsKey("thumb")? (element.get("thumb")!=null?((Double)element.get("thumb")).intValue():0) : 0;
                     Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
                     Boolean isJapan = true;
                     for(Double charId : charIds)
@@ -1756,7 +1804,7 @@ private final static Double APP_VERSION = 3.1;
                 for(Map<String, Object> element : forts_entries)
                 {
                     String drop_name = (String)element.get("name");
-                    Integer drop_thumb = ((Double)element.get("thumb")).intValue();
+                    Integer drop_thumb = element.containsKey("thumb")? (element.get("thumb")!=null?((Double)element.get("thumb")).intValue():0) : 0;
                     Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
                     Boolean isJapan = true;
                     if(element.containsKey("Elite"))
@@ -1810,7 +1858,7 @@ private final static Double APP_VERSION = 3.1;
                 for(Map<String, Object> element : raid_entries)
                 {
                     String drop_name = (String)element.get("name");
-                    Integer drop_thumb = ((Double)element.get("thumb")).intValue();
+                    Integer drop_thumb = element.containsKey("thumb")? (element.get("thumb")!=null?((Double)element.get("thumb")).intValue():0) : 0;
                     Boolean isGlobal = element.containsKey("global")? (Boolean)element.get("global") : false;
                     Boolean isJapan = true;
                     if(element.containsKey("Master"))
@@ -1910,6 +1958,15 @@ private final static Double APP_VERSION = 3.1;
     }
 
     class CheckUpdates extends AsyncTask<Void, Void, String[]> {
+        boolean autoDownload = false;
+        public CheckUpdates()
+        {
+
+        }
+        public CheckUpdates(boolean autoDownload)
+        {
+            this.autoDownload = autoDownload;
+        }
         protected String[] doInBackground(Void... voids) {
             FeedParser parser = new FeedParser();
             String uri = "";
@@ -1936,24 +1993,32 @@ private final static Double APP_VERSION = 3.1;
         }
 
         protected void onPostExecute(final String[] result) {
+            updateUrl = result[0];
             if (!result[0].equals("")) {
-                final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), String.format(getString(R.string.update_msg), result[1]), Snackbar.LENGTH_INDEFINITE);
-                msg.setAction(getString(R.string.update_btn), new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        /*Intent i = new Intent(Intent.ACTION_VIEW);
-                        i.setData(Uri.parse(result));
-                        startActivity(i);*/
-                        (new DownloadUpdate()).execute(result);
-                    }
-                })
-                        .setActionTextColor(Color.WHITE).setDuration(8000).show();
-                msg.getView().setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        msg.dismiss();
-                    }
-                });
+                if(autoDownload)
+                {
+                    checkPermissionAndUpdate();
+                } else {
+                    final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), String.format(getString(R.string.update_msg), result[1]), Snackbar.LENGTH_INDEFINITE);
+                    msg.setAction(getString(R.string.update_btn), new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            checkPermissionAndUpdate();
+                        }
+                    })
+                            .setActionTextColor(Color.WHITE).setDuration(8000).show();
+                    msg.getView().setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            msg.dismiss();
+                        }
+                    });
+                }
+            } else {
+                if (autoDownload)
+                {
+                    Snackbar.make(findViewById(android.R.id.content), getString(R.string.no_updates), Snackbar.LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -2294,12 +2359,31 @@ private final static Double APP_VERSION = 3.1;
         return result;
     }
 
-    private class DownloadUpdate extends AsyncTask<String, Integer, String> {
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
+    }
 
-        protected String doInBackground(String... strings) {
-            String downloadPath = strings[0];
-            String localPath = getExternalFilesDir(null).getAbsolutePath() + "/optcsmartdb_install.apk";
-            File file = new File(localPath);
+    public File getApkPath(String apkName) {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS), apkName);
+        if (!file.mkdirs()) {
+            Log.e("err", "Directory not created");
+        }
+        return file;
+    }
+
+    private String updateUrl = "";
+    private class DownloadUpdate extends AsyncTask<Void, Integer, File> {
+
+        protected File doInBackground(Void... voids) {
+            String downloadPath = updateUrl;
+            //String localPath = getExternalFilesDir(null).getAbsolutePath() + "/optcsmartdb_install.apk";
+            File file = getApkPath("optcsmartdb_install.apk");
             if (file.exists())
                 file.delete();
 
@@ -2312,7 +2396,7 @@ private final static Double APP_VERSION = 3.1;
 
                 // download the file
                 InputStream input = new BufferedInputStream(url.openStream());
-                OutputStream output = new FileOutputStream(localPath);
+                OutputStream output = new FileOutputStream(file);
 
                 byte data[] = new byte[1024];
                 long total = 0;
@@ -2327,44 +2411,79 @@ private final static Double APP_VERSION = 3.1;
                 output.close();
                 input.close();
             } catch (Exception e) {
-                Log.e("YourApp", e.getMessage());
+                e.printStackTrace();
+                this.cancel(true);
             }
-            return localPath;
+            return file;
         }
 
         protected void onPreExecute() {
-            showLoading(context);
+            if(isExternalStorageWritable())
+                showLoading(context);
+            else {
+                Toast.makeText(context, "Error while accessing device memory", Toast.LENGTH_SHORT).show();
+                this.cancel(false);
+            }
         }
 
-        protected void onPostExecute(String s) {
+        protected void onPostExecute(File s) {
             hideLoading();
-            /*if (!isUnknownSourcesEnabled()) {
-                apk_file = s;
-                (new AlertDialog.Builder(context)).setMessage(getString(R.string.enable_unknown_sources_first))
-                        .setPositiveButton(getString(R.string.enable_unknown_sources_btn), new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int i) {
-                                startActivityForResult(new Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS), SETTINGS_UNKNOWN_SOURCES);
-                            }
-                        })
-                        .create().show();
-            } else {
-                Intent i = new Intent();
-                i.setAction(Intent.ACTION_VIEW);
-                i.setDataAndType(Uri.fromFile(new File(s)), "application/vnd.android.package-archive");
-                Log.d("Lofting", "About to install new .apk");
-                context.startActivity(i);
-            } ### Android should handle by himself asking user to enable unknown sources   */
 
             Intent i = new Intent();
             i.setAction(Intent.ACTION_VIEW);
-            i.setDataAndType(Uri.fromFile(new File(s)), "application/vnd.android.package-archive");
+            if(Build.VERSION.SDK_INT >= 24) {
+                i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                i.setDataAndType(FileProvider.getUriForFile(context, getPackageName() + ".provider", s), "application/vnd.android.package-archive");
+            } else
+                i.setDataAndType(Uri.fromFile(s), "application/vnd.android.package-archive");
             context.startActivity(i);
-
         }
 
         protected void onProgressUpdate(Integer... values) {
             setProgressInt(values[0]);
+        }
+    }
+
+    public void checkPermissionAndUpdate()
+    {
+        if(isStoragePermissionGranted())
+        {
+            (new DownloadUpdate()).execute();
+        }
+    }
+
+    private static final int WRITE_EXT_STORAGE_PERM = 54;
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                Log.v("perm","Permission is granted");
+                return true;
+            } else {
+
+                Log.v("perm","Permission is revoked");
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, WRITE_EXT_STORAGE_PERM);
+                return false;
+            }
+        }
+        else { //permission is automatically granted on sdk<23 upon installation
+            Log.v("perm","Permission is granted");
+            return true;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch(requestCode)
+        {
+            case WRITE_EXT_STORAGE_PERM:
+                if(grantResults[0]== PackageManager.PERMISSION_GRANTED) {
+                    Log.v("perm", "Permission: " + permissions[0] + "was " + grantResults[0]);
+                    //resume tasks needing this permission
+                    (new DownloadUpdate()).execute();
+                }
+                break;
         }
     }
 
@@ -2376,6 +2495,9 @@ private final static Double APP_VERSION = 3.1;
     }
 
     private static final int SETTINGS_UNKNOWN_SOURCES = 101;
+    private static final int PREFERENCES_ACTIVITY = 102;
+    public static final int LANG_PREF_CHANGED = 199;
+    public static final int UPDATE_APP_PREF = 200;
     private String apk_file = "";
 
     @Override
@@ -2389,6 +2511,18 @@ private final static Double APP_VERSION = 3.1;
                     i.setDataAndType(Uri.fromFile(new File(apk_file)), "application/vnd.android.package-archive");
                     Log.d("Lofting", "About to install new .apk");
                     context.startActivity(i);
+                }
+                break;
+            case PREFERENCES_ACTIVITY:
+                switch (resultCode)
+                {
+                    case LANG_PREF_CHANGED:
+                        getSharedPreferences(getString(R.string.pref_name), 0).edit().putBoolean(getString(R.string.rebuild_db), true).commit();
+                        crossfade(300);
+                        break;
+                    case UPDATE_APP_PREF:
+                        (new CheckUpdates(true)).execute();
+                        break;
                 }
                 break;
         }
