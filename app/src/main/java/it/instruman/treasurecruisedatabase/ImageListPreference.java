@@ -37,11 +37,11 @@ public class ImageListPreference extends ListPreference {
 
         for (int i=0;i<imageNames.length;i++) {
             String imageName = imageNames[i].substring(
-                    imageNames[i].indexOf('/') + 1,
+                    imageNames[i].lastIndexOf('/') + 1,
                     imageNames[i].lastIndexOf('.'));
 
-            resourceIds[i] = context.getResources().getIdentifier(imageName,
-                    null, context.getPackageName());
+                resourceIds[i] = context.getResources().getIdentifier(imageName,
+                    "drawable", context.getPackageName());
         }
 
         typedArray.recycle();

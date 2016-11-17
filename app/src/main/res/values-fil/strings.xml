@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Character info dialog strings -->
+    <string name="class1">Uri 1</string>
+    <string name="class2">Uri 2</string>
+    <string name="type">Tipo</string>
+    <string name="stars">Bituin</string>
+    <string name="cost">Halaga</string>
+    <string name="combo">Kombo</string>
+    <string name="slots">Slots</string>
+    <string name="maxlevel">Max na Lebel</string>
+    <string name="exptomax">Max na Exp</string>
+    <string name="level">Lebel</string>
+    <string name="hp">HP</string>
+    <string name="atk">ATK</string>
+    <string name="rcv">RCV</string>
+    <string name="lvl1">1</string>
+    <string name="lvlmax">MAX</string>
+    <string name="captability">Abilidad</string>
+    <string name="specability">Espesyal:</string>
+    <string name="speccooldown">Bilang ng paghihintay (max/min):</string>
+
+    <!-- Filter box hint text -->
+    <string name="filter_hint">Maghanap gamit ang pangalan o ID</string>
+
+    <!-- Updates text -->
+    <string name="update_msg">May bagong update! Gusto mo bang i-install? (v%1$s)</string>
+    <string name="update_btn">Sige</string>
+
+    <string name="loadingmsg">Maghintay habang nilo-load ang data…</string>
+    <string name="loading_characters">Ina-update ang listahan</string>
+    <string name="downloading_cooldowns">Dinodownload ang cooldowns</string>
+    <string name="loading_cooldowns">Ina-upload ang cooldowns</string>
+    <string name="downloading_abilities">Dinodownload ang mga abilidad</string>
+    <string name="loading_abilities">Ina-update ang mga abilidad</string>
+    <string name="downloading_evolutions">Dinodownload ang mga ebolusyon</string>
+    <string name="loading_evolutions">Ina-update ang mga ebolusyon</string>
+
+    <string name="evolutions">Mga ebolutions:</string>
+
+    <string name="notes_text">"Mga Nota: "</string>
+
+    <string name="tab_maininfo">Impormasyon</string>
+    <string name="tab_abilities">Mga Abilidad</string>
+    <string name="tab_evolutions">Mga Ebolusyon</string>
+
+    <string name="reset_db_title">I-reset ang Database</string>
+    <string name="reset_db_message">Gusto mo bang i-reset ang Database?</string>
+    <string name="reset_db_cancel">Hindi</string>
+    <string name="reset_db_confirm">Oo</string>
+
+    <string name="enable_unknown_sources_first">To install this app you need to enable unknown sources from your device settings first!</string>
+    <string name="enable_unknown_sources_btn">OK</string>
+
+    <!-- Navigation Drawer List Array -->
+    <string name="type_title">Type</string>
+    <string-array name="type_array">
+        <item>STR</item>
+        <item>DEX</item>
+        <item>QCK</item>
+        <item>PSY</item>
+        <item>INT</item>
+    </string-array>
+
+    <string name="class_title">Class</string>
+    <string-array name="class_array">
+        <item>Fighter</item>
+        <item>Striker</item>
+        <item>Slasher</item>
+        <item>Shooter</item>
+        <item>Free Spirit</item>
+        <item>Cerebral</item>
+        <item>Powerhouse</item>
+        <item>Driven</item>
+        <item>Booster</item>
+        <item>Evolver</item>
+    </string-array>
+
+    <string name="stars_title">Stars</string>
+    <string-array name="stars_array">
+        <item>6</item>
+        <item>5</item>
+        <item>4</item>
+        <item>3</item>
+        <item>2</item>
+        <item>1</item>
+    </string-array>
+    <string name="drop_locations">Lokasyon:</string>
+    <string name="tab_drops">Lokasyon</string>
+    <string name="drops_global">Mga Global na yunit lamang</string>
+    <string name="drops_japan">Mga Jap na yunit lamang</string>
+    <string name="downloading_drops">Dinowdownload ang mga drops</string>
+    <string name="loading_drops">Ina-update ang mga drops</string>
+    <string name="prefs_cat_appsettings">App Settings</string>
+    <string name="prefs_check_updates">Check for updates</string>
+    <string name="prefs_check_updates_desc">Notify user when app update is available</string>
+    <string name="prefs_download_update">Download update</string>
+    <string name="prefs_extra_cat">Extra</string>
+    <string name="prefs_localization">Language</string>
+    <string name="prefs_localization_cat">Localization</string>
+    <string name="prefs_update_db">Update database</string>
+    <string name="prefs_update_db_desc">Automatically update database</string>
+    <string name="no_updates">No updates available</string>
+    <string name="prefs_title">Settings</string>
+
+</resources>

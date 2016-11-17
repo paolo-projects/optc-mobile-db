@@ -45,6 +45,11 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
                 , childPosititon);
     }
 
+    public String getChildText(int groupPosition, int childPosititon) {
+        return (String) getKeyByIndex(this._listDataChild.get(this._listDataHeader.get(groupPosition))
+                , childPosititon);
+    }
+
     public void setChildValue(int groupPosition, int childPosition, Boolean value) {
         LinkedHashMap<String, Boolean> entries = this._listDataChild.get(this._listDataHeader.get(groupPosition));
         String key = (String) getChild(groupPosition, childPosition);

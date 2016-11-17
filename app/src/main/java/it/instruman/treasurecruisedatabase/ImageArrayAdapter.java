@@ -36,13 +36,14 @@ public class ImageArrayAdapter extends ArrayAdapter<CharSequence> {
         index = i;
         resourceIds = ids;
     }
+
     /**
      * {@inheritDoc}
      */
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = ((Activity)getContext()).getLayoutInflater();
-        View row = inflater.inflate(R.layout.preference_language, parent, false);
 
+        LayoutInflater inflater = ((Activity) getContext()).getLayoutInflater();
+        View row = inflater.inflate(R.layout.preference_language, parent, false);
         ImageView imageView = (ImageView)row.findViewById(R.id.lanpref_image);
         imageView.setImageResource(resourceIds[position]);
 

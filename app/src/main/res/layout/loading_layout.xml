@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<!--<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:background="#44000000"
-    android:gravity="center">
+    android:gravity="center"
+    android:layout_gravity="fill">-->
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res-auto"
         android:id="@+id/loadingPanel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center"
         android:layout_gravity="center"
@@ -22,6 +24,7 @@
             android:gravity="center"
             android:text="@string/loadingmsg"
             android:textSize="24sp"
+            android:textColor="?char_info_txt"
             android:layout_marginBottom="15dp" />
 
         <TextView
@@ -30,6 +33,7 @@
             android:gravity="center"
             android:text="@string/loadingmsg"
             android:textSize="18sp"
+            android:textColor="?char_info_txt"
             android:id="@+id/loading_text"
             android:layout_marginBottom="15dp" />
 
@@ -38,6 +42,9 @@
             android:layout_height="100dp"
             custom:arc_bottom_text="LOADING"
             android:layout_gravity="center"
+            custom:arc_finished_color="?char_info_txt"
+            custom:arc_text_color="?char_info_header_txt"
+            custom:arc_unfinished_color="?char_info_header_bg"
             android:id="@+id/loading_bar" />
     </LinearLayout>
-</LinearLayout>
+<!--</LinearLayout>-->

@@ -25,8 +25,8 @@
             android:entryValues="@array/locale_array"
             android:key="@string/pref_language"
             android:summary="%s"
-            custom:entryImages="@array/flags_array"
-            android:icon="@drawable/ic_translate_black"/>
+            android:icon="@drawable/ic_translate_black"
+            custom:entryImages="@array/flags_array" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/prefs_extra_cat">
         <Preference android:title="OPTC SmartDB project page"

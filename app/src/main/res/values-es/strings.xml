@@ -102,4 +102,5 @@
     <string name="prefs_localization_cat">Localization</string>
     <string name="prefs_update_db">Update database</string>
     <string name="prefs_update_db_desc">Automatically update database</string>
+    <string name="prefs_title">Settings</string>
 </resources>

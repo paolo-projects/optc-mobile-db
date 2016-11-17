@@ -40,6 +40,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         setSupportActionBar(actToolbar);
         android.support.v7.app.ActionBar actionBar = getDelegate().getSupportActionBar();
         if(actionBar!=null) {
+            actionBar.setTitle(getString(R.string.prefs_title));
             actionBar.setDisplayHomeAsUpEnabled(true);
             actToolbar.setNavigationOnClickListener(new View.OnClickListener() {
                 @Override

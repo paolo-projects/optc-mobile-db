@@ -91,14 +91,15 @@
     <string name="drop_locations">Missioni per droppare il personaggio:</string>
     <string name="loading_drops">Sto processando e impostando i drop</string>
     <string name="downloading_drops">Downloading drops</string>
-    <string name="no_updates">No updates available</string>
-    <string name="prefs_cat_appsettings">App Settings</string>
-    <string name="prefs_check_updates">Check for updates</string>
-    <string name="prefs_check_updates_desc">Notify user when app update is available</string>
-    <string name="prefs_download_update">Download update</string>
+    <string name="no_updates">Nessun aggiornamento disponibile</string>
+    <string name="prefs_cat_appsettings">Impostazioni app</string>
+    <string name="prefs_check_updates">Cerca aggiornamenti</string>
+    <string name="prefs_check_updates_desc">Notifica l\'utente quando un aggiornamento è disponibile</string>
+    <string name="prefs_download_update">Scarica aggiornamento</string>
     <string name="prefs_extra_cat">Extra</string>
-    <string name="prefs_localization">Language</string>
-    <string name="prefs_localization_cat">Localization</string>
-    <string name="prefs_update_db">Update database</string>
-    <string name="prefs_update_db_desc">Automatically update database</string>
+    <string name="prefs_localization">Lingua</string>
+    <string name="prefs_localization_cat">Localizzazione</string>
+    <string name="prefs_update_db">Aggiorna database</string>
+    <string name="prefs_update_db_desc">Aggiorna automaticamente il database</string>
+    <string name="prefs_title">Impostazioni</string>
 </resources>

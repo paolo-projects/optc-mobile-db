@@ -43,23 +43,23 @@ public class DBHelper extends SQLiteOpenHelper {
     public final static String UNITS_MAXRCV = "maxrcv";
 
     // Table specials
-    private final static String SPECIALS_TABLE = "specials";
+    public final static String SPECIALS_TABLE = "specials";
     // Columns
-    private final static String SPECIALS_ID = "_id";
-    private final static String SPECIALS_CHARID = "char_id";
-    private final static String SPECIALS_NAME = "name";
-    private final static String SPECIALS_DESCRIPTION = "description";
-    private final static String SPECIALS_MAXCD = "max_cd";
-    private final static String SPECIALS_MINCD = "min_cd";
-    private final static String SPECIALS_NOTES = "notes";
+    public final static String SPECIALS_ID = "_id";
+    public final static String SPECIALS_CHARID = "char_id";
+    public final static String SPECIALS_NAME = "name";
+    public final static String SPECIALS_DESCRIPTION = "description";
+    public final static String SPECIALS_MAXCD = "max_cd";
+    public final static String SPECIALS_MINCD = "min_cd";
+    public final static String SPECIALS_NOTES = "notes";
 
     // Table captains
-    private final static String CAPTAINS_TABLE = "captains";
+    public final static String CAPTAINS_TABLE = "captains";
     // Columns
-    private final static String CAPTAINS_ID = "_id";
-    private final static String CAPTAINS_CHARID = "char_id";
-    private final static String CAPTAINS_DESCRIPTION = "description";
-    private final static String CAPTAINS_NOTES = "notes";
+    public final static String CAPTAINS_ID = "_id";
+    public final static String CAPTAINS_CHARID = "char_id";
+    public final static String CAPTAINS_DESCRIPTION = "description";
+    public final static String CAPTAINS_NOTES = "notes";
 
     // Table evolutions
     private final static String EVOLUTIONS_TABLE = "evolutions";

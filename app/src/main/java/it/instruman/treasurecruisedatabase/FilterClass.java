@@ -3,14 +3,18 @@ package it.instruman.treasurecruisedatabase;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
+import android.util.Log;
 import android.util.TimingLogger;
 
 import org.mozilla.javascript.NativeArray;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.regex.Pattern;
 
 /**
  * Created by Paolo on 10/10/2016.
@@ -18,8 +22,54 @@ import java.util.Iterator;
 
 public class FilterClass {
 
+    private static ArrayList<HashMap> filterByIds(ArrayList<HashMap> list, ArrayList<Integer> ids)
+    {
+        ArrayList<HashMap> result = new ArrayList<>();
+        for(HashMap entry : list)
+        {
+            Integer id = (Integer)entry.get(Constants.ID);
+            if(ids.contains(id))
+                result.add(entry);
+        }
+        return result;
+    }
+
+    private static ArrayList<Integer> getIdsWithRegex(SQLiteDatabase db, String table, ArrayList<String> expressions)
+    {
+        Cursor c;
+        if(table.equals(DBHelper.CAPTAINS_TABLE))
+            c = db.query(table, new String [] {DBHelper.CAPTAINS_CHARID, DBHelper.CAPTAINS_DESCRIPTION}, null, null, null, null, null, null);
+        else if(table.equals(DBHelper.SPECIALS_TABLE))
+            c = db.query(table, new String [] {DBHelper.SPECIALS_CHARID, DBHelper.SPECIALS_DESCRIPTION, DBHelper.SPECIALS_NOTES}, null, null, null, null, null, null);
+        else return new ArrayList<>();
+        ArrayList<Integer> result = new ArrayList<>();
+        c.moveToFirst();
+        while(!c.isAfterLast())
+        {
+            Integer id = c.getInt(0);
+            String desc = c.getString(1);
+            if((desc!=null) && !desc.equals("")) {
+                boolean matches = true;
+                for (String exp : expressions) {
+                    if(exp.equals("specialProportional")) {
+                        result.addAll(Arrays.asList(403, 521, 522, 640, 641, 775, 778, 779, 1017, 1018, 1034, 1035, 1116, 1117, 1235, 1236));
+                        matches = false;
+                    }
+                    else
+                        matches = matches && Pattern.compile(exp, Pattern.CASE_INSENSITIVE).matcher(desc).find();
+                }
+                if (matches)
+                    result.add(id);
+            }
+            c.moveToNext();
+        }
+        c.close();
+        return result;
+    }
+
     public static ArrayList<HashMap> filterWithDB(Context context, EnumSet<MainActivity.FL_TYPE> type_filters, EnumSet<MainActivity.FL_CLASS> class_filters,
-                                                  EnumSet<MainActivity.FL_STARS> stars_filters, String filterText) {
+                                                  EnumSet<MainActivity.FL_STARS> stars_filters, EnumSet<MainActivity.FL_CAPT_FLAGS> captflags_filters,
+                                                  EnumSet<MainActivity.FL_SPEC_FLAGS> specflags_filters, String filterText, String locale) {
         TimingLogger timing = new TimingLogger("TIME", "Init");
         DBHelper dbhelper = new DBHelper(context);
         SQLiteDatabase db = dbhelper.getReadableDatabase();
@@ -131,6 +181,18 @@ public class FilterClass {
                 values.add("Driven");
                 values.add("Driven");
             }
+            if (class_filters.contains(MainActivity.FL_CLASS.BOOSTER)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Booster");
+                values.add("Booster");
+            }
+            if (class_filters.contains(MainActivity.FL_CLASS.EVOLVER)) {
+                type_condition += "( " + DBHelper.UNITS_CLASS1 + " = ? OR " +
+                        DBHelper.UNITS_CLASS2 + " = ? ) AND ";
+                values.add("Evolver");
+                values.add("Evolver");
+            }
             type_condition = type_condition.substring(0, type_condition.length() - 4);
             type_condition += " ) AND ";
         }
@@ -149,6 +211,7 @@ public class FilterClass {
             return new ArrayList<>();
         }
         type_condition = type_condition.substring(0, type_condition.length() - 4);
+        Log.d("DBG", type_condition);
         String[] values_array = new String[values.size()];
         values.toArray(values_array);
         ArrayList<HashMap> filtered = new ArrayList<>();
@@ -168,6 +231,31 @@ public class FilterClass {
             result.moveToNext();
         }
         result.close();
+
+        if(captflags_filters.size()>0) {
+            ArrayList<String> regex = new ArrayList<>();
+            for (MainActivity.FL_CAPT_FLAGS flag : captflags_filters)
+            {
+                if(locale.equals("it"))
+                    regex.add(flag.getMatcherIt());
+                else
+                    regex.add(flag.getMatcher());
+            }
+            filtered = filterByIds(filtered, getIdsWithRegex(db, DBHelper.CAPTAINS_TABLE, regex));
+        }
+
+        if(specflags_filters.size()>0) {
+            ArrayList<String> regex = new ArrayList<>();
+            for (MainActivity.FL_SPEC_FLAGS flag : specflags_filters)
+            {
+                if(locale.equals("it"))
+                    regex.add(flag.getMatcherIt());
+                else
+                    regex.add(flag.getMatcher());
+            }
+            filtered = filterByIds(filtered, getIdsWithRegex(db, DBHelper.SPECIALS_TABLE, regex));
+        }
+
         db.close();
         dbhelper.close();
         timing.addSplit("END");

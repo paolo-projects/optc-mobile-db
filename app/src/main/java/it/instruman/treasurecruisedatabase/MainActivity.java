@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.2;
+private final static Double APP_VERSION = 3.3;
 /*
     ##################################################
 */
@@ -232,10 +232,183 @@ private final static Double APP_VERSION = 3.2;
         }
     }
 
+    public enum FL_CAPT_FLAGS {
+        TYPE_BOOSTING_CAPTAINS("Type-boosting captains", "Boosts (ATK|HP|RCV|ATK and HP|ATK and RCV|HP and RCV|ATK, HP and RCV) of[^,]+(STR|DEX|QCK|PSY|INT)\\b", "Aumenta (ATK|HP|RCV|ATK e HP|ATK e RCV|HP e RCV|ATK, HP e RCV) dei[^,]+(STR|DEX|QCK|PSY|INT)\\b"),
+        CLASS_BOOSTING_CAPTAINS("Class-boosting captains", "Boosts (ATK|HP|RCV|ATK and HP|ATK and RCV|HP and RCV|ATK, HP and RCV) of[^,]+(Slasher|Striker|Fighter|Shooter|Free Spirit|Cerebral|Powerhouse|Driven)", "Aumenta (ATK|HP|RCV|ATK e HP|ATK e RCV|HP e RCV|ATK, HP e RCV) dei[^,]+(Slasher|Striker|Fighter|Shooter|Free Spirit|Cerebral|Powerhouse|Driven)"),
+        ATK_BOOSTING_CAPTAINS("ATK boosting captains", "Boosts ATK", "Aumenta ATK"),
+        HP_BOOSTING_CAPTAINS("HP boosting captains", "Boosts (HP|ATK and HP|ATK, HP)|Boosts.+and their HP","Aumenta (HP|ATK e HP|ATK, HP)|Aumenta.+e i loro HP"),
+        RCV_BOOSTING_CAPTAINS("RCV boosting captains", "Boosts (RCV|ATK and RCV|HP and RCV|ATK, HP and RCV)|Boosts.+and their RCV", "Aumenta (RCV|ATK e RCV|HP e RCV|ATK, HP e RCV)|Aumenta.+e i loro RCV"),
+        SPECIAL_BOOSTING_CAPTAINS("Special boosting captains", "Boosts damage.+specials", "Aumenta il danno.+attacchi speciali"),
+        _2X_ATK_AND_HP_CAPTAINS("2x ATK and HP captains", "Boosts (ATK and HP|ATK, HP).+by 2x", "Aumenta (ATK e HP|ATK, HP).+di 2x"),
+        _2X_ATK_AND_RCV_CAPTAINS("2x ATK and RCV captains", "Boosts ATK and RCV.+by 2x", "Aumenta ATK e RCV.+di 2x"),
+        _2_5X_ATK_CAPTAINS("2.5x ATK captains", "Boosts (their )?ATK.+by 2.5x", "Aumenta (il loro )?ATK.+di 2.5x"),
+        _2_75X_ATK_CAPTAINS("2.75x ATK captains", "Boosts (their )?ATK.+by 2.75x", "Aumenta (il loro )?ATK.+di 2.75x", new Integer[] { 529, 530, 668, 669 }),
+        _3X_ATK_CAPTAINS("3x ATK captains", "Boosts (their )?ATK.+by 3x", "Aumenta (il loro )?ATK.+di 3x"),
+        HP_BASED_ATK_CAPTAINS("HP-based ATK captains", "Boosts ATK.+proportionally to", "Aumenta ATK.+proporzionalmente a"),
+        POSITIONAL_CAPTAINS("Positional captains", "(after scoring|following a chain|perfect|great|good)", "(dopo aver fatto|seguendo l'ordine|Dopo aver fatto.+ Good|Dopo aver fatto.+ Great|Dopo aver fatto.+ Perfect)"),
+        BENEFICIAL_ORB_CAPTAINS("\"Beneficial\" Orb captains", "\"beneficial", "Gli orb ((STR|DEX|QCK|PSY|INT|\\[RCV\\]|\\[TND\\])|((STR|DEX|QCK|PSY|INT|\\[RCV\\]|\\[TND\\]) e (STR|DEX|QCK|PSY|INT|\\[RCV\\]|\\[TND\\]))) funzionano come se fossero positivi"),
+        CHAIN_MULTIPLIERS("Chain multipliers", "Boosts.+chain multiplier", "Aumenta.+moltiplicatore.+della catena"),
+        COOLDOWN_REDUCERS("Cooldown reducers", "reduces.+cooldown", "Riduce.+turn.+attacchi speciali"),
+        DAMAGE_REDUCERS("Damage reducers", "Reduces (any )?damage received", "Riduce (qualsiasi )?il danno ricevuto"),
+        HEALERS("Healers", "Recovers", "Recupera"),
+        TANKERS("Tankers", "Reduces (any )?damage.+if HP.+99", "Riduce (qualsiasi )?il danno.+se gli HP.+99"),
+        ZOMBIES("Zombies", "Protects from defeat", "Protegge dalla sconfitta"),
+        END_OF_TURN_DAMAGE_DEALER("End of Turn Damage Dealer", "deals.+end of each turn", "Infligge.+alla fine di ogni turno");
+
+        private String text;
+        private String matcher, matcher_it;
+        private Integer[] include = {};
+
+        FL_CAPT_FLAGS(String text, String matcher, String matcher_it) { this.text = text; this.matcher = matcher; this.matcher_it = matcher_it; }
+        FL_CAPT_FLAGS(String text, String matcher, String matcher_it, Integer[] include) { this.text = text; this.matcher = matcher; this.matcher_it = matcher_it; this.include = include;}
+
+        public String getText() {
+            return this.text;
+        }
+        public String getMatcher() { return this.matcher; }
+        public String getMatcherIt() { return this.matcher_it; }
+        public Integer[] getInclude() { return this.include; }
+
+        public boolean textEqualsCaseInsensitive(String what) {
+            if (what != null) {
+                return this.text.equalsIgnoreCase(what);
+            }
+            throw new IllegalArgumentException("Argument can't be null");
+        }
+
+        public boolean matcherEqualsCaseInsensitive(String what) {
+            if (what != null) {
+                return this.matcher.equalsIgnoreCase(what);
+            }
+            throw new IllegalArgumentException("Argument can't be null");
+        }
+
+        public static FL_CAPT_FLAGS fromString(String text) {
+            if (text != null) {
+                for (FL_CAPT_FLAGS b : FL_CAPT_FLAGS.values()) {
+                    if (text.equalsIgnoreCase(b.text)) {
+                        return b;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No constant named " + text);
+        }
+
+        public static FL_CAPT_FLAGS fromMatcher(String matcher) {
+            if (matcher != null) {
+                for (FL_CAPT_FLAGS b : FL_CAPT_FLAGS.values()) {
+                    if (matcher.equalsIgnoreCase(b.matcher)) {
+                        return b;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No constant named " + matcher);
+        }
+    }
+
+    public enum FL_SPEC_FLAGS {
+        TYPE_BOOSTING_SPECIALS("Type-boosting specials", "Boosts (ATK|HP|RCV|ATK and HP|ATK and RCV|HP and RCV|ATK, HP and RCV) of[^,]+(STR|DEX|QCK|PSY|INT)\\b", "Aumenta (ATK|HP|RCV|ATK e HP|ATK e RCV|HP e RCV|ATK, HP e RCV) dei[^,]+(STR|DEX|QCK|PSY|INT)\\b"),
+        CLASS_BOOSTING_SPECIALS("Class-boosting specials", "Boosts (ATK|HP|RCV|ATK and HP|ATK and RCV|HP and RCV|ATK, HP and RCV) of[^,]+(Slasher|Striker|Fighter|Shooter|Free Spirit|Cerebral|Powerhouse|Driven)", "Aumenta (ATK|HP|RCV|ATK e HP|ATK e RCV|HP e RCV|ATK, HP e RCV) dei[^,]+(Slasher|Striker|Fighter|Shooter|Free Spirit|Cerebral|Powerhouse|Driven)"),
+        x1_5_ATK_SPECIALS("1.5x ATK specials", "Boosts ATK.+by 1.5x", "Aumenta ATK.+di 1.5x"),
+        x1_75_ATK_SPECIALS("1.75x ATK specials", "Boosts ATK.+by 1.75x", "Aumenta ATK.+di 1.75x"),
+        x2_ATK_SPECIALS("2x ATK specials", "Boosts ATK.+by 2x", "Aumenta ATK.+di 2x"),
+        CONDITIONAL_ATK_BOOSTERS("Conditional ATK boosters", "Boosts ATK.+against.+enemies", "Aumenta ATK.+contro.+nemici"),
+        DELAYED_ATK_BOOSTERS("Delayed ATK boosters", "(Following the activation.+boosts.+ATK|If during that turn.+boosts.+ATK)", "(Dopo l'attivazione.+aumenta.+ATK|Se durante il turno.+aumenta.+ATK)"),
+        COLOR_AFFINITY_BOOSTERS("Color Affinity boosters", "Boosts the Color Affinity", "\\\"l\\'affinità di colore\\\""),
+        RCV_BOOSTERS("RCV boosters", "Boosts RCV", "Aumenta RCV"),
+        ORB_LOCKERS("Orb lockers", "locks.+orbs", "Blocca.+orbs"),
+        ORB_BOOSTERS("Orb boosters", "amplifies.+orb", "Amplifica.+orb"),
+        ORB_CHANCE_BOOSTERS("Orb chance boosters", "boosts chances of getting.+orbs", "Aumenta le probabilità di ottenere.+orbs"),
+        ORB_CONTROLLERS("Orb controllers", "(Changes.+(orb|orbs))", "(Cambia.+(orb|orbs))"),
+        FULL_BOARD_ORB_CONTROLLERS("Full-board orb controllers", "(Changes[^,]+all orbs|Changes the orbs in|Changes[^,]*every other orb)", "(Cambia[^,]+tutti gli orbs|Cambia gli orbs della|Cambia[^,]*gli altri orb|Cambia casualmente gli orbs della|Sostituisce casualmente ogni altro orb)"),
+        SELF_ORB_CONTROLLERS("Self-orb controllers", "Changes.+own orb.+into", "Cambia.+il proprio orb.+in"),
+        ORB_RANDOMIZERS("Orb randomizers", "randomizes.+orb", "Sostituisce casualmente.+orb"),
+        ORB_SWITCHERS("Orb switchers", "switches orbs", "Sposta gli orbs tra loro"),
+        ORB_MATCHERS("Orb matchers", "(Changes.+(orb|orbs))[^,]+Matching", "(Cambia.+(orb|orbs))[^,]+Positiv", new Integer[] { 1036, 1037 }),
+        SLOT_EMPTIERS("Slot emptiers", "(Empties|Changes.+into.+\\[EMPTY\\])", "(Svuota|Cambia.+in.+\\[EMPTY\\])"),
+        SLOT_FILLERS("Slot fillers", "(Fills\\b|\\[EMPTY\\] orbs into|Changes.+\\[EMPTY\\].+into)", "(Riempie\\b|orbs \\[EMPTY\\] in|Cambia.+\\[EMPTY\\].+in)"),
+        DELAYERS("Delayers", "delays", "Ritarda "),
+        SINGLE_TARGET_DAMAGE_DEALER("Single-target damage dealer", "deals.+to one enemy", "Infligge.+a un nemico"),
+        MULTI_TARGET_DAMAGE_DEALERS("Multi-target damage dealers", "Deals.+to (all|random) enemies", "Infligge.+(a tutti i nemici|a nemici casuali)"),
+        MULTI_HIT_DAMAGE_DEALERS("Multi-hit damage dealers", "Deals \\d+ hits", "Infligge \\d+ colpi"),
+        FIXED_DAMAGE_DEALERS("Fixed damage dealers", "Deals.+fixed damage", "Infligge.+danno fisso"),
+        HEALTH_CUTTERS("Health cutters", "Cuts.+current HP.+enem", "Taglia.+gli HP.+nemic"),
+        HP_BASED_DAMAGE_DEALERS("HP-based damage dealers", "specialProportional", "specialProportional"),
+        DEFENSE_REDUCERS("Defense reducers", "Reduces.+defense", "Riduce.+difesa"),
+        MEAT_PRODUCERS("Meat producers", "into( either)?[\\s,\\[\\]A-Zor]+\\[RCV\\]", "(in orbs( o)?[\\s,\\[\\]A-Zor]+\\[RCV\\]|adiacenti in \\[RCV\\]|riga .+ in \\[RCV\\]|capitano in \\[RCV\\])"),
+        MEAT_CONVERTERS("Meat converters", "\\[RCV\\].+into", "\\[RCV\\].+in "),
+        DAMAGE_REDUCERS("Damage reducers", "Reduces (any )?damage received", "Riduce (qualsiasi )?il danno ricevuto"),
+        DAMAGE_NULLIFIERS("Damage nullifiers", "Reduces (any )?damage received.+100%", "Riduce (qualsiasi )?il danno ricevuto.+100%"),
+        BIND_REDUCERS("Bind reducers", "(reduces|removes).+bind.+duration", "(Riduce|Rimuove).+durata.+Bind"),
+        DESPAIR_REDUCERS("Despair reducers", "(reduces|removes).+despair.+duration", "(Riduce|Rimuove).+durata.+Despair"),
+        SILENCE_REDUCERS("Silence reducers", "(reduces|removes).+silence.+duration", "(Rimuove|Riduce).+durata.+Silence"),
+        BLOCK_ORB_REMOVERS("Block orb removers", "(empties.+with \\[BLOCK\\]|changes.+\\[BLOCK\\].+into|including.+\\[BLOCK\\])", "(Svuota.+con.+\\[BLOCK\\]|Cambia.+\\[BLOCK\\].+in|incluso.+\\[BLOCK\\])"),
+        BLINDNESS_REMOVERS("Blindness removers", "(reduces|removes).+blindness", "(Rimuove|Riduce).+Blindness"),
+        HEALERS("Healers", "Recovers", "Recupera"),
+        HEALTH_REDUCERS("Health reducers", "Reduces crew\'s (current )?HP", "(Riduce gli (correnti )?HP della ciurma|Riduce gli HP della ciurma a)"),
+        POISONERS("Poisoners", "poisons", "Avvelena "),
+        POISON_REMOVERS("Poison removers", "removes.+poison", "Rimuove il veleno"),
+        ZOMBIES("Zombies", "Protects from defeat", "Protegge dalla sconfitta"),
+        SPECIAL_COOLDOWN_REDUCER("Special cooldown reducer", "reduces special cooldown", "Riduce di.+turn.+special"),
+        PARALYSIS_REDUCERS("Paralysis reducers", "(reduces|removes).+Paralysis", "Riduce.+durata.+paralisi");
+
+        private String text;
+        private String matcher, matcher_it;
+        private Integer[] include = {};
+
+        FL_SPEC_FLAGS(String text, String matcher, String matcher_it) { this.text = text; this.matcher = matcher; this.matcher_it = matcher_it;}
+        FL_SPEC_FLAGS(String text, String matcher, String matcher_it, Integer[] include) { this.text = text; this.matcher = matcher; this.matcher_it = matcher_it; this.include = include;}
+
+        public String getText() {
+            return this.text;
+        }
+        public String getMatcherIt() { return this.matcher_it; }
+        public String getMatcher() { return this.matcher; }
+        public Integer[] getInclude() { return this.include; }
+
+        public boolean textEqualsCaseInsensitive(String what) {
+            if (what != null) {
+                return this.text.equalsIgnoreCase(what);
+            }
+            throw new IllegalArgumentException("Argument can't be null");
+        }
+
+        public boolean matcherEqualsCaseInsensitive(String what) {
+            if (what != null) {
+                return this.matcher.equalsIgnoreCase(what);
+            }
+            throw new IllegalArgumentException("Argument can't be null");
+        }
+
+        public static FL_SPEC_FLAGS fromString(String text) {
+            if (text != null) {
+                for (FL_SPEC_FLAGS b : FL_SPEC_FLAGS.values()) {
+                    if (text.equalsIgnoreCase(b.text)) {
+                        return b;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No constant named " + text);
+        }
+
+        public static FL_SPEC_FLAGS fromMatcher(String matcher) {
+            if (matcher != null) {
+                for (FL_SPEC_FLAGS b : FL_SPEC_FLAGS.values()) {
+                    if (matcher.equalsIgnoreCase(b.matcher)) {
+                        return b;
+                    }
+                }
+            }
+            throw new IllegalArgumentException("No constant named " + matcher);
+        }
+    }
+
     private Dialog loading;
     public EnumSet<FL_TYPE> TypeFlags = EnumSet.allOf(FL_TYPE.class);
     public EnumSet<FL_CLASS> ClassFlags = EnumSet.noneOf(FL_CLASS.class);
     public EnumSet<FL_STARS> StarsFlags = EnumSet.allOf(FL_STARS.class);
+    public EnumSet<FL_CAPT_FLAGS> CaptFlags = EnumSet.noneOf(FL_CAPT_FLAGS.class);
+    public EnumSet<FL_SPEC_FLAGS> SpecFlags = EnumSet.noneOf(FL_SPEC_FLAGS.class);
     public String FilterText = "";
     private Activity activity = this;
 
@@ -809,8 +982,15 @@ private final static Double APP_VERSION = 3.2;
         loading.setCanceledOnTouchOutside(false);
         loading.setCancelable(false);
         loading.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-        loading.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        loading.getWindow().setLayout(getScreenWidth(),getScreenHeight());
+        WindowManager.LayoutParams attrs = loading.getWindow().getAttributes();
+        attrs.dimAmount = 0.5f;
+        attrs.verticalMargin = 0.0f;
+        attrs.horizontalMargin = 0.0f;
+        int width = dpToPx(300);
+        int height = dpToPx(400);
+        loading.getWindow().setAttributes(attrs);
+        loading.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        loading.getWindow().setLayout(width, height);
         loading.show();
         loadingdlg_hwnd = loading;
     }
@@ -1156,8 +1336,7 @@ private final static Double APP_VERSION = 3.2;
                 crossfade(300);
             }
         });
-
-        if(!mPrefs.getBoolean(getString(R.string.rebuild_db), isUpdatesCheckEnabled)) {
+        if(!mPrefs.getBoolean(getString(R.string.rebuild_db), true)) {
             // run async task to download or load DB
             if (mPrefs.contains(getString(R.string.lastupdate)) && isDbOn()) {
                 //There's cached data, so check if it's old
@@ -1186,8 +1365,8 @@ private final static Double APP_VERSION = 3.2;
         if (!displayedTutorial) {
             new ShowcaseView.Builder(this)
                     .setTarget(new ViewTarget(placeholder))
-                    .setContentTitle("Drawer position changed!")
-                    .setContentText("Drawer now moved to the right edge of the screen!")
+                    .setContentTitle("New filters available")
+                    .setContentText("New filters for captain and special abilities available!")
                     .setStyle(R.style.CustomShowcaseTheme2)
                     .hideOnTouchOutside()
                     .build();
@@ -1336,11 +1515,15 @@ private final static Double APP_VERSION = 3.2;
         explistDataHeader.add(getString(R.string.type_title));
         explistDataHeader.add(getString(R.string.class_title));
         explistDataHeader.add(getString(R.string.stars_title));
+        explistDataHeader.add(getString(R.string.capt_flags_title));
+        explistDataHeader.add(getString(R.string.spec_flags_title));
 
         // Adding child data
         List<String> type_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.type_array)));
         List<String> class_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.class_array)));
         List<String> stars_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.stars_array)));
+        List<String> captflags_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.capt_flags_array)));
+        List<String> specflags_list = new ArrayList<>(Arrays.asList(getResources().getStringArray(R.array.spec_flags_array)));
 
         LinkedHashMap<String, Boolean> tmp = new LinkedHashMap<>();
         for (String entry : type_list) {
@@ -1359,6 +1542,18 @@ private final static Double APP_VERSION = 3.2;
             tmp.put(entry, true);
         }
         explistDataChild.put(explistDataHeader.get(2), tmp);
+
+        tmp = new LinkedHashMap<>();
+        for (String entry : captflags_list) {
+            tmp.put(entry, false);
+        }
+        explistDataChild.put(explistDataHeader.get(3), tmp);
+
+        tmp = new LinkedHashMap<>();
+        for (String entry : specflags_list) {
+            tmp.put(entry, false);
+        }
+        explistDataChild.put(explistDataHeader.get(4), tmp);
     }
 
     private void resetFilters() {
@@ -1366,6 +1561,8 @@ private final static Double APP_VERSION = 3.2;
         TypeFlags = EnumSet.allOf(FL_TYPE.class);
         ClassFlags = EnumSet.noneOf(FL_CLASS.class);
         StarsFlags = EnumSet.allOf(FL_STARS.class);
+        CaptFlags = EnumSet.noneOf(FL_CAPT_FLAGS.class);
+        SpecFlags = EnumSet.noneOf(FL_SPEC_FLAGS.class);
         rebuildList();
         explistAdapter = new ExpandableListAdapter(this, explistDataHeader, explistDataChild);
         // setting list adapter
@@ -2191,6 +2388,14 @@ private final static Double APP_VERSION = 3.2;
                                 break;
                         }
                         break;
+                    case 3: //Capt flags
+                        String flag = explistAdapter.getChildText(groupPosition, childPosition);
+                        CaptFlags.remove(FL_CAPT_FLAGS.fromString(flag));
+                        break;
+                    case 4: //Spec flags
+                        String flagS = explistAdapter.getChildText(groupPosition, childPosition);
+                        SpecFlags.remove(FL_SPEC_FLAGS.fromString(flagS));
+                        break;
                 }
             } else {
                 switch (groupPosition) {
@@ -2271,6 +2476,14 @@ private final static Double APP_VERSION = 3.2;
                                 break;
                         }
                         break;
+                    case 3: //Capt flags
+                        String flag = explistAdapter.getChildText(groupPosition, childPosition);
+                        CaptFlags.add(FL_CAPT_FLAGS.fromString(flag));
+                        break;
+                    case 4: //Spec flags
+                        String flagS = explistAdapter.getChildText(groupPosition, childPosition);
+                        SpecFlags.add(FL_SPEC_FLAGS.fromString(flagS));
+                        break;
                 }
             }
 
@@ -2319,7 +2532,8 @@ private final static Double APP_VERSION = 3.2;
 
     private void rebuildList() {
         list = original_list;
-        list = FilterClass.filterWithDB(context, TypeFlags, ClassFlags, StarsFlags, FilterText);
+        String locale = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.pref_language), "");
+        list = FilterClass.filterWithDB(context, TypeFlags, ClassFlags, StarsFlags, CaptFlags, SpecFlags, FilterText, locale);
         updateList();
     }
 
