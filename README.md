@@ -28,6 +28,7 @@ Most of the work done for this app is from the people at optc-db.github.io, caus
 * Portuguese (Portugal): GolDenBoY16
 * Portuguese (Brazilian): JustAnotherDevGuy
 * French: Kiddycarus
+* Filippino: chysera
 
 **Thanks to reddit mod Anton who created light and dark themes, and provided the app with its beautiful icon**
 
