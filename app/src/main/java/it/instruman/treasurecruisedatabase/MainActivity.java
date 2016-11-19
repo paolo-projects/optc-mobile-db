@@ -4,6 +4,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -35,6 +36,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -86,6 +88,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
@@ -102,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.3;
+private final static Double APP_VERSION = 3.4;
 /*
     ##################################################
 */
@@ -411,6 +414,7 @@ private final static Double APP_VERSION = 3.3;
     public EnumSet<FL_SPEC_FLAGS> SpecFlags = EnumSet.noneOf(FL_SPEC_FLAGS.class);
     public String FilterText = "";
     private Activity activity = this;
+    private ValueAnimator anim, anim_charlist;
 
     ImageView sortName, sortType, sortStars, sortAtk, sortHP, sortRCV;
     ListView lview;
@@ -556,7 +560,22 @@ private final static Double APP_VERSION = 3.3;
         }
 
         final Dialog dialog = new Dialog(context, theme_id);
+
         dialog.setContentView(R.layout.dialog_main);//dialog.setContentView(R.layout.character_info);
+
+        boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
+        if(daynightTheme) {
+            int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            LinearLayout mainContent = (LinearLayout)dialog.findViewById(R.id.charInfoMainContent);
+            if((8<=hour)&&(hour<20))
+            {
+                //DAYLIGHT
+                animateColor(mainContent, anim_charlist, "#DDDDDD","#fdd9be");
+            } else {
+                //NIGHT
+                animateColor(mainContent, anim_charlist, "#333333", "#504e3c");
+            }
+        }
 
         final TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
         tabs.setup();
@@ -865,7 +884,6 @@ private final static Double APP_VERSION = 3.3;
         List<DropInfo> drops = charInfo.getDropInfo();
 
         if (drops.size() > 0) {
-            //MULTIPLE EVOLUTIONS
             for (int i = 0; i < drops.size(); i++) {
                 DropInfo this_drops = drops.get(i);
 
@@ -877,8 +895,8 @@ private final static Double APP_VERSION = 3.3;
                 )); // SET WIDTH AND HEIGHT
                 drops_row.setGravity(Gravity.CENTER_VERTICAL);
 
-                //############# EVOLUTION SMALL ICON ###############
-                ImageButton evo_pic = new ImageButton(context); //CREATE EVOLUTION PIC
+                //############# SMALL ICON ###############
+                ImageButton evo_pic = new ImageButton(context); //CREATE PIC
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                         dpToPx(48), dpToPx(48)
                 );
@@ -952,7 +970,6 @@ private final static Double APP_VERSION = 3.3;
             }
         });
 
-        dialog.show();
         dlg_hwnd = dialog;
 
         int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
@@ -965,6 +982,7 @@ private final static Double APP_VERSION = 3.3;
             dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             dialog.getWindow().setLayout(width, height);
         }
+        dialog.show();
     }
 
     public int dpToPx(int dp) {
@@ -1007,36 +1025,50 @@ private final static Double APP_VERSION = 3.3;
         StrictMode.setThreadPolicy(policy);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        final SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
 
         int currTheme = R.style.AppThemeTeal;
-        final SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
-        String theme_str = mPrefs.getString(getResources().getString(R.string.theme_pref), "teal");
-        switch (theme_str) {
-            case "teal":
-                currTheme = R.style.AppThemeTeal;
+
+        Boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
+        if(daynightTheme) {
+            int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            if ((8 <= hour) && (hour < 20)) {
+                currTheme =R.style.AppThemeLight;
                 setTheme(currTheme);
-                break;
-            case "red":
-                currTheme = R.style.AppThemeRed;
+            } else {
+                currTheme =R.style.AppThemeDark;
                 setTheme(currTheme);
-                break;
-            case "amber":
-                currTheme = R.style.AppThemeAmber;
-                setTheme(currTheme);
-                break;
-            case "light":
-                currTheme = R.style.AppThemeLight;
-                setTheme(currTheme);
-                break;
-            case "dark":
-                currTheme = R.style.AppThemeDark;
-                setTheme(currTheme);
-                break;
-            default:
-                currTheme = R.style.AppThemeTeal;
-                setTheme(currTheme);
-                break;
+            }
+        } else {
+            String theme_str = mPrefs.getString(getResources().getString(R.string.theme_pref), "teal");
+            switch (theme_str) {
+                case "teal":
+                    currTheme = R.style.AppThemeTeal;
+                    setTheme(currTheme);
+                    break;
+                case "red":
+                    currTheme = R.style.AppThemeRed;
+                    setTheme(currTheme);
+                    break;
+                case "amber":
+                    currTheme = R.style.AppThemeAmber;
+                    setTheme(currTheme);
+                    break;
+                case "light":
+                    currTheme = R.style.AppThemeLight;
+                    setTheme(currTheme);
+                    break;
+                case "dark":
+                    currTheme = R.style.AppThemeDark;
+                    setTheme(currTheme);
+                    break;
+                default:
+                    currTheme = R.style.AppThemeTeal;
+                    setTheme(currTheme);
+                    break;
+            }
         }
+        final int theme_ = currTheme;
         boolean firstLocaleSet = mPrefs.getBoolean(locale_pref, false);
         if (!firstLocaleSet) {
             Locale lan = Locale.getDefault();
@@ -1104,6 +1136,7 @@ private final static Double APP_VERSION = 3.3;
         }
 
         setContentView(R.layout.activity_main);
+
 
         boolean isDownloadEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true);
         boolean isUpdatesCheckEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true);
@@ -1267,6 +1300,7 @@ private final static Double APP_VERSION = 3.3;
                 Intent intent = new Intent(MainActivity.this, DmgCalcActivity.class);
                 Bundle b = new Bundle();
                 b.putString("lan", locale.toLowerCase());
+                b.putInt("theme", theme_);
                 intent.putExtras(b);
                 startActivity(intent);
             }
@@ -1354,7 +1388,7 @@ private final static Double APP_VERSION = 3.3;
             mPrefs.edit().putBoolean(getString(R.string.rebuild_db), false).commit();
         }
 
-        Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
+        /*Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -1372,7 +1406,7 @@ private final static Double APP_VERSION = 3.3;
                     .build();
             SharedPreferences.Editor mEditor = mPrefs.edit();
             mEditor.putBoolean(getString(R.string.tutorial_displayed), true).apply();
-        }
+        }*/
 
         DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -1384,17 +1418,17 @@ private final static Double APP_VERSION = 3.3;
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                Boolean displayed_dmgcalc = mPrefs.getBoolean(getString(R.string.dmgcalc_displayed), false);
+                Boolean displayed_dmgcalc = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
                 if(!displayed_dmgcalc) {
                     new ShowcaseView.Builder(activity)
-                            .setTarget(new ViewTarget(findViewById(R.id.dmg_calculator)))
-                            .setContentTitle("Try the Damage Calculator!")
-                            .setContentText("Web interface to damage calculator added, try it!")
+                            .setTarget(new ViewTarget(findViewById(R.id.settings_btn)))
+                            .setContentTitle("Try the new Day/Night theme!")
+                            .setContentText("Try the new theme Day/Night, change app colors when darkness falls!")
                             .setStyle(R.style.CustomShowcaseTheme2)
                             .hideOnTouchOutside()
                             .build();
                     SharedPreferences.Editor mEditor = mPrefs.edit();
-                    mEditor.putBoolean(getString(R.string.dmgcalc_displayed), true).apply();
+                    mEditor.putBoolean(getString(R.string.tutorial_displayed), true).apply();
                 }
             }
 
@@ -1485,6 +1519,73 @@ private final static Double APP_VERSION = 3.3;
         else params.width = dpToPx(550);
         list_size.setLayoutParams(params);
 
+        SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+        String theme_str = mPrefs.getString(getResources().getString(R.string.theme_pref), "teal");
+        boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
+        if(daynightTheme) theme_str = "daynight_theme";
+
+
+        if(daynightTheme) {
+            LinearLayout themeBtns = (LinearLayout)findViewById(R.id.themeBtns);
+            themeBtns.setVisibility(View.GONE);
+            int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            LinearLayout mainContent = (LinearLayout)findViewById(R.id.maincontent);
+            if((8<=hour)&&(hour<20))
+            {
+                //DAYLIGHT
+                animateColor(mainContent, anim, "#FFFFFF","#FFC090");
+                //animateColor(mainContent, "#ffc090", "#ffffff");
+            } else {
+                //NIGHT
+                animateColor(mainContent, anim, "#111111", "#686235");
+            }
+        }
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopAnimation(anim);
+        stopAnimation(anim_charlist);
+    }
+
+    private void animateColor(final View view, ValueAnimator animator, String colorStart, String colorEnd)
+    {
+        final float[] from = new float[3],
+                to =   new float[3];
+
+        Color.colorToHSV(Color.parseColor(colorStart), from);   // from white
+        Color.colorToHSV(Color.parseColor(colorEnd), to);     // to red
+
+        if(animator==null) {
+            animator = ValueAnimator.ofFloat(0, 1);   // animate from 0 to 1
+            animator.setDuration(6000); // for 10s
+            animator.setRepeatCount(ValueAnimator.INFINITE);
+            animator.setRepeatMode(ValueAnimator.REVERSE);
+            animator.setStartDelay(200);
+
+            final float[] hsv = new float[3];                  // transition color
+            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    // Transition along each axis of HSV (hue, saturation, value)
+                    hsv[0] = from[0] + (to[0] - from[0]) * animation.getAnimatedFraction();
+                    hsv[1] = from[1] + (to[1] - from[1]) * animation.getAnimatedFraction();
+                    hsv[2] = from[2] + (to[2] - from[2]) * animation.getAnimatedFraction();
+
+                    view.setBackgroundColor(Color.HSVToColor(hsv));
+                }
+            });
+        }
+        animator.start();
+    }
+
+    private void stopAnimation(ValueAnimator animator)
+    {
+        if(animator != null)
+            if(animator.isStarted())
+                animator.cancel();
     }
 
     private void crossfade(int mShortAnimationDuration) {
@@ -2168,12 +2269,14 @@ private final static Double APP_VERSION = 3.3;
             FeedParser parser = new FeedParser();
             String uri = "";
             String version = "";
+            String content = "";
             try {
                 InputStream releases = FeedParser.downloadUrl("https://github.com/paolo-optc/optc-mobile-db/releases.atom");
                 List<FeedParser.Entry> feed = parser.parse(releases);
                 for (FeedParser.Entry entry : feed) {
                     version = entry.id.replace("tag:github.com,2008:Repository/70237456/", "");
                     Double vrs = Double.valueOf(version);
+                    content = entry.content;
                     if (vrs > APP_VERSION) {
                         uri += "https://github.com/paolo-optc/optc-mobile-db/releases/download/" + version + "/app-release.apk";
                         break;
@@ -2182,7 +2285,7 @@ private final static Double APP_VERSION = 3.3;
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            return new String[] {uri, version};
+            return new String[] {uri, version, content};
         }
 
         protected void onPreExecute() {
@@ -2190,13 +2293,13 @@ private final static Double APP_VERSION = 3.3;
         }
 
         protected void onPostExecute(final String[] result) {
-            updateUrl = result[0];
+             updateUrl = result[0];
             if (!result[0].equals("")) {
                 if(autoDownload)
                 {
                     checkPermissionAndUpdate();
                 } else {
-                    final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), String.format(getString(R.string.update_msg), result[1]), Snackbar.LENGTH_INDEFINITE);
+                    /*final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), String.format(getString(R.string.update_msg), result[1]), Snackbar.LENGTH_INDEFINITE);
                     msg.setAction(getString(R.string.update_btn), new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
@@ -2209,7 +2312,20 @@ private final static Double APP_VERSION = 3.3;
                         public void onClick(View view) {
                             msg.dismiss();
                         }
-                    });
+                    });*/
+                    AlertDialog updDlg = new AlertDialog.Builder(context).setTitle(String.format(getString(R.string.update_msg), result[1]))
+                            .setMessage(Html.fromHtml(result[2], null, new ListTagHandler())).setNegativeButton(getString(R.string.reset_db_cancel), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    //DO NOTHING
+                                }
+                            }).setPositiveButton(getString(R.string.reset_db_confirm), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    checkPermissionAndUpdate();
+                                }
+                            }).create();
+                    updDlg.show();
                 }
             } else {
                 if (autoDownload)
@@ -2389,13 +2505,19 @@ private final static Double APP_VERSION = 3.3;
                         }
                         break;
                     case 3: //Capt flags
-                        String flag = explistAdapter.getChildText(groupPosition, childPosition);
+                    {
+                        String[] captArray = getResources().getStringArray(R.array.capt_flags_array_link);
+                        String flag = captArray[childPosition];
                         CaptFlags.remove(FL_CAPT_FLAGS.fromString(flag));
                         break;
+                    }
                     case 4: //Spec flags
-                        String flagS = explistAdapter.getChildText(groupPosition, childPosition);
-                        SpecFlags.remove(FL_SPEC_FLAGS.fromString(flagS));
+                    {
+                        String[] specArray = getResources().getStringArray(R.array.spec_flags_array_link);
+                        String flag = specArray[childPosition];
+                        SpecFlags.remove(FL_SPEC_FLAGS.fromString(flag));
                         break;
+                    }
                 }
             } else {
                 switch (groupPosition) {
@@ -2477,13 +2599,19 @@ private final static Double APP_VERSION = 3.3;
                         }
                         break;
                     case 3: //Capt flags
-                        String flag = explistAdapter.getChildText(groupPosition, childPosition);
+                    {
+                        String[] captArray = getResources().getStringArray(R.array.capt_flags_array_link);
+                        String flag = captArray[childPosition];
                         CaptFlags.add(FL_CAPT_FLAGS.fromString(flag));
                         break;
+                    }
                     case 4: //Spec flags
-                        String flagS = explistAdapter.getChildText(groupPosition, childPosition);
-                        SpecFlags.add(FL_SPEC_FLAGS.fromString(flagS));
+                    {
+                        String[] specArray = getResources().getStringArray(R.array.spec_flags_array_link);
+                        String flag = specArray[childPosition];
+                        SpecFlags.add(FL_SPEC_FLAGS.fromString(flag));
                         break;
+                    }
                 }
             }
 
@@ -2712,6 +2840,7 @@ private final static Double APP_VERSION = 3.3;
     private static final int PREFERENCES_ACTIVITY = 102;
     public static final int LANG_PREF_CHANGED = 199;
     public static final int UPDATE_APP_PREF = 200;
+    public static final int THEMEDAYNIGHT_CHANGED = 201;
     private String apk_file = "";
 
     @Override
@@ -2737,6 +2866,8 @@ private final static Double APP_VERSION = 3.3;
                     case UPDATE_APP_PREF:
                         (new CheckUpdates(true)).execute();
                         break;
+                    case THEMEDAYNIGHT_CHANGED:
+                        crossfade(300);
                 }
                 break;
         }

@@ -24,7 +24,7 @@
     <!-- Updates text -->
     <string name="update_msg">Une maj est sortie! Veux-tu l\'installer ? (v%1$s)</string>
     <string name="update_btn">Bien sûr</string>
-<string name="loadingmsg">Veuiller patienter pendant le chargment des données...</string>
+<string name="loadingmsg">Veuiller patienter pendant le chargement des données...</string>
     <string name="loading_characters">Mise à jour de la liste des persos</string>
     <string name="downloading_cooldowns">Téléchargement des comptes à rebours</string>
     <string name="loading_cooldowns">Mise à jour des comptes à rebours</string>
@@ -80,15 +80,89 @@
     <string name="drops_japan">Jap seulement</string>
     <string name="downloading_drops">Téléchargement des drops</string>
     <string name="loading_drops">Analyse et mise à jour des drops</string>
-    <string name="no_updates">No updates available</string>
-    <string name="prefs_cat_appsettings">App Settings</string>
-    <string name="prefs_check_updates">Check for updates</string>
-    <string name="prefs_check_updates_desc">Notify user when app update is available</string>
-    <string name="prefs_download_update">Download update</string>
+    <string name="no_updates">Pas de màjs disponibles</string>
+    <string name="prefs_cat_appsettings">Options de l\'App</string>
+    <string name="prefs_check_updates">Vérification des màjs</string>
+    <string name="prefs_check_updates_desc">Notifie l\'utilisateur quand une màj est disponible</string>
+    <string name="prefs_download_update">Téléchargement de la màj</string>
     <string name="prefs_extra_cat">Extra</string>
-    <string name="prefs_localization">Language</string>
-    <string name="prefs_localization_cat">Localization</string>
-    <string name="prefs_update_db">Update database</string>
-    <string name="prefs_update_db_desc">Automatically update database</string>
-    <string name="prefs_title">Settings</string>
+    <string name="prefs_localization">Langue</string>
+    <string name="prefs_localization_cat">Localisation</string>
+    <string name="prefs_update_db">Màj de la database</string>
+    <string name="prefs_update_db_desc">Mets à jour automatiquement la database</string>
+    <string name="prefs_title">Paramètres</string>
+
+    <string name="capt_flags_title">Captain ability</string>
+    <string-array name="capt_flags_array">
+        <item>Boosts de type captains</item>
+        <item>Boosts de classes captains</item>
+        <item>Boosts d\'ATK captains</item>
+        <item>Boosts d\'HP captains</item>
+        <item>Boosts de RCV captains</item>
+        <item>Boosts de spécials captains</item>
+        <item>2x ATK et HP captains</item>
+        <item>2x ATK et RCV captains</item>
+        <item>2.5x ATK captains</item>
+        <item>2.75x ATK captains</item>
+        <item>3x ATK captains</item>
+        <item>HP-basé ATK captains</item>
+        <item>Positionement captains</item>
+        <item>\"Bénéficiel\" Orbes captains</item>
+        <item>Chaînes multipliers</item>
+        <item>Réduction de chargement</item>
+        <item>Réduction de dommages</item>
+        <item>Healers</item>
+        <item>Tankers</item>
+        <item>Zombies</item>
+        <item>Dommages en fin de tours</item>
+    </string-array>
+
+    <string name="spec_flags_title">Special ability</string>
+    <string-array name="spec_flags_array">
+        <item>Boosts de type captains</item>
+        <item>Boosts de classes captains</item>
+        <item>1.5x ATK specials</item>
+        <item>1.75x ATK specials</item>
+        <item>2x ATK specials</item>
+        <item>Condition ATK boosters</item>
+        <item>ATK boosters retardé</item>
+        <item>Affinité des couleurs boosters</item>
+        <item>RCV boosters</item>
+        <item>Orb bloqueurs</item>
+        <item>Orb boosters</item>
+        <item>Orb chance boosters</item>
+        <item>Orb controlleurs</item>
+        <item>Tableau complet orb controllers</item>
+        <item>Propre orb controllers</item>
+        <item>Orb randomizers</item>
+        <item>Orb changeurs</item>
+        <item>Orb correspondantes</item>
+        <item>Videurs de slots</item>
+        <item>Remplisseurs de slots</item>
+        <item>Retardateurs</item>
+        <item>Dommage sur 1 cible</item>
+        <item>Dommage sur plusieurs cibles</item>
+        <item>Dommages en plusieurs coups</item>
+        <item>Dommages fixes</item>
+        <item>Coupeur de vie</item>
+        <item>Dommage basé sur les HP</item>
+        <item>Réduiseur de dommage</item>
+        <item>Producteur de viande</item>
+        <item>Converteur de viande</item>
+        <item>Réduction de dommage</item>
+        <item>Annulation des dommages</item>
+        <item>Réduction de Bind</item>
+        <item>Réduction de Despair</item>
+        <item>Réduction de Silence</item>
+        <item>Retireur de orbes Block</item>
+        <item>Retireur d\'aveuglement</item>
+        <item>Healers</item>
+        <item>Réduction de vie</item>
+        <item>Poisoneurs</item>
+        <item>Retireur de poison</item>
+        <item>Zombies</item>
+        <item>Réducteur du chargement de spécial</item>
+        <item>Réducteur de Paralysie</item>
+    </string-array>
+    <string name="prefs_daynight_theme">Day / Night Theme</string>
 </resources>

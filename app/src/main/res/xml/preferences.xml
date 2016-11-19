@@ -16,6 +16,11 @@
             android:key="@string/check_update"
             android:summary="@string/prefs_check_updates_desc"
             android:icon="@drawable/ic_update_black"/>
+        <SwitchPreference
+            android:defaultValue="false"
+            android:title="@string/prefs_daynight_theme"
+            android:key="@string/pref_daynight_theme"
+            android:icon="@drawable/ic_moon" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/prefs_localization_cat">
         <it.instruman.treasurecruisedatabase.ImageListPreference
@@ -38,6 +43,11 @@
             android:icon="@drawable/ic_web_black">
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://www.reddit.com/r/OnePieceTC/comments/5b9xpa/optc_smartdb_app_masterthread/" />
+        </Preference>
+        <Preference android:title="optc-db.github.io"
+            android:icon="@drawable/ic_web_black">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://www.optc-db.github.io/" />
         </Preference>
         <Preference android:title="@string/prefs_download_update"
             android:icon="@drawable/ic_download_black"

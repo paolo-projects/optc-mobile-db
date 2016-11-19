@@ -370,6 +370,7 @@
         </RelativeLayout>
 
         <LinearLayout
+            android:id="@+id/themeBtns"
             android:layout_width="240dp"
             android:layout_height="40dp"
             android:paddingTop="4dp"

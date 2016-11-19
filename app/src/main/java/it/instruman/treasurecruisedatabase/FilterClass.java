@@ -234,26 +234,34 @@ public class FilterClass {
 
         if(captflags_filters.size()>0) {
             ArrayList<String> regex = new ArrayList<>();
+            ArrayList<Integer> ids = new ArrayList<>();
             for (MainActivity.FL_CAPT_FLAGS flag : captflags_filters)
             {
                 if(locale.equals("it"))
                     regex.add(flag.getMatcherIt());
                 else
                     regex.add(flag.getMatcher());
+                if(flag.getInclude().length>0)
+                    ids.addAll(Arrays.asList(flag.getInclude()));
             }
-            filtered = filterByIds(filtered, getIdsWithRegex(db, DBHelper.CAPTAINS_TABLE, regex));
+            ids.addAll(getIdsWithRegex(db, DBHelper.CAPTAINS_TABLE, regex));
+            filtered = filterByIds(filtered, ids);
         }
 
         if(specflags_filters.size()>0) {
             ArrayList<String> regex = new ArrayList<>();
+            ArrayList<Integer> ids = new ArrayList<>();
             for (MainActivity.FL_SPEC_FLAGS flag : specflags_filters)
             {
                 if(locale.equals("it"))
                     regex.add(flag.getMatcherIt());
                 else
                     regex.add(flag.getMatcher());
+                if(flag.getInclude().length>0)
+                    ids.addAll(Arrays.asList(flag.getInclude()));
             }
-            filtered = filterByIds(filtered, getIdsWithRegex(db, DBHelper.SPECIALS_TABLE, regex));
+            ids.addAll(getIdsWithRegex(db, DBHelper.SPECIALS_TABLE, regex));
+            filtered = filterByIds(filtered, ids);
         }
 
         db.close();

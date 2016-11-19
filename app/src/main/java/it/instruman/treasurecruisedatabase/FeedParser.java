@@ -81,12 +81,14 @@ public class FeedParser {
         public final String link;
         public final String summary;
         public final String id;
+        public final String content;
 
-        private Entry(String title, String summary, String link, String id) {
+        private Entry(String title, String summary, String link, String id, String content) {
             this.title = title;
             this.summary = summary;
             this.link = link;
             this.id = id;
+            this.content = content;
         }
     }
 
@@ -98,6 +100,7 @@ public class FeedParser {
         String summary = null;
         String link = null;
         String id = null;
+        String content = null;
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.getEventType() != XmlPullParser.START_TAG) {
                 continue;
@@ -116,12 +119,15 @@ public class FeedParser {
                 case "id":
                     id = readId(parser);
                     break;
+                case "content":
+                    content = readContent(parser);
+                    break;
                 default:
                     skip(parser);
                     break;
             }
         }
-        return new Entry(title, summary, link, id);
+        return new Entry(title, summary, link, id, content);
     }
 
     // Processes title tags in the feed.
@@ -144,6 +150,13 @@ public class FeedParser {
         String id = readText(parser);
         parser.require(XmlPullParser.END_TAG, ns, "id");
         return id;
+    }
+
+    private String readContent(XmlPullParser parser) throws IOException, XmlPullParserException {
+        parser.require(XmlPullParser.START_TAG, ns, "content");
+        String content = readText(parser);
+        parser.require(XmlPullParser.END_TAG, ns, "content");
+        return content;
     }
 
     // Processes link tags in the feed.
@@ -200,8 +213,8 @@ public class FeedParser {
     public static InputStream downloadUrl(String urlString) throws IOException {
         URL url = new URL(urlString);
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setReadTimeout(10000 /* milliseconds */);
-        conn.setConnectTimeout(15000 /* milliseconds */);
+        conn.setReadTimeout(3000 /* milliseconds */);
+        conn.setConnectTimeout(3000 /* milliseconds */);
         conn.setRequestMethod("GET");
         conn.setDoInput(true);
         // Starts the query

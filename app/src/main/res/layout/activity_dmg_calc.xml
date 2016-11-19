@@ -9,33 +9,34 @@
 
     android:layout_width="match_parent"
     android:layout_height="48dp"
-    android:background="#99000000"
+    android:background="?drawer_bar_bg"
     android:gravity="center_vertical"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin">
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:elevation="4dp">
     <ImageButton
         android:id="@+id/dmgcalc_navigateback"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_arrow_back_white_24dp"
+        android:background="@drawable/ic_arrow_back"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="10dp"
-        android:layout_marginEnd="10dp"/>
+        android:layout_marginEnd="10dp" />
     <ImageButton
         android:id="@+id/dmgcalc_navigateforward"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_arrow_forward_white_24dp"
+        android:background="@drawable/ic_arrow_forward"
         android:layout_toRightOf="@id/dmgcalc_navigateback"
         android:layout_toEndOf="@id/dmgcalc_navigateback"/>
     <ImageButton
         android:id="@+id/dmgcalc_backBtn"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_back_white"
+        android:background="@drawable/ic_back_dmg"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"/>
+        android:layout_alignParentRight="true" />
 </RelativeLayout>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"

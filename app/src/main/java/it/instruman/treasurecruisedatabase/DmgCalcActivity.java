@@ -50,6 +50,9 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
                 break;
         }
 
+        int themeR = b.getInt("theme");
+        setTheme(themeR);
+
         setContentView(R.layout.activity_dmg_calc);
 
         final WebView webView = (WebView) findViewById(R.id.web_view);
@@ -91,6 +94,7 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
             }
         });
 
+
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
         webSettings.setUseWideViewPort(true);
@@ -116,6 +120,8 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
         webView.loadUrl(DMGCALC_URL);
 
         if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+        CookieManager.allowFileSchemeCookies();
+        CookieManager.getInstance().setAcceptCookie(true);
 
         ImageButton backBtn = (ImageButton)findViewById(R.id.dmgcalc_backBtn);
         backBtn.setOnClickListener(new View.OnClickListener() {

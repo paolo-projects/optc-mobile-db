@@ -92,15 +92,89 @@
     <string name="loading_drops">Analizando y actualizando recompensas</string>
     <string name="tab_drops">Localizaciones de recompensas</string>
     <string name="downloading_drops">Descargando recompensas</string>
-    <string name="no_updates">No updates available</string>
-    <string name="prefs_cat_appsettings">App Settings</string>
-    <string name="prefs_check_updates">Check for updates</string>
-    <string name="prefs_check_updates_desc">Notify user when app update is available</string>
-    <string name="prefs_download_update">Download update</string>
+    <string name="no_updates">No hay actualizaciones disponibles</string>
+    <string name="prefs_cat_appsettings">Ajustes de la app</string>
+    <string name="prefs_check_updates">Comprobar actualizaciones</string>
+    <string name="prefs_check_updates_desc">Notificar al usuario cuando una actualización de la app esté disponible</string>
+    <string name="prefs_download_update">Descargar actualización</string>
     <string name="prefs_extra_cat">Extra</string>
-    <string name="prefs_localization">Language</string>
-    <string name="prefs_localization_cat">Localization</string>
-    <string name="prefs_update_db">Update database</string>
-    <string name="prefs_update_db_desc">Automatically update database</string>
-    <string name="prefs_title">Settings</string>
+    <string name="prefs_localization">Idioma</string>
+    <string name="prefs_localization_cat">Localización</string>
+    <string name="prefs_update_db">Actualizar base de datos</string>
+    <string name="prefs_update_db_desc">Actualizar base de datos automaticamente</string>
+    <string name="prefs_title">Ajustes</string>
+
+    <string name="capt_flags_title">Habilidad de capitán</string>
+    <string-array name="capt_flags_array">
+        <item>Capitanes aumentadores de tipo</item>
+        <item>Capitanes aumentadores de clase</item>
+        <item>Capitanes aumentadores de ATK</item>
+        <item>Capitanes aumentadores de HP</item>
+        <item>Capitanes aumentadores de RCV</item>
+        <item>Capitanes aumentadores de especial</item>
+        <item>Capitanes 2xATK 2xHP</item>
+        <item>Capitanes 2xATK 2xRCV</item>
+        <item>Capitanes 2.5xATK</item>
+        <item>Capitanes 2.75xATK</item>
+        <item>Capitanes 3xATK</item>
+        <item>Capitanes de ATK basado en HP</item>
+        <item>Capitanes basados en posición</item>
+        <item>Capitanes de orbe \"Beneficioso\"</item>
+        <item>Multiplicadores de cadena</item>
+        <item>Reductores de carga de especiales</item>
+        <item>Reductores de daño</item>
+        <item>Curadores</item>
+        <item>Tankers</item>
+        <item>Zombies</item>
+        <item>Daño de final de turno</item>
+    </string-array>
+
+    <string name="spec_flags_title">Special ability</string>
+    <string-array name="spec_flags_array">
+        <item>Especiales aumentadores de tipo</item>
+        <item>Especiales aumentadores de clase</item>
+        <item>Especiales 1.5xATK</item>
+        <item>Especiales 1.75xATK</item>
+        <item>Especiales 2xATK</item>
+        <item>Aumentadores de ATK condicionales</item>
+        <item>Aumentadores de ATK contra retardo</item>
+        <item>Aumentadores de afinidad de color</item>
+        <item>Aumentadores de RCV</item>
+        <item>Bloqueadores de orbes</item>
+        <item>Potenciadores de orbes</item>
+        <item>Aumentador de probabilidad de orbe</item>
+        <item>Controladores de orbes</item>
+        <item>Controladores de orbe tablero completo</item>
+        <item>Controladores de orbe propio</item>
+        <item>Conversor aleatorio de orbes</item>
+        <item>Cambiador de orbes</item>
+        <item>Conversor a beneficioso</item>
+        <item>Vaciadores de ranuras</item>
+        <item>Rellenadores de ranuras</item>
+        <item>Retardador</item>
+        <item>Daño a un objetivo</item>
+        <item>Daño a varios objetivos</item>
+        <item>Daño con varios golpes</item>
+        <item>Daño fijo</item>
+        <item>Cortadores de HP</item>
+        <item>Daño basado en HP</item>
+        <item>Reductores de defensa</item>
+        <item>Productores de carne</item>
+        <item>Convertidores de carne</item>
+        <item>Reductores de daño</item>
+        <item>Anuladores de daño</item>
+        <item>Reductores de cadenas</item>
+        <item>Reductores de anulación de capitán</item>
+        <item>Reductores de silencio</item>
+        <item>Eliminadores de orbe block</item>
+        <item>Eliminadores de ceguera</item>
+        <item>Curadores</item>
+        <item>Reductores de HP</item>
+        <item>Envenenadores</item>
+        <item>Eliminadores de veneno</item>
+        <item>Zombies</item>
+        <item>Reductores de carga de especiales</item>
+        <item>Reductores de parálisis</item>
+    </string-array>
+    <string name="prefs_daynight_theme">Day / Night Theme</string>
 </resources>

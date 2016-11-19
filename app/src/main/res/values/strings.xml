@@ -12,10 +12,18 @@
     <string name="sort_contDesc" translatable="false">Sort button pic</string>
 
     <string name="pref_name" translatable="false">optc_smart_db_setting</string>
-    <string name="tutorial_displayed" translatable="false">displayed_newfilters</string>
-    <string name="dmgcalc_displayed" translatable="false">displayed_dmgcalc</string>
+    <string name="tutorial_displayed" translatable="false">displayed_daynight</string>
     <string name="lastupdate" translatable="false">date_last_update</string>
     <string name="theme_pref" translatable="false">theme_preference</string>
+
+    <string name="rebuild_db" translatable="false">pref_db_rebuild_3_3</string>
+    <string name="title_activity_settings" translatable="false">Settings</string>
+
+    <string name="download_db" translatable="false">download_database_pref</string>
+    <string name="check_update" translatable="false">check_updates_pref</string>
+    <string name="pref_language" translatable="false">preference_language</string>
+    <string name="pref_update_app" translatable="false">preferences_update_app</string>
+    <string name="pref_daynight_theme" translatable="false">preference_daynight_theme</string>
     <!-- ###-->
 
     <!-- Character info dialog strings -->
@@ -104,8 +112,8 @@
         <item>1</item>
     </string-array>
 
-    <string name="capt_flags_title" translatable="false">Captain ability</string>
-    <string-array name="capt_flags_array" translatable="false">
+    <string name="capt_flags_title">Captain ability</string>
+    <string-array name="capt_flags_array">
         <item>Type-boosting captains</item>
         <item>Class-boosting captains</item>
         <item>ATK boosting captains</item>
@@ -129,8 +137,79 @@
         <item>End of Turn Damage Dealer</item>
     </string-array>
 
-    <string name="spec_flags_title" translatable="false">Special ability</string>
-    <string-array name="spec_flags_array" translatable="false">
+    <string name="spec_flags_title">Special ability</string>
+    <string-array name="spec_flags_array">
+        <item>Type-boosting specials</item>
+        <item>Class-boosting specials</item>
+        <item>1.5x ATK specials</item>
+        <item>1.75x ATK specials</item>
+        <item>2x ATK specials</item>
+        <item>Conditional ATK boosters</item>
+        <item>Delayed ATK boosters</item>
+        <item>Color Affinity boosters</item>
+        <item>RCV boosters</item>
+        <item>Orb lockers</item>
+        <item>Orb boosters</item>
+        <item>Orb chance boosters</item>
+        <item>Orb controllers</item>
+        <item>Full-board orb controllers</item>
+        <item>Self-orb controllers</item>
+        <item>Orb randomizers</item>
+        <item>Orb switchers</item>
+        <item>Orb matchers</item>
+        <item>Slot emptiers</item>
+        <item>Slot fillers</item>
+        <item>Delayers</item>
+        <item>Single-target damage dealer</item>
+        <item>Multi-target damage dealers</item>
+        <item>Multi-hit damage dealers</item>
+        <item>Fixed damage dealers</item>
+        <item>Health cutters</item>
+        <item>HP-based damage dealers</item>
+        <item>Defense reducers</item>
+        <item>Meat producers</item>
+        <item>Meat converters</item>
+        <item>Damage reducers</item>
+        <item>Damage nullifiers</item>
+        <item>Bind reducers</item>
+        <item>Despair reducers</item>
+        <item>Silence reducers</item>
+        <item>Block orb removers</item>
+        <item>Blindness removers</item>
+        <item>Healers</item>
+        <item>Health reducers</item>
+        <item>Poisoners</item>
+        <item>Poison removers</item>
+        <item>Zombies</item>
+        <item>Special cooldown reducer</item>
+        <item>Paralysis reducers</item>
+    </string-array>
+
+    <string-array name="capt_flags_array_link" translatable="false">
+        <item>Type-boosting captains</item>
+        <item>Class-boosting captains</item>
+        <item>ATK boosting captains</item>
+        <item>HP boosting captains</item>
+        <item>RCV boosting captains</item>
+        <item>Special boosting captains</item>
+        <item>2x ATK and HP captains</item>
+        <item>2x ATK and RCV captains</item>
+        <item>2.5x ATK captains</item>
+        <item>2.75x ATK captains</item>
+        <item>3x ATK captains</item>
+        <item>HP-based ATK captains</item>
+        <item>Positional captains</item>
+        <item>\"Beneficial\" Orb captains</item>
+        <item>Chain multipliers</item>
+        <item>Cooldown reducers</item>
+        <item>Damage reducers</item>
+        <item>Healers</item>
+        <item>Tankers</item>
+        <item>Zombies</item>
+        <item>End of Turn Damage Dealer</item>
+    </string-array>
+
+    <string-array name="spec_flags_array_link" translatable="false">
         <item>Type-boosting specials</item>
         <item>Class-boosting specials</item>
         <item>1.5x ATK specials</item>
@@ -218,13 +297,6 @@
     <string name="drops_japan">jap only</string>
     <string name="downloading_drops">Downloading drops</string>
     <string name="loading_drops">Parsing and updating drops</string>
-    <string name="rebuild_db" translatable="false">pref_db_rebuild_3_3</string>
-    <string name="title_activity_settings" translatable="false">Settings</string>
-
-    <string name="download_db" translatable="false">download_database_pref</string>
-    <string name="check_update" translatable="false">check_updates_pref</string>
-    <string name="pref_language" translatable="false">preference_language</string>
-    <string name="pref_update_app" translatable="false">preferences_update_app</string>
     <string name="no_updates">No updates available</string>
 
     <string name="prefs_cat_appsettings">App Settings</string>
@@ -238,4 +310,6 @@
     <string name="prefs_extra_cat">Extra</string>
         <string name="prefs_download_update">Download update</string>
     <string name="prefs_title">Settings</string>
+    <string name="prefs_daynight_theme">Day / Night Theme</string>
+    <string name="prefs_daynight_theme_desc">Enables a theme that switches colors depending on daylight or night</string>
 </resources>

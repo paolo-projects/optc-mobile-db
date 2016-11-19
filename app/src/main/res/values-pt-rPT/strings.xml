@@ -85,22 +85,95 @@
         <item>2</item>
         <item>1</item>
     </string-array>
-    <string name="loading_drops">Parsing and updating drops</string>
-    <string name="drops_japan">jap only</string>
-    <string name="drops_global">global only</string>
-    <string name="drop_locations">Drop locations:</string>
-    <string name="downloading_drops">Downloading drops</string>
-    <string name="tab_drops">Drop locations</string>
-    <string name="no_updates">No updates available</string>
-    <string name="prefs_cat_appsettings">App Settings</string>
-    <string name="prefs_check_updates">Check for updates</string>
-    <string name="prefs_check_updates_desc">Notify user when app update is available</string>
-    <string name="prefs_download_update">Download update</string>
+    <string name="loading_drops">A analizar e a actualizar drops</string>
+    <string name="drops_japan">Exclusivo jap</string>
+    <string name="drops_global">Exclusivo global</string>
+    <string name="drop_locations">Localização dos drops:</string>
+    <string name="downloading_drops">A descarregar drops</string>
+    <string name="tab_drops">Localização dos drops</string>
+    <string name="no_updates">Sem actualizações disponiveis</string>
+    <string name="prefs_cat_appsettings">Opções da App</string>
+    <string name="prefs_check_updates">A verificar por actualizações</string>
+    <string name="prefs_check_updates_desc">Notificar-me quando uma actualização estiver disponivel</string>
+    <string name="prefs_download_update">A descarregar a atualização</string>
     <string name="prefs_extra_cat">Extra</string>
-    <string name="prefs_localization">Language</string>
-    <string name="prefs_localization_cat">Localization</string>
-    <string name="prefs_update_db">Update database</string>
-    <string name="prefs_update_db_desc">Automatically update database</string>
-    <string name="prefs_title">Settings</string>
+    <string name="prefs_localization">Linguagem</string>
+    <string name="prefs_localization_cat">Localização</string>
+    <string name="prefs_update_db">Actualizar base de dados</string>
+    <string name="prefs_update_db_desc">Actualizar base de dados automaticamente</string>
+    <string name="prefs_title">Opções</string>
 
+    <string name="capt_flags_title">Abilidade de capitão</string>
+    <string-array name="capt_flags_array">
+        <item>Capitães que aumentam o Tipo</item>
+        <item>Capitães que aumentam a Classe</item>
+        <item>Capitães que aumentam o ATK</item>
+        <item>Capitães que aumentam HP</item>
+        <item>Capitães que aumentam RCV</item>
+        <item>Capitães que aumentam o Poder</item>
+        <item>Capitães que aumentam 2x ATK e HP</item>
+        <item>Capitães que aumentam 2x ATK e RCV</item>
+        <item>Capitães que aumentam 2,5x ATK</item>
+        <item>Capitães que aumentam 2,75x ATK</item>
+        <item>Capitães que aumentam 3x ATK</item>
+        <item>Capitães que dão ATK baseado no HP</item>
+        <item>Capitães baseados na posição</item>
+        <item>\Capitães "benéfico" de esferas</item>
+        <item>Multiplicadores em série </item>
+        <item>Redutores de tempo de carga</item>
+        <item>Redutores de dano</item>
+        <item>Curadores</item>
+        <item>Tanques</item>
+        <item>Mortos-vivos</item>
+        <item>Dano no final do turno</item>
+    </string-array>
+
+    <string name="spec_flags_title">Poder</string>
+    <string-array name="spec_flags_array">
+        <item>Poder que aumenta o Tipo</item>
+        <item>Poder que aumenta a Classe</item>
+        <item>Poder que aumenta 1.5x ATK </item>
+        <item>Poder que aumenta 1.75x ATK</item>
+        <item>Poder que aumenta 2x ATK</item>
+        <item>Poder que aumenta o ATK condicionalmente</item>
+        <item>Poder que aumenta o ATK num enemigo temporizado</item>
+        <item>Poder que aumenta o ATK por afinidade de cor</item>
+        <item>Poder que aumenta RCV</item>
+        <item>Mantém esferas</item>
+        <item>Reforça esferas</item>
+        <item>Reforça possibilidade de esferas</item>
+        <item>Controladores de esferas</item>
+        <item>Controladores de todo o tabuleiro</item>
+        <item>Auto controlador esfera</item>
+        <item>Aleatorizador de esferas</item>
+        <item>Trocador de esferas</item>
+        <item>Correspondedor de esferas</item>
+        <item>Esvaziador de espaços</item>
+        <item>Preenchedor de espaços</item>
+        <item>Temporizadores</item>
+        <item>Dá dano em 1 inimigo</item>
+        <item>Dá dano em multiplos inimigos</item>
+        <item>Dá dano multiplas vezes</item>
+        <item>Dá dano fixo</item>
+        <item>Curtador de vida</item>
+        <item>Dá dano baseado no HP</item>
+        <item>Redutores de defesa</item>
+        <item>Produtores de carne</item>
+        <item>Convertores de carne</item>
+        <item>Redutores de dano</item>
+        <item>Anuladores de dano</item>
+        <item>Redutores de "restringir"</item>
+        <item>Redutores de desespero</item>
+        <item>Redutores de silenciadores</item>
+        <item>Removedores de esferas de bloque</item>
+        <item>Removedores de segueira</item>
+        <item>Curadores</item>
+        <item>Redutores de vida</item>
+        <item>Envenenadores</item>
+        <item>Removedores de veneno</item>
+        <item>Mortos-vivos</item>
+        <item>Redutores de tempo de carga</item>
+        <item>Redutores de paralisia</item>
+    </string-array>
+    <string name="prefs_daynight_theme">Day / Night Theme</string>
 </resources>

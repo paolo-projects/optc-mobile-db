@@ -11,9 +11,12 @@ import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import org.mozilla.javascript.tools.debugger.Main;
+
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
     private AppCompatDelegate mDelegate;
+    private boolean lanChanged = false;
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
@@ -21,6 +24,11 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         if(key.equals(getString(R.string.pref_language)))
         {
             setResult(MainActivity.LANG_PREF_CHANGED);
+            lanChanged = true;
+        } else if (key.equals(getString(R.string.pref_daynight_theme)))
+        {
+            if(!lanChanged)
+                setResult(MainActivity.THEMEDAYNIGHT_CHANGED);
         }
     }
 

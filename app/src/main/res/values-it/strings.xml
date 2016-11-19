@@ -102,4 +102,78 @@
     <string name="prefs_update_db">Aggiorna database</string>
     <string name="prefs_update_db_desc">Aggiorna automaticamente il database</string>
     <string name="prefs_title">Impostazioni</string>
+
+    <string name="capt_flags_title">Abilità capitano</string>
+    <string-array name="capt_flags_array">
+        <item>Capitani che boostano il tipo</item>
+        <item>Capitani che boostano la classe</item>
+        <item>Capitani che boostano ATK</item>
+        <item>Capitani che boostano HP</item>
+        <item>Capitani che boostano RCV</item>
+        <item>Capitani che boostano le special</item>
+        <item>Capitani 2x ATK e HP</item>
+        <item>Capitani 2x ATK e RCV</item>
+        <item>Capitani 2.5x ATK</item>
+        <item>Capitani 2.75x ATK</item>
+        <item>Capitani 3x ATK</item>
+        <item>ATK basato su HP</item>
+        <item>Capitani basati sulla posizione</item>
+        <item>Capitani con orb \"Benefiche\"</item>
+        <item>Moltiplicatori di catena</item>
+        <item>Riduttori di cooldown</item>
+        <item>Riduttori di danno</item>
+        <item>Guaritori</item>
+        <item>Tankers</item>
+        <item>Zombi</item>
+        <item>Danno a fine turno</item>
+    </string-array>
+
+    <string name="spec_flags_title">Abilità special</string>
+    <string-array name="spec_flags_array">
+        <item>Special che boostano il tipo</item>
+        <item>Special che boostano la classe</item>
+        <item>Special 1.5x ATK</item>
+        <item>Special 1.75x ATK</item>
+        <item>Special 2x ATK</item>
+        <item>Booster ATK condizionale</item>
+        <item>Booster ATK sui nemici ritardati</item>
+        <item>Booster dell\'affinità di colore</item>
+        <item>Booster RCV</item>
+        <item>Blocca-orb</item>
+        <item>Booster orb</item>
+        <item>Booster della possibilità delle orb</item>
+        <item>Controllo delle orb</item>
+        <item>Controllo delle orb di tutti i personaggi</item>
+        <item>Controllo della propria orb</item>
+        <item>Orb casuali</item>
+        <item>Scambiatori di orb</item>
+        <item>Orb corrispondenti</item>
+        <item>Svuota-orb</item>
+        <item>Riempi-orb</item>
+        <item>Ritardatori</item>
+        <item>Danno ad un singolo nemico</item>
+        <item>Danno a più nemici</item>
+        <item>Danno a colpi multipli</item>
+        <item>Danno fisso</item>
+        <item>Danno pecentuale sulla vita nemica</item>
+        <item>Danno basato su HP</item>
+        <item>Riduttori di difesa</item>
+        <item>Produttori di orb RCV</item>
+        <item>Convertitori di orb RCV</item>
+        <item>Riduttori di danno</item>
+        <item>Annullatori di danno</item>
+        <item>Riduttori di bind</item>
+        <item>Riduttori di despair</item>
+        <item>Riduttori di silence</item>
+        <item>Rimozione orb BLOCK</item>
+        <item>Rimozione blindness</item>
+        <item>Guaritori</item>
+        <item>Riduttori vita</item>
+        <item>Avvelenatori</item>
+        <item>Rimozione veleno</item>
+        <item>Zombi</item>
+        <item>Riduttore cooldown special</item>
+        <item>Riduttore paralisi</item>
+    </string-array>
+    <string name="prefs_daynight_theme">Day / Night Theme</string>
 </resources>
