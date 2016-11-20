@@ -18,7 +18,7 @@
     <string name="lvlmax">MAX</string>
     <string name="captability">Habilidad de capitán</string>
     <string name="specability">Especial:</string>
-    <string name="speccooldown">Cooldown (máx./mín.):</string>
+    <string name="speccooldown">Tiempo de carga (máx./mín.):</string>
 
     <!-- Filter box hint text -->
     <string name="filter_hint">Buscar por nombre o ID</string>
@@ -129,7 +129,7 @@
         <item>Daño de final de turno</item>
     </string-array>
 
-    <string name="spec_flags_title">Special ability</string>
+    <string name="spec_flags_title">Habilidad especial</string>
     <string-array name="spec_flags_array">
         <item>Especiales aumentadores de tipo</item>
         <item>Especiales aumentadores de clase</item>

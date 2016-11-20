@@ -43,6 +43,7 @@
 
     <!-- BLUE THEME -->
     <color name="main_bg_teal">#009688</color>
+    <color name="char_info_back_button_teal">#009688</color>
     <color name="filtertext_teal">#E0F2F1</color>
     <color name="text_icons_searchbox_teal">#DE000000</color>
     <color name="list_bg_teal">#80CBC4</color>
@@ -62,6 +63,7 @@
 
     <!-- RED THEME -->
     <color name="main_bg_red">#F44336</color>
+    <color name="char_info_back_button_red">#F44336</color>
     <color name="filtertext_red">#FFEBEE</color>
     <color name="text_icons_searchbox_red">#DE000000</color>
     <color name="list_bg_red">#EF9A9A</color>
@@ -81,6 +83,7 @@
 
     <!-- AMBER THEME -->
     <color name="main_bg_amber">#FFC107</color>
+    <color name="char_info_back_button_amber">#FFC107</color>
     <color name="filtertext_amber">#FFF8E1</color>
     <color name="text_icons_searchbox_amber">#DE000000</color>
     <color name="list_bg_amber">#FFE082</color>
@@ -100,6 +103,7 @@
 
     <!-- LIGHT THEME -->
     <color name="main_bg_light">#FFF</color>
+    <color name="char_info_back_button_light">#DE000000</color>
     <color name="filtertext_light">#f3f3f3</color>
     <color name="text_icons_searchbox_light">#DE000000</color>
     <color name="list_bg_light">#f3f3f3</color>
@@ -119,6 +123,7 @@
 
     <!-- DARK THEME -->
     <color name="main_bg_dark">#111</color>
+    <color name="char_info_back_button_dark">#fff</color>
     <color name="filtertext_dark">#444</color>
     <color name="text_icons_searchbox_dark">#FFF</color>
     <color name="list_bg_dark">#333</color>
@@ -135,4 +140,44 @@
     <color name="char_info_stats_min_txt_dark">#DED1D1D1</color>
     <color name="char_info_stats_max_bg_dark">#c9c9c9</color>
     <color name="char_info_stats_max_txt_dark">#222</color>
+
+    <!-- LIGHT THEME DAYNIGHT-->
+    <color name="main_bg_light_daynight">#FFF</color>
+    <color name="char_info_back_button_light_daynight">#DE000000</color>
+    <color name="filtertext_light_daynight">#99f3f3f3</color>
+    <color name="text_icons_searchbox_light_daynight">#DE000000</color>
+    <color name="list_bg_light_daynight">#99f3f3f3</color>
+    <color name="list_text_light_daynight">#DE000000</color>
+    <color name="list_sort_btn_light_daynight">#a2a2a2</color>
+    <color name="list_sort_btn_disabled_light_daynight">#a2a2a2</color>
+    <color name="drawer_bar_bg_light_daynight">#2196F3</color>
+    <color name="drawer_bar_btn_light_daynight">#fff</color>
+    <color name="char_info_bg_light_daynight">#e3f2fd</color>
+    <color name="char_info_header_bg_light_daynight">#90caf9</color>
+    <color name="char_info_header_txt_light_daynight">#99000000</color>
+    <color name="char_info_txt_light_daynight">#DE000000</color>
+    <color name="char_info_stats_min_bg_light_daynight">#00FFFFFF</color>
+    <color name="char_info_stats_min_txt_light_daynight">#DE000000</color>
+    <color name="char_info_stats_max_bg_light_daynight">#42a5f5</color>
+    <color name="char_info_stats_max_txt_light_daynight">#fff</color>
+
+    <!-- DARK THEME DAYNIGHT -->
+    <color name="main_bg_dark_daynight">#111</color>
+    <color name="char_info_back_button_dark_daynight">#fff</color>
+    <color name="filtertext_dark_daynight">#99444444</color>
+    <color name="text_icons_searchbox_dark_daynight">#FFF</color>
+    <color name="list_bg_dark_daynight">#99333333</color>
+    <color name="list_text_dark_daynight">#DEf1f1f1</color>
+    <color name="list_sort_btn_dark_daynight">#f3f3f3</color>
+    <color name="list_sort_btn_disabled_dark_daynight">#99f3f3f3</color>
+    <color name="drawer_bar_bg_dark_daynight">#333</color>
+    <color name="drawer_bar_btn_dark_daynight">#F9F9F9</color>
+    <color name="char_info_bg_dark_daynight">#333</color>
+    <color name="char_info_header_bg_dark_daynight">#33f6f6f6</color>
+    <color name="char_info_header_txt_dark_daynight">#99FFFFFF</color>
+    <color name="char_info_txt_dark_daynight">#DED1D1D1</color>
+    <color name="char_info_stats_min_bg_dark_daynight">#00000000</color>
+    <color name="char_info_stats_min_txt_dark_daynight">#DED1D1D1</color>
+    <color name="char_info_stats_max_bg_dark_daynight">#c9c9c9</color>
+    <color name="char_info_stats_max_txt_dark_daynight">#222</color>
 </resources>

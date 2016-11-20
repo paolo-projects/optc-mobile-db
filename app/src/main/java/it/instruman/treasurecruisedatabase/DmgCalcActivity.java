@@ -4,16 +4,20 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.net.http.SslError;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.CookieManager;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 
 
 public class DmgCalcActivity extends AppCompatActivity {
@@ -42,11 +46,11 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
                 DMGCALC_URL = "http://www.one-piece-treasure-cruise-italia.org/damage/";
                 break;
             case "es":
-                DMGCALC_URL = "http://optc-sp.github.io/damage/";
+                DMGCALC_URL = "https://optc-sp.github.io/damage/";
                 break;
             case "":
             default:
-                DMGCALC_URL = "http://optc-db.github.io/damage/";
+                DMGCALC_URL = "https://optc-db.github.io/damage/";
                 break;
         }
 
@@ -74,6 +78,12 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
                 return handleUri(uri);
             }
 
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                super.onReceivedSslError(view, handler, error);
+                handler.proceed();
+            }
+
             private boolean handleUri(final Uri uri) {
                 final String host = uri.getHost();
                 final String scheme = uri.getScheme();
@@ -92,8 +102,12 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
                     return true;
                 }
             }
-        });
 
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+            }
+        });
 
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadWithOverviewMode(true);
@@ -102,6 +116,8 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
         webSettings.setSupportZoom(true);
         webSettings.setDisplayZoomControls(false);
         webSettings.setDomStorageEnabled(true);
+        if(Build.VERSION.SDK_INT >= 21)
+            webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
             String databasePath = this.getApplicationContext().getDir("databases", Context.MODE_PRIVATE).getPath();
             webSettings.setDatabasePath(databasePath);

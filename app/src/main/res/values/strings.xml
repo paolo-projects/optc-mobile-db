@@ -311,5 +311,4 @@
         <string name="prefs_download_update">Download update</string>
     <string name="prefs_title">Settings</string>
     <string name="prefs_daynight_theme">Day / Night Theme</string>
-    <string name="prefs_daynight_theme_desc">Enables a theme that switches colors depending on daylight or night</string>
 </resources>

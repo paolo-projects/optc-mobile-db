@@ -46,7 +46,11 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -66,6 +70,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.FutureTarget;
+import com.flaviofaria.kenburnsview.KenBurnsView;
+import com.flaviofaria.kenburnsview.RandomTransitionGenerator;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
@@ -105,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.4;
+private final static Double APP_VERSION = 3.5;
 /*
     ##################################################
 */
@@ -414,7 +420,6 @@ private final static Double APP_VERSION = 3.4;
     public EnumSet<FL_SPEC_FLAGS> SpecFlags = EnumSet.noneOf(FL_SPEC_FLAGS.class);
     public String FilterText = "";
     private Activity activity = this;
-    private ValueAnimator anim, anim_charlist;
 
     ImageView sortName, sortType, sortStars, sortAtk, sortHP, sortRCV;
     ListView lview;
@@ -567,14 +572,18 @@ private final static Double APP_VERSION = 3.4;
         if(daynightTheme) {
             int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
             LinearLayout mainContent = (LinearLayout)dialog.findViewById(R.id.charInfoMainContent);
-            if((8<=hour)&&(hour<20))
+            /*if((8<=hour)&&(hour<20))
             {
                 //DAYLIGHT
-                animateColor(mainContent, anim_charlist, "#DDDDDD","#fdd9be");
+                KenBurnsView charInfoBgImg = (KenBurnsView)dialog.findViewById(R.id.charInfoBgImg);
+                charInfoBgImg.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_sunny_sky));
+                RandomTransitionGenerator generator = new RandomTransitionGenerator(15000, new LinearInterpolator());
+                charInfoBgImg.setTransitionGenerator(generator);
+                charInfoBgImg.resume();
             } else {
                 //NIGHT
                 animateColor(mainContent, anim_charlist, "#333333", "#504e3c");
-            }
+            }*/
         }
 
         final TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
@@ -1027,16 +1036,16 @@ private final static Double APP_VERSION = 3.4;
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         final SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
 
-        int currTheme = R.style.AppThemeTeal;
+        int currTheme;
 
         Boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
         if(daynightTheme) {
             int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
             if ((8 <= hour) && (hour < 20)) {
-                currTheme =R.style.AppThemeLight;
+                currTheme =R.style.AppThemeLightDayNight;
                 setTheme(currTheme);
             } else {
-                currTheme =R.style.AppThemeDark;
+                currTheme =R.style.AppThemeDarkDayNight;
                 setTheme(currTheme);
             }
         } else {
@@ -1136,7 +1145,6 @@ private final static Double APP_VERSION = 3.4;
         }
 
         setContentView(R.layout.activity_main);
-
 
         boolean isDownloadEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true);
         boolean isUpdatesCheckEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true);
@@ -1533,11 +1541,18 @@ private final static Double APP_VERSION = 3.4;
             if((8<=hour)&&(hour<20))
             {
                 //DAYLIGHT
-                animateColor(mainContent, anim, "#FFFFFF","#FFC090");
-                //animateColor(mainContent, "#ffc090", "#ffffff");
+                KenBurnsView bgImg = (KenBurnsView) findViewById(R.id.mainBgImage);
+                bgImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_sunny_sky));
+                RandomTransitionGenerator generator = new RandomTransitionGenerator(20000, new AccelerateDecelerateInterpolator());
+                bgImg.setTransitionGenerator(generator);
+                bgImg.resume();
             } else {
                 //NIGHT
-                animateColor(mainContent, anim, "#111111", "#686235");
+                KenBurnsView bgImg = (KenBurnsView) findViewById(R.id.mainBgImage);
+                bgImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_night));
+                RandomTransitionGenerator generator = new RandomTransitionGenerator(20000, new AccelerateDecelerateInterpolator());
+                bgImg.setTransitionGenerator(generator);
+                bgImg.resume();
             }
         }
 
@@ -1546,46 +1561,12 @@ private final static Double APP_VERSION = 3.4;
     @Override
     protected void onPause() {
         super.onPause();
-        stopAnimation(anim);
-        stopAnimation(anim_charlist);
-    }
-
-    private void animateColor(final View view, ValueAnimator animator, String colorStart, String colorEnd)
-    {
-        final float[] from = new float[3],
-                to =   new float[3];
-
-        Color.colorToHSV(Color.parseColor(colorStart), from);   // from white
-        Color.colorToHSV(Color.parseColor(colorEnd), to);     // to red
-
-        if(animator==null) {
-            animator = ValueAnimator.ofFloat(0, 1);   // animate from 0 to 1
-            animator.setDuration(6000); // for 10s
-            animator.setRepeatCount(ValueAnimator.INFINITE);
-            animator.setRepeatMode(ValueAnimator.REVERSE);
-            animator.setStartDelay(200);
-
-            final float[] hsv = new float[3];                  // transition color
-            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    // Transition along each axis of HSV (hue, saturation, value)
-                    hsv[0] = from[0] + (to[0] - from[0]) * animation.getAnimatedFraction();
-                    hsv[1] = from[1] + (to[1] - from[1]) * animation.getAnimatedFraction();
-                    hsv[2] = from[2] + (to[2] - from[2]) * animation.getAnimatedFraction();
-
-                    view.setBackgroundColor(Color.HSVToColor(hsv));
-                }
-            });
+        boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
+        if(daynightTheme)
+        {
+            KenBurnsView bgImg = (KenBurnsView) findViewById(R.id.mainBgImage);
+            bgImg.pause();
         }
-        animator.start();
-    }
-
-    private void stopAnimation(ValueAnimator animator)
-    {
-        if(animator != null)
-            if(animator.isStarted())
-                animator.cancel();
     }
 
     private void crossfade(int mShortAnimationDuration) {

@@ -16,7 +16,8 @@
         android:theme="@style/AppThemeTeal">
         <activity
             android:name=".MainActivity"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
