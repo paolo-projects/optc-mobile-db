@@ -90,7 +90,7 @@
     <string name="tab_drops">Drop</string>
     <string name="drop_locations">Missioni per droppare il personaggio:</string>
     <string name="loading_drops">Sto processando e impostando i drop</string>
-    <string name="downloading_drops">Downloading drops</string>
+    <string name="downloading_drops">Sto scaricando i drop</string>
     <string name="no_updates">Nessun aggiornamento disponibile</string>
     <string name="prefs_cat_appsettings">Impostazioni app</string>
     <string name="prefs_check_updates">Cerca aggiornamenti</string>
@@ -176,4 +176,10 @@
         <item>Riduttore paralisi</item>
     </string-array>
     <string name="prefs_daynight_theme">Day / Night Theme</string>
+    <string name="pref_donation_cat">Supporta l\'app!</string>
+    <string name="prefs_donation">Donazioni</string>
+    <string name="prefs_donation_desc">Fai una donazione per migliorare l\'app! Il prossimo obiettivo sarà pubblicare l\'app sul Play Store</string>
+    <string name="prefs_donation_message">Innanzitutto, grazie per il tuo supporto!\nOPTC Smart DB è un\'app open source utilizzabile gratuitamente e che continuerà ad essere gratuita.\nCredo che l\'app abbia raggiunto la sua fase di maturità, e sarei felice di vederla pubblicata sul Play Store (così come credo anche voi lo sareste!), potendo aggiornarla senza mostrarvi fastidiosi messaggi.\nQuesto però non è gratuito in quanto Google richiede il pagamento di una tassa per iniziare a pubblicare sul Play Store. Io ho personalmente dedicato giorni e notti per sviluppare, testare e migliorare quest\'app, e non li rimpiango per niente. La mia ricompensa è il vostro apprezzamento, e sono davvero contento che l\'app stia diventando un punto di riferimento nella community di OPTC, e non mi serve nient\'altro per sentirmi realizzato!\nComunque, molti utenti hanno contribuito nella traduzione, nel design, nel riportare bug ed errori (e li ringrazio tutti!), e puoi contribuire anche tu attraverso una piccola donazione!\nFrancamente potrei pagare le spese di tasca mia, ma questo non è il mio lavoro e l\'app non è una fonte di guadagno, quindi non rientrerei dei soldi spesi.\nHo pensato quindi che se ognuno di noi donasse l\'equivalente di un caffè potremo sicuramente pubblicare l\'app sul Play Store oltre ad ottenere numerosi miglioramenti! \nGrazie per il tempo che hai dedicato a leggere questo messaggio, spero che continuerai ad apprezzare l\'app!</string>
+    <string name="prefs_overlay">Attiva l\'icona fluttuante</string>
+    <string name="prefs_overlay_desc">Mostra un\'icona fluttuante quando l\'app non è aperta</string>
 </resources>

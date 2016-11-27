@@ -18,6 +18,12 @@
             android:icon="@drawable/ic_update_black"/>
         <SwitchPreference
             android:defaultValue="false"
+            android:title="@string/prefs_overlay"
+            android:key="@string/pref_overlay"
+            android:summary="@string/prefs_overlay_desc"
+            android:icon="@drawable/ic_star"/>
+        <SwitchPreference
+            android:defaultValue="false"
             android:title="@string/prefs_daynight_theme"
             android:key="@string/pref_daynight_theme"
             android:icon="@drawable/ic_moon" />
@@ -33,6 +39,14 @@
             android:icon="@drawable/ic_translate_black"
             custom:entryImages="@array/flags_array" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/pref_donation_cat" >
+        <Preference android:title="@string/prefs_donation"
+            android:summary="@string/prefs_donation_desc"
+            android:icon="@drawable/ic_happy"
+            android:key="@string/pref_donation"
+            android:layout="@layout/layout_pref_donate">
+        </Preference>
+    </PreferenceCategory>
     <PreferenceCategory android:title="@string/prefs_extra_cat">
         <Preference android:title="OPTC SmartDB project page"
             android:icon="@drawable/ic_web_black">
@@ -47,7 +61,7 @@
         <Preference android:title="optc-db.github.io"
             android:icon="@drawable/ic_web_black">
             <intent android:action="android.intent.action.VIEW"
-                android:data="http://www.optc-db.github.io/" />
+                android:data="https://optc-db.github.io/" />
         </Preference>
         <Preference android:title="@string/prefs_download_update"
             android:icon="@drawable/ic_download_black"

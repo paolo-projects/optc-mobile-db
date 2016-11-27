@@ -4,7 +4,7 @@ import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
@@ -47,10 +47,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
-import android.view.animation.TranslateAnimation;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
@@ -111,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.5;
+private final static Double APP_VERSION = 3.6;
 /*
     ##################################################
 */
@@ -120,6 +117,7 @@ private final static Double APP_VERSION = 3.5;
     public static final int thumbnail_height = 96;
 
     private static final String locale_pref = "locale-set";
+    private boolean goingToSettings = false;
 
     ExpandableListAdapter explistAdapter;
     ExpandableListView expListView;
@@ -1319,6 +1317,7 @@ private final static Double APP_VERSION = 3.5;
         settBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                goingToSettings = true;
                 Intent intent = new Intent(context, SettingsActivity.class);
                 Bundle b = new Bundle();
                 b.putInt("appTheme", currThemeGlobal);
@@ -1396,25 +1395,21 @@ private final static Double APP_VERSION = 3.5;
             mPrefs.edit().putBoolean(getString(R.string.rebuild_db), false).commit();
         }
 
-        /*Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        int height = size.y;
         TextView placeholder = (TextView) findViewById(R.id.placeholder);
         placeholder.setX(getScreenWidth());
-        placeholder.setY(height / 2);
+        placeholder.setY(getScreenHeight() / 2);
+        Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
         if (!displayedTutorial) {
             new ShowcaseView.Builder(this)
                     .setTarget(new ViewTarget(placeholder))
-                    .setContentTitle("New filters available")
-                    .setContentText("New filters for captain and special abilities available!")
+                    .setContentTitle("New app overlay available")
+                    .setContentText("\"Flying chopper\" is making his debut! And he's flying for real allowing you to use the app even when playing optc!")
                     .setStyle(R.style.CustomShowcaseTheme2)
                     .hideOnTouchOutside()
                     .build();
             SharedPreferences.Editor mEditor = mPrefs.edit();
             mEditor.putBoolean(getString(R.string.tutorial_displayed), true).apply();
-        }*/
+        }
 
         DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
 
@@ -1426,17 +1421,17 @@ private final static Double APP_VERSION = 3.5;
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                Boolean displayed_dmgcalc = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
+                Boolean displayed_dmgcalc = mPrefs.getBoolean(getString(R.string.tutorial_drawer), false);
                 if(!displayed_dmgcalc) {
                     new ShowcaseView.Builder(activity)
                             .setTarget(new ViewTarget(findViewById(R.id.settings_btn)))
-                            .setContentTitle("Try the new Day/Night theme!")
-                            .setContentText("Try the new theme Day/Night, change app colors when darkness falls!")
+                            .setContentTitle("Just one step away!")
+                            .setContentText("Open app settings to free the flying beast! You'll need to reassure android that he won't mess things up, and then when you'll close the application you'll see him shining!")
                             .setStyle(R.style.CustomShowcaseTheme2)
                             .hideOnTouchOutside()
                             .build();
                     SharedPreferences.Editor mEditor = mPrefs.edit();
-                    mEditor.putBoolean(getString(R.string.tutorial_displayed), true).apply();
+                    mEditor.putBoolean(getString(R.string.tutorial_drawer), true).apply();
                 }
             }
 
@@ -1518,6 +1513,7 @@ private final static Double APP_VERSION = 3.5;
 
     protected void onResume() {
         super.onResume();
+        stopService(new Intent(context, FlyingChopper.class));
         int width = getScreenWidth();
 
         LinearLayout list_size = (LinearLayout) findViewById(R.id.list_size_layout);
@@ -1561,12 +1557,19 @@ private final static Double APP_VERSION = 3.5;
     @Override
     protected void onPause() {
         super.onPause();
+        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_overlay), false) && !goingToSettings)
+            if (isSystemAlertPermissionGranted(this)) {
+                Intent i = new Intent(context, FlyingChopper.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startService(i);
+            }
         boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
         if(daynightTheme)
         {
             KenBurnsView bgImg = (KenBurnsView) findViewById(R.id.mainBgImage);
             bgImg.pause();
         }
+        goingToSettings = false;
     }
 
     private void crossfade(int mShortAnimationDuration) {
@@ -1724,6 +1727,7 @@ private final static Double APP_VERSION = 3.5;
     }
 
     public String convertID(Integer ID) {
+        if ((ID==574)||(ID==575)) return ("00" + ID.toString());
         if (ID < 10) return ("000" + ID.toString());
         else if (ID < 100) return ("00" + ID.toString());
         else if (ID < 1000) return ("0" + ID.toString());
@@ -1765,6 +1769,7 @@ private final static Double APP_VERSION = 3.5;
                             .diskCacheStrategy(DiskCacheStrategy.RESULT)
                             .into(thumbnail_width, thumbnail_height);
                     GlideDrawable cacheFile = future.get();
+                    Log.v("CACHE", "Done: "+(n+1));
                 } catch (Exception e) {
                     Log.e("ERR", "Pic not found");
                 }
@@ -2810,6 +2815,12 @@ private final static Double APP_VERSION = 3.5;
         }
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
+    public static boolean isSystemAlertPermissionGranted(Context context) {
+        final boolean result = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context);
+        return result;
+    }
+
     private void showKeyboard() {
         //SHOW KEYBOARD
         filterText.requestFocus();
@@ -2819,9 +2830,10 @@ private final static Double APP_VERSION = 3.5;
 
     private static final int SETTINGS_UNKNOWN_SOURCES = 101;
     private static final int PREFERENCES_ACTIVITY = 102;
-    public static final int LANG_PREF_CHANGED = 199;
-    public static final int UPDATE_APP_PREF = 200;
-    public static final int THEMEDAYNIGHT_CHANGED = 201;
+    private static final int EXTERNAL_OVERLAY_PREFERENCE = 103;
+    public static final String LANG_PREF_CHANGED = "result_lang_pref_changed";
+    public static final String UPDATE_APP_PREF = "result_update_app_preference";
+    public static final String THEMEDAYNIGHT_CHANGED = "result_daynight_theme_changed";
     private String apk_file = "";
 
     @Override
@@ -2838,17 +2850,15 @@ private final static Double APP_VERSION = 3.5;
                 }
                 break;
             case PREFERENCES_ACTIVITY:
-                switch (resultCode)
-                {
-                    case LANG_PREF_CHANGED:
+                if(data!=null) {
+                    if (data.getBooleanExtra(LANG_PREF_CHANGED, false)) {
                         getSharedPreferences(getString(R.string.pref_name), 0).edit().putBoolean(getString(R.string.rebuild_db), true).commit();
                         crossfade(300);
-                        break;
-                    case UPDATE_APP_PREF:
-                        (new CheckUpdates(true)).execute();
-                        break;
-                    case THEMEDAYNIGHT_CHANGED:
+                    } else if (data.getBooleanExtra(THEMEDAYNIGHT_CHANGED, false)) {
                         crossfade(300);
+                    }
+                    if (data.getBooleanExtra(UPDATE_APP_PREF, false))
+                        (new CheckUpdates(true)).execute();
                 }
                 break;
         }

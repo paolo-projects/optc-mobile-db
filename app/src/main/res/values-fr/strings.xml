@@ -165,4 +165,10 @@
         <item>Réducteur de Paralysie</item>
     </string-array>
     <string name="prefs_daynight_theme">Day / Night Theme</string>
+    <string name="pref_donation_cat">Support the app!</string>
+    <string name="prefs_donation">Donate to support development</string>
+    <string name="prefs_donation_desc">Next goal will be publishing app to Play Store</string>
+    <string name="prefs_donation_message">First of all, thank you for your support!\nOPTC Smart DB is an open source app, it\'s meant to be free and to continue being free.\nI think the app now reached a very mature stage, so I (and all of you I guess) would be very happy to see it on Play Store, being updated without the need of a reminder.\nThis however is not free, and google applies a fee to whoever starts publishing apps in the market. I personally have dedicated countless days and nights to program, test and improve this app, and I\'m surely not regretting it. My reward is people appreciation, and I\'m very glad that my work is becoming a milestone in optc community, I really don\'t need anything else but this!\nHowever, while many users contributed by providing translations, design advices, or by reporting bugs (and I thank them all), you can also contribute by sending a small donation!\nFrankly I could pay the fees with my money, but since this is not my job and I\'m not doing it for profit, I\'m not getting back the money I spend.\nSo I thought that if each of us donates the amount of a coffee we can surely have the app published on Google Play market and probably even more improvements!\nThank you for the time spent reading this and I hope you\'ll keep appreciating this app!</string>
+    <string name="prefs_overlay">Show floating app icon</string>
+    <string name="prefs_overlay_desc">Show floating button when app is not open</string>
 </resources>

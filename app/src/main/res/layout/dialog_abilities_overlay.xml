@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_abilities"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/captability"
+        android:textStyle="bold"
+        android:background="@color/char_info_header_bg_teal"
+        android:textColor="@color/char_info_header_txt_teal" />
+
+    <TextView
+        android:id="@+id/captabilityText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/char_info_txt_teal" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/capt_notes"
+        android:visibility="gone"
+        android:textColor="@color/char_info_header_txt_teal" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/specability"
+            android:textStyle="bold"
+            android:layout_marginRight="2sp"
+            android:background="@color/char_info_header_bg_teal"
+            android:textColor="@color/char_info_header_txt_teal" />
+
+        <TextView
+            android:id="@+id/specnameText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="4"
+            android:textStyle="bold"
+            android:background="@color/char_info_header_bg_teal"
+            android:textColor="@color/char_info_header_txt_teal" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/specials_container"
+        android:orientation="vertical">
+    </LinearLayout>
+</LinearLayout>

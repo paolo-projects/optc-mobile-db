@@ -4,7 +4,6 @@ package it.instruman.treasurecruisedatabase;
  * Created by Paolo on 05/10/2016.
  */
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -20,11 +19,11 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class listViewAdapter extends BaseAdapter {
+public class listViewAdapterOverlay extends BaseAdapter {
     private ArrayList<HashMap> list;
     private Context activity;
 
-    public listViewAdapter(Context activity, ArrayList<HashMap> list) {
+    public listViewAdapterOverlay(Context activity, ArrayList<HashMap> list) {
         super();
         this.activity = activity;
         this.list = list;
@@ -54,7 +53,7 @@ public class listViewAdapter extends BaseAdapter {
         ViewHolder holder;
         LayoutInflater inflater = (LayoutInflater) activity.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
         if (convertView == null) {
-            convertView = inflater.inflate(R.layout.column_row, parent, false);
+            convertView = inflater.inflate(R.layout.column_row_overlay, null);
             holder = new ViewHolder();
             holder.smallImg = (ImageView) convertView.findViewById(R.id.small_img);
             holder.txtName = (TextView) convertView.findViewById(R.id.name);
