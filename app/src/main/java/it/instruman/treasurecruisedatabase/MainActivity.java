@@ -108,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.6;
+private final static Double APP_VERSION = 3.7;
 /*
     ##################################################
 */
@@ -1401,9 +1401,9 @@ private final static Double APP_VERSION = 3.6;
         Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
         if (!displayedTutorial) {
             new ShowcaseView.Builder(this)
-                    .setTarget(new ViewTarget(placeholder))
-                    .setContentTitle("New app overlay available")
-                    .setContentText("\"Flying chopper\" is making his debut! And he's flying for real allowing you to use the app even when playing optc!")
+                    .setContentTitle("Damage Calculator overlay available!")
+                    .setContentText("Flying chopper is now equipped with the Super damage calculator from the main optc-db! You can now quickly build up your team or calculate your specials\' damage directly from OPTC app!\nTry it!\n\n"
+                                    + "If you didn\'t enable floating icon yet, you can quickly do it in settings screen!")
                     .setStyle(R.style.CustomShowcaseTheme2)
                     .hideOnTouchOutside()
                     .build();
@@ -1421,7 +1421,7 @@ private final static Double APP_VERSION = 3.6;
 
             @Override
             public void onDrawerOpened(View drawerView) {
-                Boolean displayed_dmgcalc = mPrefs.getBoolean(getString(R.string.tutorial_drawer), false);
+                /*Boolean displayed_dmgcalc = mPrefs.getBoolean(getString(R.string.tutorial_drawer), false);
                 if(!displayed_dmgcalc) {
                     new ShowcaseView.Builder(activity)
                             .setTarget(new ViewTarget(findViewById(R.id.settings_btn)))
@@ -1432,7 +1432,7 @@ private final static Double APP_VERSION = 3.6;
                             .build();
                     SharedPreferences.Editor mEditor = mPrefs.edit();
                     mEditor.putBoolean(getString(R.string.tutorial_drawer), true).apply();
-                }
+                }*/
             }
 
             @Override
@@ -1769,7 +1769,6 @@ private final static Double APP_VERSION = 3.6;
                             .diskCacheStrategy(DiskCacheStrategy.RESULT)
                             .into(thumbnail_width, thumbnail_height);
                     GlideDrawable cacheFile = future.get();
-                    Log.v("CACHE", "Done: "+(n+1));
                 } catch (Exception e) {
                     Log.e("ERR", "Pic not found");
                 }

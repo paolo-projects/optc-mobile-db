@@ -12,7 +12,7 @@
     <string name="sort_contDesc" translatable="false">Sort button pic</string>
 
     <string name="pref_name" translatable="false">optc_smart_db_setting</string>
-    <string name="tutorial_displayed" translatable="false">displayed_newsettings</string>
+    <string name="tutorial_displayed" translatable="false">displayed_flyingchopperdmgcalc</string>
     <string name="tutorial_drawer" translatable="false">displayed_newsettings_indrawer</string>
     <string name="lastupdate" translatable="false">date_last_update</string>
     <string name="theme_pref" translatable="false">theme_preference</string>

@@ -1,24 +1,28 @@
 package it.instruman.treasurecruisedatabase;
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
-import android.app.Dialog;
+import android.annotation.TargetApi;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
+import android.net.http.SslError;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.preference.PreferenceManager;
-import android.support.v4.view.MotionEventCompat;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -26,13 +30,18 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewPropertyAnimator;
 import android.view.WindowManager;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
+import android.webkit.CookieManager;
+import android.webkit.SslErrorHandler;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
@@ -45,18 +54,14 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.gms.analytics.HitBuilders;
-
-import org.mozilla.javascript.tools.debugger.Main;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
+import java.util.Locale;
+import java.util.concurrent.Callable;
 
-import static it.instruman.treasurecruisedatabase.MainActivity.getResIdFromAttribute;
 import static it.instruman.treasurecruisedatabase.MainActivity.thumbnail_height;
 import static it.instruman.treasurecruisedatabase.MainActivity.thumbnail_width;
 
@@ -146,23 +151,22 @@ public class FlyingChopper extends Service {
 
 
     private WindowManager windowManager;
-    private ImageView chatHead;
+    private ImageView mainIcon, listIcon, dmgcalcIcon, ellipsisIcon;
     private boolean isClick = false;
     private boolean isCloseVisible = false;
     private Context context = this;
     private Service service = this;
-    private View oView = null;
+    private View listInterfaceView = null;
+    private View dmgCalcInterfaceView = null;
     private ImageView closeBtn;
     private ListView dbList;
     private ArrayList<HashMap> dbListItems, dbOriginalListItems;
     private listViewAdapterOverlay dbListAdapter;
     private ImageView sortName, sortType, sortHP, sortAtk, sortRCV, sortStars;
 
-    AnimationLayoutParams paramsA, paramsB, paramsC;
+    AnimationLayoutParams paramsMainIcon, paramsCloseBtn, paramsListInterface, paramsListIcon, paramsDmgCalcInterface, paramsDmgCalcIcon, paramsEllipsisIcon;
     int panelState = 0;  // state 0 = close
                     // state 1 = open
-
-
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
@@ -203,95 +207,63 @@ public class FlyingChopper extends Service {
 
     private void clickClose()
     {
-        ObjectAnimator animation = ObjectAnimator.ofFloat(paramsC, "alpha", 0.0f);
-        animation.setDuration(100);
-        animation.setInterpolator(new LinearInterpolator());
-        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                try {
-                    windowManager.updateViewLayout(oView, paramsC);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    hasView = false;
-                }
-            }
-        });
-        animation.addListener(new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                try {
-                    windowManager.removeView(oView);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    hasView = false;
-                }
-            }
-
-            @Override
-            public void onAnimationCancel(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animator animator) {
-
-            }
-        });
-        animation.start();
+        if(panelSelection==SELECT_LIST)
+            animateFade(listInterfaceView, paramsListInterface, 0.0f, 100, true, new LinearInterpolator());
+        if(panelSelection==SELECT_DMGCALC)
+            animateFade(dmgCalcInterfaceView, paramsDmgCalcInterface, 0.0f, 100, true, new LinearInterpolator());
+        int mainY = paramsMainIcon.y;
+        View[] toShrink = {listIcon, dmgcalcIcon};
+        AnimationLayoutParams[] paramsToShrink = {paramsListIcon, paramsDmgCalcIcon};
+        animateSize(toShrink, paramsToShrink, mainIcon, paramsMainIcon);
+        ObjectAnimator listAnim = getYAnimator(paramsListIcon, listIcon, mainY, 300, new LinearInterpolator(), true, null);
+        ObjectAnimator dmgcalcAnim = getYAnimator(paramsDmgCalcIcon, dmgcalcIcon, mainY, 300, new LinearInterpolator(), true, null);
+        ObjectAnimator ellipsisAnim = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY, 300, new LinearInterpolator(), true, null);
+        AnimatorSet animSet = new AnimatorSet();
+        animSet.playTogether(listAnim, dmgcalcAnim, ellipsisAnim);
+        animSet.start();
         panelState = 0;
-        chatHead.setOnTouchListener(thumbClickListener);
+        mainIcon.setOnTouchListener(mainiconClickAndMove);
     }
 
-    private boolean hasView = false;
+    private static final int SELECT_LIST = 1;
+    private static final int SELECT_DMGCALC = 2;
+    private int panelSelection = SELECT_LIST;
     private void clickOpen()
     {
-        if(oView == null) {
-            LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
-            oView = layoutInflater.inflate(R.layout.activity_main_overlay, null);
+        switch(panelSelection)
+        {
+            default:
+            case SELECT_LIST: {
+                listOpen();
+                animateIconsDropping();
+                View[] toShrink = {mainIcon, dmgcalcIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsDmgCalcIcon};
+                animateSize(toShrink, paramsToShrink, listIcon, paramsListIcon);
+                break;
+            }
+            case SELECT_DMGCALC: {
+                dmgcalcOpen();
+                animateIconsDropping();
+                View[] toShrink = {mainIcon, listIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon};
+                animateSize(toShrink, paramsToShrink, dmgcalcIcon, paramsDmgCalcIcon);
+                break;
+            }
         }
-        paramsC = new AnimationLayoutParams(
-                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
-                WindowManager.LayoutParams.FLAG_DIM_BEHIND |
-                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
-                PixelFormat.TRANSLUCENT);
-        boolean left = (paramsA.x < getScreenWidth()/2);
-        if(left) {
-            paramsC.gravity = Gravity.CENTER_VERTICAL;
-            paramsC.x = dpToPx(64);
-        } else {
-            paramsC.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
-            paramsC.x = 0;
-        }
-        paramsC.width = (getScreenWidth()-dpToPx(64));
-        paramsC.alpha = 0.0f;
-        paramsC.dimAmount = 0.5f;
-        if(!hasView) {
-            windowManager.addView(oView, paramsC);
-            hasView = true;
-        }
+    }
 
-        ObjectAnimator animation = ObjectAnimator.ofFloat(paramsC, "alpha", 1.0f);
-        animation.setDuration(300);
-        animation.setInterpolator(new LinearInterpolator());
-        animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+    private ObjectAnimator getYAnimator(final AnimationLayoutParams params, final View view, int endY, long duration, Interpolator interpolator, final boolean toRemove, @Nullable final Callable<Void> runAtEnd)
+    {
+        ObjectAnimator animator = ObjectAnimator.ofInt(params, "y",endY);
+        animator.setInterpolator(interpolator);
+        animator.setDuration(duration);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                try {
-                    windowManager.updateViewLayout(oView, paramsC);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    hasView = false;
-                }
+                windowManager.updateViewLayout(view, params);
             }
         });
-        animation.addListener(new Animator.AnimatorListener() {
+        animator.addListener(new Animator.AnimatorListener() {
             @Override
             public void onAnimationStart(Animator animator) {
 
@@ -300,10 +272,19 @@ public class FlyingChopper extends Service {
             @Override
             public void onAnimationEnd(Animator animator) {
                 try {
-                    windowManager.updateViewLayout(oView, paramsC);
+                    if (runAtEnd != null) {
+                        try {
+                            runAtEnd.call();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if(!toRemove)
+                        windowManager.updateViewLayout(view, params);
+                    else
+                        windowManager.removeView(view);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    hasView = false;
                 }
             }
 
@@ -317,9 +298,243 @@ public class FlyingChopper extends Service {
 
             }
         });
-        animation.start();
+        return animator;
+    }
+
+    private void dmgcalcOpen()
+    {
+        if((listInterfaceView != null) && (listInterfaceView.getWindowToken() != null))
+            windowManager.removeView(listInterfaceView);
+        if((dmgCalcInterfaceView != null) && (dmgCalcInterfaceView.getWindowToken() != null))
+            windowManager.removeView(dmgCalcInterfaceView);
+        if(dmgCalcInterfaceView == null) {
+            LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+            dmgCalcInterfaceView = layoutInflater.inflate(R.layout.activity_dmg_calc_overlay, null);
+            initializeDmgCalcDialog();
+        }
+        paramsDmgCalcInterface = new AnimationLayoutParams(
+                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                //WindowManager.LayoutParams.FLAG_DIM_BEHIND |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+        boolean left = (paramsMainIcon.x < getScreenWidth()/2);
+        if(left) {
+            paramsDmgCalcInterface.gravity = Gravity.CENTER_VERTICAL;
+            paramsDmgCalcInterface.x = dpToPx(INTERFACE_SPACING);
+        } else {
+            paramsDmgCalcInterface.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
+            paramsDmgCalcInterface.x = 0;
+        }
+        paramsDmgCalcInterface.width = (getScreenWidth()-dpToPx(INTERFACE_SPACING));
+        paramsDmgCalcInterface.alpha = 0.0f;
+
+        if(dmgCalcInterfaceView.getWindowToken() == null)
+            windowManager.addView(dmgCalcInterfaceView, paramsDmgCalcInterface);
+
+        animateFade(dmgCalcInterfaceView, paramsDmgCalcInterface, 1.0f, 300, false, new LinearInterpolator());
+
         panelState = 1;
-        chatHead.setOnTouchListener(thumbClickSimple);
+        mainIcon.setOnTouchListener(mainiconClickSimple);
+    }
+
+    private String DMGCALC_URL = "http://optc-db.github.io/damage/";
+    private void initializeDmgCalcDialog() {
+        final String locale = PreferenceManager.getDefaultSharedPreferences(this).getString(getString(R.string.pref_language), "");
+        if (!locale.equals("")) {
+            Resources res = context.getResources();
+            // Change locale settings in the app.
+            DisplayMetrics dm = res.getDisplayMetrics();
+            android.content.res.Configuration conf = res.getConfiguration();
+            if (locale.contains("-")) {
+                String[] combined = locale.split("-");
+                conf.locale = new Locale(combined[0].toLowerCase(), combined[1].toLowerCase());
+            } else conf.locale = new Locale(locale.toLowerCase());
+            res.updateConfiguration(conf, dm);
+        }
+
+        switch(locale.toLowerCase())
+        {
+            case "it":
+                DMGCALC_URL = "http://www.one-piece-treasure-cruise-italia.org/damage/";
+                break;
+            case "es":
+                DMGCALC_URL = "https://optc-sp.github.io/damage/";
+                break;
+            case "":
+            default:
+                DMGCALC_URL = "https://optc-db.github.io/damage/";
+                break;
+        }
+
+        final WebView webView = (WebView) dmgCalcInterfaceView.findViewById(R.id.web_view);
+
+        WebSettings webSettings = webView.getSettings();
+
+        webView.setWebViewClient(new WebViewClient() {
+            @SuppressWarnings("deprecation")
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                final Uri uri = Uri.parse(url);
+                return handleUri(uri);
+            }
+
+            @TargetApi(Build.VERSION_CODES.N)
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                final Uri uri = request.getUrl();
+                return handleUri(uri);
+            }
+
+            @Override
+            public void onReceivedSslError(WebView view, SslErrorHandler handler, SslError error) {
+                super.onReceivedSslError(view, handler, error);
+                handler.proceed();
+            }
+
+            private boolean handleUri(final Uri uri) {
+                final String host = uri.getHost();
+                final String scheme = uri.getScheme();
+                final Uri dmg_url = Uri.parse(DMGCALC_URL);
+                // Based on some condition you need to determine if you are going to load the url
+                // in your web view itself or in a browser.
+                // You can use `host` or `scheme` or any part of the `uri` to decide.
+                if (dmg_url.getHost().equals(host)) {
+                    // Returning false means that you are going to load this url in the webView itself
+                    return false;
+                } else {
+                    // Returning true means that you need to handle what to do with the url
+                    // e.g. open web page in a Browser
+                    final Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                    startActivity(intent);
+                    return true;
+                }
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+            }
+        });
+
+        webSettings.setJavaScriptEnabled(true);
+        webSettings.setLoadWithOverviewMode(true);
+        webSettings.setUseWideViewPort(true);
+        webSettings.setBuiltInZoomControls(true);
+        webSettings.setSupportZoom(true);
+        webSettings.setDisplayZoomControls(false);
+        webSettings.setDomStorageEnabled(true);
+        if(Build.VERSION.SDK_INT >= 21)
+            webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            String databasePath = this.getApplicationContext().getDir("databases", Context.MODE_PRIVATE).getPath();
+            webSettings.setDatabasePath(databasePath);
+        }
+
+        if(Build.VERSION.SDK_INT < 18)
+            webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+        if (Build.VERSION.SDK_INT >= 19) {
+            // chromium, enable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        } else {
+            // older android version, disable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
+
+        webView.loadUrl(DMGCALC_URL);
+
+        if (Build.VERSION.SDK_INT >= 21) CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true);
+        CookieManager.allowFileSchemeCookies();
+        CookieManager.getInstance().setAcceptCookie(true);
+
+        ImageButton navigateBackBtn = (ImageButton)dmgCalcInterfaceView.findViewById(R.id.dmgcalc_navigateback);
+        ImageButton navigateForwardBtn = (ImageButton)dmgCalcInterfaceView.findViewById(R.id.dmgcalc_navigateforward);
+        navigateBackBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                webView.goBack();
+            }
+        });
+        navigateForwardBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                webView.goForward();
+            }
+        });
+    }
+
+    private void animateIconsDropping()
+    {
+        int mainX = paramsMainIcon.x;
+        int mainY = paramsMainIcon.y;
+        Log.d("DBG", "x="+mainX+" y="+mainY);
+
+        paramsListIcon.x = mainX;
+        paramsListIcon.y = mainY;
+
+        paramsDmgCalcIcon.x = mainX;
+        paramsDmgCalcIcon.y = mainY;
+
+        paramsEllipsisIcon.x = mainX;
+        paramsEllipsisIcon.y = mainY;
+
+        AnimatorSet animatorSet = new AnimatorSet();
+
+        if(mainY<((getScreenHeight()-dpToPx(SIZE_NORMAL))/2)) {
+            //ANIMATE FALLING DOWN
+            ObjectAnimator listAnimator = getYAnimator(paramsListIcon, listIcon, mainY+dpToPx(SIZE_NORMAL), 800, new BounceInterpolator(), false, null);
+            ObjectAnimator dmgcalcAnimator = getYAnimator(paramsDmgCalcIcon, dmgcalcIcon, mainY+dpToPx(SIZE_NORMAL*2), 800, new BounceInterpolator(), false, null);
+            ObjectAnimator ellipsisAnimator = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY+dpToPx(SIZE_NORMAL*3), 800, new BounceInterpolator(), false, null);
+            animatorSet.playTogether(listAnimator, dmgcalcAnimator, ellipsisAnimator);
+        } else {
+            //ANIMATE JUMPING UP
+            ObjectAnimator listAnimator = getYAnimator(paramsListIcon, listIcon, mainY-dpToPx(SIZE_NORMAL), 800, new BounceInterpolator(), false, null);
+            ObjectAnimator dmgcalcAnimator = getYAnimator(paramsDmgCalcIcon, dmgcalcIcon, mainY-dpToPx(SIZE_NORMAL*2), 800, new BounceInterpolator(), false, null);
+            ObjectAnimator ellipsisAnimator = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY-dpToPx(SIZE_NORMAL*3), 800, new BounceInterpolator(), false, null);
+            animatorSet.playTogether(listAnimator, dmgcalcAnimator, ellipsisAnimator);
+        }
+        try {
+            windowManager.addView(listIcon, paramsListIcon);
+            windowManager.addView(dmgcalcIcon, paramsDmgCalcIcon);
+            windowManager.addView(ellipsisIcon, paramsEllipsisIcon);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        animatorSet.start();
+    }
+
+    private void listOpen()
+    {
+        if((listInterfaceView != null) && (listInterfaceView.getWindowToken() != null))
+            windowManager.removeView(listInterfaceView);
+        if((dmgCalcInterfaceView != null) && (dmgCalcInterfaceView.getWindowToken() != null))
+            windowManager.removeView(dmgCalcInterfaceView);
+        if(listInterfaceView == null) {
+            LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+            listInterfaceView = layoutInflater.inflate(R.layout.activity_main_overlay, null);
+        }
+        paramsListInterface = new AnimationLayoutParams(
+                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                //WindowManager.LayoutParams.FLAG_DIM_BEHIND |
+                        WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+        boolean left = (paramsMainIcon.x < getScreenWidth()/2);
+        if(left) {
+            paramsListInterface.gravity = Gravity.CENTER_VERTICAL;
+            paramsListInterface.x = dpToPx(INTERFACE_SPACING);
+        } else {
+            paramsListInterface.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
+            paramsListInterface.x = 0;
+        }
+        paramsListInterface.width = (getScreenWidth()-dpToPx(INTERFACE_SPACING));
+        paramsListInterface.alpha = 0.0f;
+
+        if(listInterfaceView.getWindowToken() == null)
+            windowManager.addView(listInterfaceView, paramsListInterface);
+
+        animateFade(listInterfaceView, paramsListInterface, 1.0f, 300, false, new LinearInterpolator());
+
+        panelState = 1;
+        mainIcon.setOnTouchListener(mainiconClickSimple);
 
         initializeDbDialog();
         populateDbList();
@@ -416,7 +631,7 @@ public class FlyingChopper extends Service {
 
     private void sortList(View v) {
         ListSortUtilityOverlay utils = new ListSortUtilityOverlay();
-        dbListItems = utils.sortList(oView, v, dbListItems);
+        dbListItems = utils.sortList(listInterfaceView, v, dbListItems);
         dbListAdapter = new listViewAdapterOverlay(this, dbListItems);
         dbList.setAdapter(dbListAdapter);
     }
@@ -426,30 +641,30 @@ public class FlyingChopper extends Service {
 
     private void initializeDbDialog()
     {
-        sortName = (ImageView)oView.findViewById(R.id.sortName_overlay);
+        sortName = (ImageView) listInterfaceView.findViewById(R.id.sortName_overlay);
         sortName.setTag(R.id.TAG_SORT_ID, R.id.sortName_overlay);
 
-        sortType = (ImageView)oView.findViewById(R.id.sortType_overlay);
+        sortType = (ImageView) listInterfaceView.findViewById(R.id.sortType_overlay);
         sortType.setTag(R.id.TAG_SORT_ID, R.id.sortType_overlay);
 
-        sortStars = (ImageView)oView.findViewById(R.id.sortStars_overlay);
+        sortStars = (ImageView) listInterfaceView.findViewById(R.id.sortStars_overlay);
         sortStars.setTag(R.id.TAG_SORT_ID, R.id.sortStars_overlay);
 
-        sortHP = (ImageView)oView.findViewById(R.id.sortHp_overlay);
+        sortHP = (ImageView) listInterfaceView.findViewById(R.id.sortHp_overlay);
         sortHP.setTag(R.id.TAG_SORT_ID, R.id.sortHp_overlay);
 
-        sortAtk = (ImageView)oView.findViewById(R.id.sortAtk_overlay);
+        sortAtk = (ImageView) listInterfaceView.findViewById(R.id.sortAtk_overlay);
         sortAtk.setTag(R.id.TAG_SORT_ID, R.id.sortAtk_overlay);
 
-        sortRCV = (ImageView)oView.findViewById(R.id.sortRcv_overlay);
+        sortRCV = (ImageView) listInterfaceView.findViewById(R.id.sortRcv_overlay);
         sortRCV.setTag(R.id.TAG_SORT_ID, R.id.sortRcv_overlay);
 
-        LinearLayout sortNamel = (LinearLayout) oView.findViewById(R.id.sortName_l_overlay);
-        LinearLayout sortTypel = (LinearLayout) oView.findViewById(R.id.sortType_l_overlay);
-        LinearLayout sortStarsl = (LinearLayout) oView.findViewById(R.id.sortStars_l_overlay);
-        LinearLayout sortAtkl = (LinearLayout) oView.findViewById(R.id.sortAtk_l_overlay);
-        LinearLayout sortHPl = (LinearLayout) oView.findViewById(R.id.sortHp_l_overlay);
-        LinearLayout sortRCVl = (LinearLayout) oView.findViewById(R.id.sortRcv_l_overlay);
+        LinearLayout sortNamel = (LinearLayout) listInterfaceView.findViewById(R.id.sortName_l_overlay);
+        LinearLayout sortTypel = (LinearLayout) listInterfaceView.findViewById(R.id.sortType_l_overlay);
+        LinearLayout sortStarsl = (LinearLayout) listInterfaceView.findViewById(R.id.sortStars_l_overlay);
+        LinearLayout sortAtkl = (LinearLayout) listInterfaceView.findViewById(R.id.sortAtk_l_overlay);
+        LinearLayout sortHPl = (LinearLayout) listInterfaceView.findViewById(R.id.sortHp_l_overlay);
+        LinearLayout sortRCVl = (LinearLayout) listInterfaceView.findViewById(R.id.sortRcv_l_overlay);
 
         sortNamel.setOnClickListener(sortNameOnClick);
         sortTypel.setOnClickListener(sortTypeOnClick);
@@ -458,9 +673,9 @@ public class FlyingChopper extends Service {
         sortHPl.setOnClickListener(sortHPOnClick);
         sortRCVl.setOnClickListener(sortRCVOnClick);
 
-        final ImageButton filterBtn = (ImageButton) oView.findViewById(R.id.filterBtn_overlay);
-        resetBtn = (ImageButton) oView.findViewById(R.id.resetBtn_overlay);
-        filterText = (EditText) oView.findViewById(R.id.filterText_overlay);
+        final ImageButton filterBtn = (ImageButton) listInterfaceView.findViewById(R.id.filterBtn_overlay);
+        resetBtn = (ImageButton) listInterfaceView.findViewById(R.id.resetBtn_overlay);
+        filterText = (EditText) listInterfaceView.findViewById(R.id.filterText_overlay);
         filterText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -472,7 +687,7 @@ public class FlyingChopper extends Service {
                 return handled;
             }
         });
-        final LinearLayout F_TEXT = (LinearLayout) oView.findViewById(R.id.filtertext_layout_overlay);
+        final LinearLayout F_TEXT = (LinearLayout) listInterfaceView.findViewById(R.id.filtertext_layout_overlay);
         filterText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
@@ -506,19 +721,8 @@ public class FlyingChopper extends Service {
                 rebuildList();
             }
         });
-        dbList = (ListView)oView.findViewById(R.id.listView1_overlay);
+        dbList = (ListView) listInterfaceView.findViewById(R.id.listView1_overlay);
         dbList.setOnItemClickListener(lvOnClick);
-
-        ImageButton goToMain = (ImageButton)oView.findViewById(R.id.goToMain);
-        goToMain.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent i= new Intent(getBaseContext(), MainActivity.class);
-                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                getApplication().startActivity(i);
-                windowManager.removeView(oView);
-            }
-        });
     }
 
     private void rebuildList()
@@ -555,7 +759,7 @@ public class FlyingChopper extends Service {
     }
 
     private void populateDbList() {
-        if(oView!=null) {
+        if(listInterfaceView !=null) {
             DBHelper dbHelper = new DBHelper(this);
             SQLiteDatabase db = dbHelper.getReadableDatabase();
             dbOriginalListItems = dbListItems = DBHelper.getAllCharacters(db);
@@ -570,32 +774,96 @@ public class FlyingChopper extends Service {
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
-        chatHead = new ImageView(this);
+        mainIcon = new ImageView(this);
 
-        chatHead.setImageResource(R.mipmap.ic_flyingchopper);
-        chatHead.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        mainIcon.setImageResource(R.mipmap.ic_flyingchopper);
+        mainIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
-        paramsA = new AnimationLayoutParams(
+        paramsMainIcon = new AnimationLayoutParams(
                 /*WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT,*/
-                dpToPx(60),
-                dpToPx(60),
+                dpToPx(SIZE_NORMAL),
+                dpToPx(SIZE_NORMAL),
                 WindowManager.LayoutParams.TYPE_PHONE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT);
 
-        paramsA.gravity = Gravity.TOP | Gravity.START;
-        paramsA.x = 0;
-        paramsA.y = 100;
+        paramsMainIcon.gravity = Gravity.TOP | Gravity.START;
+        paramsMainIcon.x = 0;
+        paramsMainIcon.y = 100;
 
-        windowManager.addView(chatHead, paramsA);
+        listIcon = new ImageView(this);
+
+        listIcon.setImageResource(R.mipmap.ic_list);
+        listIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+        paramsListIcon = new AnimationLayoutParams(
+                /*WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,*/
+                dpToPx(SIZE_NORMAL),
+                dpToPx(SIZE_NORMAL),
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        paramsListIcon.gravity = Gravity.TOP | Gravity.START;
+        dmgcalcIcon = new ImageView(this);
+
+        dmgcalcIcon.setImageResource(R.mipmap.ic_dmgcalc);
+        dmgcalcIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+        paramsDmgCalcIcon = new AnimationLayoutParams(
+                /*WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,*/
+                dpToPx(SIZE_NORMAL),
+                dpToPx(SIZE_NORMAL),
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        paramsDmgCalcIcon.gravity = Gravity.TOP | Gravity.START;
+
+        ellipsisIcon = new ImageView(this);
+
+        ellipsisIcon.setImageResource(R.mipmap.ic_ellipsis);
+        ellipsisIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+        paramsEllipsisIcon = new AnimationLayoutParams(
+                /*WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,*/
+                dpToPx(SIZE_SMALL),
+                dpToPx(SIZE_SMALL),
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+
+        paramsEllipsisIcon.gravity = Gravity.TOP | Gravity.START;
+
+        ellipsisIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i= new Intent(getBaseContext(), MainActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                getApplication().startActivity(i);
+                if(listInterfaceView != null && listInterfaceView.getWindowToken() != null)
+                    windowManager.removeView(listInterfaceView);
+                if(dmgCalcInterfaceView != null && dmgCalcInterfaceView.getWindowToken() != null)
+                    windowManager.removeView(dmgCalcInterfaceView);
+                if(listIcon != null && listIcon.getWindowToken() != null)
+                    windowManager.removeView(listIcon);
+                if(dmgcalcIcon != null && dmgcalcIcon.getWindowToken() != null)
+                    windowManager.removeView(dmgcalcIcon);
+                if(ellipsisIcon != null && ellipsisIcon.getWindowToken() != null)
+                    windowManager.removeView(ellipsisIcon);
+            }
+        });
+
+        windowManager.addView(mainIcon, paramsMainIcon);
 
         closeBtn = new ImageView(context);
 
         closeBtn.setImageResource(R.mipmap.ic_close);
         closeBtn.setScaleType(ImageView.ScaleType.FIT_CENTER);
 
-        paramsB = new AnimationLayoutParams(
+        paramsCloseBtn = new AnimationLayoutParams(
                 dpToPx(40),
                 dpToPx(40),
                 WindowManager.LayoutParams.TYPE_PHONE,
@@ -603,12 +871,14 @@ public class FlyingChopper extends Service {
                         WindowManager.LayoutParams.FLAG_DIM_BEHIND,
                 PixelFormat.TRANSLUCENT);
 
-        paramsB.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        paramsB.dimAmount = 0.5f;
-        paramsB.setY(dpToPx(24));
+        paramsCloseBtn.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+        paramsCloseBtn.dimAmount = 0.5f;
+        paramsCloseBtn.setY(dpToPx(24));
 
         try {
-            chatHead.setOnTouchListener(thumbClickListener);
+            mainIcon.setOnTouchListener(mainiconClickAndMove);
+            listIcon.setOnClickListener(listIconClick);
+            dmgcalcIcon.setOnClickListener(dmgcalcIconClick);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -618,10 +888,10 @@ public class FlyingChopper extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (chatHead != null) windowManager.removeView(chatHead);
+        if (mainIcon != null) windowManager.removeView(mainIcon);
     }
 
-    View.OnTouchListener thumbClickSimple = new View.OnTouchListener() {
+    View.OnTouchListener mainiconClickSimple = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
             if(motionEvent.getAction() == MotionEvent.ACTION_UP)
@@ -632,7 +902,7 @@ public class FlyingChopper extends Service {
         }
     };
 
-    View.OnTouchListener thumbClickListener = new View.OnTouchListener() {
+    View.OnTouchListener mainiconClickAndMove = new View.OnTouchListener() {
         private int initialX;
         private int initialY;
         private float initialTouchX;
@@ -644,8 +914,8 @@ public class FlyingChopper extends Service {
 
                     // Get current time in nano seconds.
 
-                    initialX = paramsA.x;
-                    initialY = paramsA.y;
+                    initialX = paramsMainIcon.x;
+                    initialY = paramsMainIcon.y;
                     initialTouchX = event.getRawX();
                     initialTouchY = event.getRawY();
                     isClick = true;
@@ -665,19 +935,19 @@ public class FlyingChopper extends Service {
                             service.stopSelf();
                             toBreak = true;
                         }
-                        animateFade(closeBtn, paramsB, 0.0f, 300, true);
+                        animateFade(closeBtn, paramsCloseBtn, 0.0f, 300, true, null);
                         isCloseVisible = false;
                         if(toBreak) return false;
                     }
                     if(!isClick) {
-                        int x = (paramsA.x > ((getScreenWidth() - dpToPx(60)) / 2)) ? getScreenWidth() - dpToPx(60) : 0;
-                        ObjectAnimator animation = ObjectAnimator.ofInt(paramsA, "x", x);
+                        int x = (paramsMainIcon.x > ((getScreenWidth() - dpToPx(SIZE_NORMAL)) / 2)) ? getScreenWidth() - dpToPx(SIZE_NORMAL) : 0;
+                        ObjectAnimator animation = ObjectAnimator.ofInt(paramsMainIcon, "x", x);
                         animation.setDuration(600);
                         animation.setInterpolator(new BounceInterpolator());
                         animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                             @Override
                             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                                windowManager.updateViewLayout(chatHead, paramsA);
+                                windowManager.updateViewLayout(mainIcon, paramsMainIcon);
                             }
                         });
                         animation.addListener(new Animator.AnimatorListener() {
@@ -688,7 +958,7 @@ public class FlyingChopper extends Service {
 
                             @Override
                             public void onAnimationEnd(Animator animator) {
-                                windowManager.updateViewLayout(chatHead, paramsA);
+                                windowManager.updateViewLayout(mainIcon, paramsMainIcon);
                             }
 
                             @Override
@@ -706,10 +976,14 @@ public class FlyingChopper extends Service {
                     isClick = false;
                     break;
                 case MotionEvent.ACTION_MOVE:
-                    if((Math.abs(event.getRawX()-initialTouchX)>dpToPx(15)) || (Math.abs(event.getRawY()-initialTouchY)>dpToPx(15))) {
-                        paramsA.x = initialX + (int) (event.getRawX() - initialTouchX);
-                        paramsA.y = initialY + (int) (event.getRawY() - initialTouchY);
-                        windowManager.updateViewLayout(chatHead, paramsA);
+                    int dpN = dpToPx(SIZE_NORMAL);
+                    int scrH = getScreenHeight();
+                    if((Math.abs(event.getRawX()-initialTouchX)>dpToPx(TOUCH_TRESHOLD)) || (Math.abs(event.getRawY()-initialTouchY)>dpToPx(TOUCH_TRESHOLD))) {
+                        paramsMainIcon.x = initialX + (int) (event.getRawX() - initialTouchX);
+                        paramsMainIcon.y = initialY + (int) (event.getRawY() - initialTouchY);
+                        paramsMainIcon.y = (paramsMainIcon.y < 0) ? 0 : paramsMainIcon.y;
+                        paramsMainIcon.y = (paramsMainIcon.y > (scrH- dpN)) ? (scrH- dpN) : paramsMainIcon.y;
+                        windowManager.updateViewLayout(mainIcon, paramsMainIcon);
                         isClick = false;
                         if (!isCloseVisible) {
                             closeBtn.setOnClickListener(new View.OnClickListener() {
@@ -718,9 +992,9 @@ public class FlyingChopper extends Service {
                                     service.stopSelf();
                                 }
                             });
-                            paramsB.alpha = 0.0f;
-                            windowManager.addView(closeBtn, paramsB);
-                            animateFade(closeBtn, paramsB, 1.0f, 300, false);
+                            paramsCloseBtn.alpha = 0.0f;
+                            windowManager.addView(closeBtn, paramsCloseBtn);
+                            animateFade(closeBtn, paramsCloseBtn, 1.0f, 300, false, null);
                             isCloseVisible = true;
                         }
                         int x = (int) event.getRawX();
@@ -729,12 +1003,12 @@ public class FlyingChopper extends Service {
                         int height = getScreenHeight();
                         if ((x > ((width / 2) - dpToPx(22))) && (x < ((width / 2) + dpToPx(22))) && (y > (height - dpToPx(64))) && (y < (height - dpToPx(24)))) {
                             if (isSmall) {
-                                animateY(closeBtn, paramsB, dpToPx(32), 100);
+                                animateY(closeBtn, paramsCloseBtn, dpToPx(32), 100, false);
                                 isSmall = false;
                             }
                         } else {
                             if (!isSmall) {
-                                animateY(closeBtn, paramsB, dpToPx(24), 100);
+                                animateY(closeBtn, paramsCloseBtn, dpToPx(24), 100, false);
                                 isSmall = true;
                             }
                         }
@@ -745,14 +1019,19 @@ public class FlyingChopper extends Service {
         }
     };
     private boolean isSmall = true;
-    private void animateFade(final View v, final AnimationLayoutParams params, float to, int ms, final boolean remove)
+    private void animateFade(final View v, final AnimationLayoutParams params, float to, int ms, final boolean remove, @Nullable Interpolator interpolator)
     {
         ObjectAnimator animation = ObjectAnimator.ofFloat(params, "alpha", to);
         animation.setDuration(ms);
+        if (interpolator!= null) animation.setInterpolator(interpolator);
         animation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                windowManager.updateViewLayout(v, params);
+                try {
+                    windowManager.updateViewLayout(v, params);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         });
         animation.addListener(new Animator.AnimatorListener() {
@@ -763,10 +1042,14 @@ public class FlyingChopper extends Service {
 
             @Override
             public void onAnimationEnd(Animator animator) {
-                if(remove)
-                    windowManager.removeView(v);
-                else
-                    windowManager.updateViewLayout(v, params);
+                try {
+                    if(remove)
+                        windowManager.removeView(v);
+                    else
+                        windowManager.updateViewLayout(v, params);
+                } catch(Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -781,7 +1064,7 @@ public class FlyingChopper extends Service {
         });
         animation.start();
     }
-    private void animateY(final View v, final AnimationLayoutParams params, int toY, int ms)
+    private void animateY(final View v, final AnimationLayoutParams params, int toY, int ms, final boolean toRemove)
     {
         PropertyValuesHolder height = PropertyValuesHolder.ofInt("y", toY);
         ObjectAnimator animation = ObjectAnimator.ofPropertyValuesHolder(params,height);
@@ -800,7 +1083,14 @@ public class FlyingChopper extends Service {
 
             @Override
             public void onAnimationEnd(Animator animator) {
-                windowManager.updateViewLayout(v, params);
+                try {
+                    if(!toRemove)
+                        windowManager.updateViewLayout(v, params);
+                    else
+                        windowManager.removeView(v);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
 
             @Override
@@ -835,6 +1125,32 @@ public class FlyingChopper extends Service {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             launchDialog(dbListAdapter.getIDfromPosition(position));
+        }
+    };
+
+    View.OnClickListener listIconClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(panelSelection != SELECT_LIST) {
+                panelSelection = SELECT_LIST;
+                View[] toShrink = {mainIcon, dmgcalcIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsDmgCalcIcon};
+                animateSize(toShrink, paramsToShrink, listIcon, paramsListIcon);
+                listOpen();
+            }
+        }
+    };
+
+    View.OnClickListener dmgcalcIconClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(panelSelection != SELECT_DMGCALC) {
+                panelSelection = SELECT_DMGCALC;
+                View[] toShrink = {mainIcon, listIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon};
+                animateSize(toShrink, paramsToShrink, dmgcalcIcon, paramsDmgCalcIcon);
+                dmgcalcOpen();
+            }
         }
     };
 
@@ -1242,5 +1558,104 @@ public class FlyingChopper extends Service {
         paramsD.height = (int)(getScreenHeight() * 0.85);
         paramsD.gravity = Gravity.CENTER;
         windowManager.addView(dialog, paramsD);
+    }
+
+    private static final int SIZE_NORMAL = 72;
+    private static final int SIZE_SMALL = 60;
+    private static final int TOUCH_TRESHOLD = 15;
+    private static final int INTERFACE_SPACING = 74;
+
+    private void animateSize(final View[] toShrink, final AnimationLayoutParams[] paramsToShrink, View toEnlarge, AnimationLayoutParams paramsToEnlarge)
+    {
+        AnimatorSet animSet = new AnimatorSet();
+        List<Animator> animList = new ArrayList<>();
+        for(int i = 0; i < toShrink.length; i++) {
+            PropertyValuesHolder width = PropertyValuesHolder.ofInt("width", dpToPx(SIZE_SMALL));
+            PropertyValuesHolder height = PropertyValuesHolder.ofInt("height", dpToPx(SIZE_SMALL));
+            final View v = toShrink[i];
+            final AnimationLayoutParams pm = paramsToShrink[i];
+            ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(pm, width, height);
+            anim.setDuration(100);
+            anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                    try {
+                        windowManager.updateViewLayout(v, pm);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            anim.addListener(new Animator.AnimatorListener() {
+                @Override
+                public void onAnimationStart(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animator) {
+                    try {
+                        windowManager.updateViewLayout(v, pm);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                @Override
+                public void onAnimationCancel(Animator animator) {
+
+                }
+
+                @Override
+                public void onAnimationRepeat(Animator animator) {
+
+                }
+            });
+            animList.add(anim);
+        }
+        PropertyValuesHolder width = PropertyValuesHolder.ofInt("width", dpToPx(SIZE_NORMAL));
+        PropertyValuesHolder height = PropertyValuesHolder.ofInt("height", dpToPx(SIZE_NORMAL));
+        final View v = toEnlarge;
+        final AnimationLayoutParams pm = paramsToEnlarge;
+        ObjectAnimator anim = ObjectAnimator.ofPropertyValuesHolder(pm, width, height);
+        anim.setDuration(100);
+        anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                try {
+                    windowManager.updateViewLayout(v, pm);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        anim.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                try {
+                    windowManager.updateViewLayout(v, pm);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+        animList.add(anim);
+        animSet.playTogether(animList);
+        animSet.start();
     }
 }

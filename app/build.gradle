@@ -8,8 +8,8 @@ android {
         applicationId "it.instruman.treasurecruisedatabase"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 21
-        versionName "3.6"
+        versionCode 22
+        versionName "3.7"
     }
     buildTypes {
         release {
