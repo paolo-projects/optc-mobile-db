@@ -772,6 +772,8 @@ public class FlyingChopper extends Service {
     public void onCreate() {
         super.onCreate();
 
+
+
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         mainIcon = new ImageView(this);
@@ -1160,7 +1162,6 @@ public class FlyingChopper extends Service {
 
         final TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
         tabs.setup();
-        tabs.setBackgroundColor(getResources().getColor(R.color.char_info_bg_teal));
 
         TabHost.TabSpec main_info = tabs.newTabSpec("MAIN_INFO");
         main_info.setIndicator(getString(R.string.tab_maininfo));
@@ -1183,6 +1184,12 @@ public class FlyingChopper extends Service {
         drops_tab.setContent(R.id.tab_drops);
         tabs.addTab(drops_tab);
         tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.GONE);
+
+        TabHost.TabSpec manuals_tab = tabs.newTabSpec("MANUALS");
+        manuals_tab.setIndicator(getString(R.string.tab_manuals));
+        manuals_tab.setContent(R.id.tab_manuals);
+        tabs.addTab(manuals_tab);
+        tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.GONE);
 
         tabs.setCurrentTab(0);
 
@@ -1536,6 +1543,84 @@ public class FlyingChopper extends Service {
                 if(!drop_notes.getText().equals("")) drops_content.addView(drop_notes);
             }
             tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.VISIBLE);
+        }
+
+        LinearLayout manuals_content = (LinearLayout) dialog.findViewById(R.id.manuals_content);
+        List<DropInfo> manuals = charInfo.getManualsInfos();
+
+        if (manuals.size() > 0) {
+            for (int i = 0; i < manuals.size(); i++) {
+                DropInfo this_manuals = manuals.get(i);
+
+                LinearLayout manuals_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
+                manuals_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
+                manuals_row.setLayoutParams(new LinearLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                )); // SET WIDTH AND HEIGHT
+                manuals_row.setGravity(Gravity.CENTER_VERTICAL);
+
+                //############# SMALL ICON ###############
+                ImageButton evo_pic = new ImageButton(context); //CREATE PIC
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        dpToPx(48), dpToPx(48)
+                );
+                params.setMargins(2, 5, 2, 5);
+                params.gravity = Gravity.CENTER;
+                evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
+                evo_pic.setPadding(0, 0, 0, 0);
+                evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
+                Integer cont_id = this_manuals.getDropThumbnail();
+                Glide
+                        .with(context)
+                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
+                        .dontTransform()
+                        .override(thumbnail_width, thumbnail_height)
+                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                        .into(evo_pic); //ADD PIC
+                manuals_row.addView(evo_pic);
+
+                TextView manual_name = new TextView(context);
+                LinearLayout.LayoutParams txt_params =  new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1
+                );
+                txt_params.setMargins(dpToPx(10), 0, 5, 0);
+                manual_name.setLayoutParams(txt_params);
+                manual_name.setText(this_manuals.getDropLocation());
+                manual_name.setTextColor(getResources().getColor(R.color.char_info_txt_teal));
+                manual_name.setGravity(Gravity.CENTER);
+
+                manuals_row.addView(manual_name);
+
+                TextView manual_det = new TextView(context);
+                LinearLayout.LayoutParams txt2_params =  new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.MATCH_PARENT, 1
+                );
+                txt2_params.setMargins(5, 0, 5, 0);
+                manual_det.setLayoutParams(txt2_params);
+                manual_det.setText(this_manuals.getDropChapterOrDifficulty());
+                manual_det.setTextColor(getResources().getColor(R.color.char_info_txt_teal));
+                manual_det.setGravity(Gravity.CENTER);
+
+                manuals_row.addView(manual_det);
+
+                TextView manual_notes = new TextView(context);
+                manual_notes.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                manual_notes.setGravity(Gravity.CENTER);
+                manual_notes.setTypeface(manual_notes.getTypeface(), Typeface.BOLD);
+                manual_notes.setTextColor(getResources().getColor(R.color.char_info_header_txt_teal));
+
+                if(this_manuals.isGlobal() && !this_manuals.isJapan())
+                    manual_notes.setText(getString(R.string.drops_global));
+                else if(!this_manuals.isGlobal() && this_manuals.isJapan())
+                    manual_notes.setText(getString(R.string.drops_japan));
+
+                manuals_content.addView(manuals_row);
+                if(!manual_notes.getText().equals("")) manuals_content.addView(manual_notes);
+            }
+            tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.VISIBLE);
         }
 
         HorizontalScrollView scr = (HorizontalScrollView) dialog.findViewById(R.id.tabs_scrollview);

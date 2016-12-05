@@ -105,6 +105,12 @@
                             layout="@layout/dialog_drops"
                             android:layout_height="match_parent"
                             android:layout_width="match_parent" />
+
+                        <include
+                            android:id="@+id/tab_manuals"
+                            layout="@layout/dialog_manuals"
+                            android:layout_height="match_parent"
+                            android:layout_width="match_parent" />
                     </FrameLayout>
                 </LinearLayout>
             </TabHost>

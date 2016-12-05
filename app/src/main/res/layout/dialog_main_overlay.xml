@@ -70,6 +70,7 @@
                         android:layout_gravity="center">
                         <TabWidget
                             android:id="@android:id/tabs"
+                            android:background="@color/char_info_bg_teal"
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="center"
@@ -104,6 +105,12 @@
                         <include
                             android:id="@+id/tab_drops"
                             layout="@layout/dialog_drops_overlay"
+                            android:layout_height="match_parent"
+                            android:layout_width="match_parent" />
+
+                        <include
+                            android:id="@+id/tab_manuals"
+                            layout="@layout/dialog_manuals_overlay"
                             android:layout_height="match_parent"
                             android:layout_width="match_parent" />
                     </FrameLayout>

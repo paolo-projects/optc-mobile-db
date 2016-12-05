@@ -17,6 +17,8 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
+import android.text.Spanned;
 import android.view.View;
 
 import com.github.amlcurran.showcaseview.ShowcaseView;
@@ -106,8 +108,8 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         donate_pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                String ls = System.getProperty("line.separator");
-                (new AlertDialog.Builder(context)).setTitle("Thank you!").setMessage(getString(R.string.prefs_donation_message))
+                Spanned result;
+                (new AlertDialog.Builder(context)).setTitle("Thank you!").setMessage(Html.fromHtml(getString(R.string.prefs_donation_message)))
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {

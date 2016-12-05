@@ -13,53 +13,53 @@ import java.util.HashMap;
  * Created by Paolo on 31/10/2016.
  */
 
-public class DBHelper extends SQLiteOpenHelper {
+class DBHelper extends SQLiteOpenHelper {
 
     // Name of database
-    public static final String DB_NAME = "optc_db_mobile";
+    static final String DB_NAME = "optc_db_mobile";
     // Version of database
     private static final int DB_VERSION = 1;
 
     // Table units
-    public final static String UNITS_TABLE = "units";
+    final static String UNITS_TABLE = "units";
     // Columns
-    public final static String UNITS_ID = "_id";
-    public final static String UNITS_CHARID = "charid";
-    public final static String UNITS_NAME = "name";
-    public final static String UNITS_TYPE = "type";
-    public final static String UNITS_CLASS1 = "class1";
-    public final static String UNITS_CLASS2 = "class2";
-    public final static String UNITS_STARS = "stars";
-    public final static String UNITS_COST = "cost";
-    public final static String UNITS_COMBO = "combo";
-    public final static String UNITS_SOCKETS = "sockets";
-    public final static String UNITS_MAXLEVEL = "maxlevel";
-    public final static String UNITS_EXPTOMAX = "exptomax";
-    public final static String UNITS_LVL1HP = "lvl1hp";
-    public final static String UNITS_LVL1ATK = "lvl1atk";
-    public final static String UNITS_LVL1RCV = "lvl1rcv";
-    public final static String UNITS_MAXHP = "maxhp";
-    public final static String UNITS_MAXATK = "maxatk";
-    public final static String UNITS_MAXRCV = "maxrcv";
+    final static String UNITS_ID = "_id";
+    final static String UNITS_CHARID = "charid";
+    final static String UNITS_NAME = "name";
+    final static String UNITS_TYPE = "type";
+    final static String UNITS_CLASS1 = "class1";
+    final static String UNITS_CLASS2 = "class2";
+    final static String UNITS_STARS = "stars";
+    final static String UNITS_COST = "cost";
+    final static String UNITS_COMBO = "combo";
+    final static String UNITS_SOCKETS = "sockets";
+    final static String UNITS_MAXLEVEL = "maxlevel";
+    final static String UNITS_EXPTOMAX = "exptomax";
+    final static String UNITS_LVL1HP = "lvl1hp";
+    final static String UNITS_LVL1ATK = "lvl1atk";
+    final static String UNITS_LVL1RCV = "lvl1rcv";
+    final static String UNITS_MAXHP = "maxhp";
+    final static String UNITS_MAXATK = "maxatk";
+    final static String UNITS_MAXRCV = "maxrcv";
 
     // Table specials
-    public final static String SPECIALS_TABLE = "specials";
+    final static String SPECIALS_TABLE = "specials";
     // Columns
-    public final static String SPECIALS_ID = "_id";
-    public final static String SPECIALS_CHARID = "char_id";
-    public final static String SPECIALS_NAME = "name";
-    public final static String SPECIALS_DESCRIPTION = "description";
-    public final static String SPECIALS_MAXCD = "max_cd";
-    public final static String SPECIALS_MINCD = "min_cd";
-    public final static String SPECIALS_NOTES = "notes";
+    final static String SPECIALS_ID = "_id";
+    final static String SPECIALS_CHARID = "char_id";
+    final static String SPECIALS_NAME = "name";
+    final static String SPECIALS_DESCRIPTION = "description";
+    final static String SPECIALS_MAXCD = "max_cd";
+    final static String SPECIALS_MINCD = "min_cd";
+    final static String SPECIALS_NOTES = "notes";
 
     // Table captains
-    public final static String CAPTAINS_TABLE = "captains";
+    final static String CAPTAINS_TABLE = "captains";
     // Columns
-    public final static String CAPTAINS_ID = "_id";
-    public final static String CAPTAINS_CHARID = "char_id";
-    public final static String CAPTAINS_DESCRIPTION = "description";
-    public final static String CAPTAINS_NOTES = "notes";
+    final static String CAPTAINS_ID = "_id";
+    final static String CAPTAINS_CHARID = "char_id";
+    final static String CAPTAINS_DESCRIPTION = "description";
+    final static String CAPTAINS_NOTES = "notes";
 
     // Table evolutions
     private final static String EVOLUTIONS_TABLE = "evolutions";
@@ -84,6 +84,17 @@ public class DBHelper extends SQLiteOpenHelper {
     private final static String DROPS_JAPAN = "japan";
     private final static String DROPS_THUMB = "thumbnail";
 
+    // Table manual locations
+    private final static String MANUALS_TABLE = "manuals_locations";
+    // Columns
+    private final static String MANUALS_ID = "_id";
+    private final static String MANUALS_CHARID = "char_id";
+    private final static String MANUALS_LOCATIONS = "drop_location";
+    private final static String MANUALS_CHAPDIFF = "chapter_or_difficulty";
+    private final static String MANUALS_GLOBAL = "global";
+    private final static String MANUALS_JAPAN = "japan";
+    private final static String MANUALS_THUMB = "thumbnail";
+
     // Custom SQL
     //Drop tables
     private final static String DROP_UNITS = "DROP TABLE IF EXISTS " + UNITS_TABLE;
@@ -91,6 +102,7 @@ public class DBHelper extends SQLiteOpenHelper {
     private final static String DROP_CAPTAINS = "DROP TABLE IF EXISTS " + CAPTAINS_TABLE;
     private final static String DROP_EVOLUTIONS = "DROP TABLE IF EXISTS " + EVOLUTIONS_TABLE;
     private final static String DROP_DROPS = "DROP TABLE IF EXISTS " + DROPS_TABLE;
+    private final static String DROP_MANUALS = "DROP TABLE IF EXISTS " + MANUALS_TABLE;
 
     // Create tables
     private final static String CREATE_TABLE_UNITS =
@@ -152,6 +164,16 @@ public class DBHelper extends SQLiteOpenHelper {
                     DROPS_JAPAN + " INT, " +
                     DROPS_THUMB + " INT, " +
                     "PRIMARY KEY ( " + DROPS_ID + " ))";
+    private final static String CREATE_TABLE_MANUALS =
+            "CREATE TABLE " + MANUALS_TABLE + " (" +
+                    MANUALS_ID + " INTEGER, " +
+                    MANUALS_CHARID + " INT, " +
+                    MANUALS_LOCATIONS + " TEXT, " +
+                    MANUALS_CHAPDIFF + " TEXT, " +
+                    MANUALS_GLOBAL + " INT, " +
+                    MANUALS_JAPAN + " INT, " +
+                    MANUALS_THUMB + " INT, " +
+                    "PRIMARY KEY ( " + MANUALS_ID + " ))";
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -165,6 +187,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_CAPTAINS);
         db.execSQL(DROP_EVOLUTIONS);
         db.execSQL(DROP_DROPS);
+        db.execSQL(DROP_MANUALS);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
@@ -172,6 +195,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_CAPTAINS);
         db.execSQL(CREATE_TABLE_EVOLUTIONS);
         db.execSQL(CREATE_TABLE_DROPS);
+        db.execSQL(CREATE_TABLE_MANUALS);
         db.close();
     }
 
@@ -202,6 +226,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_CAPTAINS);
         db.execSQL(DROP_EVOLUTIONS);
         db.execSQL(DROP_DROPS);
+        db.execSQL(DROP_MANUALS);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
@@ -209,6 +234,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_CAPTAINS);
         db.execSQL(CREATE_TABLE_EVOLUTIONS);
         db.execSQL(CREATE_TABLE_DROPS);
+        db.execSQL(CREATE_TABLE_MANUALS);
     }
 
     public static void insertIntoDrops(SQLiteDatabase db, Integer char_id, String drop_location, String chap_or_difficulty, boolean is_global, boolean is_japan, Integer thumbnail)
@@ -234,6 +260,31 @@ public class DBHelper extends SQLiteOpenHelper {
             db.insert(DROPS_TABLE, null, values);
         }
         drops_cursor.close();
+    }
+
+    public static void insertIntoManuals(SQLiteDatabase db, Integer char_id, String drop_location, String chap_or_difficulty, boolean is_global, boolean is_japan, Integer thumbnail)
+    {
+        Cursor manuals_cursor = db.query(MANUALS_TABLE, new String[] {MANUALS_ID,MANUALS_CHAPDIFF}, MANUALS_CHARID + " = ? AND " + MANUALS_LOCATIONS
+                        + " = ? AND " + MANUALS_GLOBAL + " = ? AND " + MANUALS_JAPAN + " = ? AND " + MANUALS_THUMB + " = ?",
+                new String[] {String.valueOf(char_id), drop_location, String.valueOf(is_global?1:0), String.valueOf(is_japan?1:0), String.valueOf(thumbnail)}, null, null, null, null);
+
+        if (manuals_cursor.getCount()>0)
+        {
+            manuals_cursor.moveToFirst();
+            ContentValues values = new ContentValues();
+            values.put(MANUALS_CHAPDIFF, manuals_cursor.getString(1)+", "+chap_or_difficulty);
+            db.update(MANUALS_TABLE, values, MANUALS_ID + " = ?", new String[] {String.valueOf(manuals_cursor.getInt(0))});
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(MANUALS_CHARID, char_id);
+            values.put(MANUALS_LOCATIONS, drop_location);
+            values.put(MANUALS_CHAPDIFF, chap_or_difficulty);
+            values.put(MANUALS_GLOBAL, is_global ? 1 : 0);
+            values.put(MANUALS_JAPAN, is_japan ? 1 : 0);
+            values.put(MANUALS_THUMB, thumbnail);
+            db.insert(MANUALS_TABLE, null, values);
+        }
+        manuals_cursor.close();
     }
 
     public static void insertIntoUnits(SQLiteDatabase db, Integer id, String name, String type, String class1, String class2,
@@ -345,6 +396,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 DROPS_CHARID + " = ?", new String[]{String.valueOf(CharId)}, null, null, null, null);
         drops_cursor.moveToFirst();
 
+        Cursor manuals_cursor = db.query(MANUALS_TABLE, new String[]{MANUALS_LOCATIONS, MANUALS_CHAPDIFF,
+                        MANUALS_GLOBAL, MANUALS_JAPAN, MANUALS_THUMB},
+                MANUALS_CHARID + " = ?", new String[]{String.valueOf(CharId)}, null, null, null, null);
+        manuals_cursor.moveToFirst();
+        
         ArrayList<CharacterSpecials> specials_data = new ArrayList<>();
         String special_name = "";
         String special_notes = "";
@@ -383,16 +439,24 @@ public class DBHelper extends SQLiteOpenHelper {
             drops_cursor.moveToNext();
         }
 
+        ArrayList<DropInfo> manualsInfos = new ArrayList<>();
+        while(!manuals_cursor.isAfterLast()) {
+            DropInfo manualsInfo = new DropInfo(CharId, manuals_cursor.getString(1), manuals_cursor.getString(0), manuals_cursor.getInt(4), (manuals_cursor.getInt(2)==1), (manuals_cursor.getInt(3)==1));
+            manualsInfos.add(manualsInfo);
+            manuals_cursor.moveToNext();
+        }
+
         units_cursor.close();
         specials_cursor.close();
         captain_cursor.close();
         evolutions_cursor.close();
         drops_cursor.close();
+        manuals_cursor.close();
 
         return new CharacterInfo(captain_description, captain_notes, char_class1, char_class2, char_combo,
                 char_cost, id, char_evos, char_exptomax, CharId, char_lvl1atk, char_lvl1hp, char_lvl1rcv,
                 char_maxatk, char_maxhp, char_maxlvl, char_maxrcv, char_name, char_sockets, special_name, special_notes,
-                specials_data, char_stars, char_type, dropInfos);
+                specials_data, char_stars, char_type, dropInfos, manualsInfos);
     }
 
     public static ArrayList<CharacterEvolutions> getEvolutions(SQLiteDatabase db, Integer charID)
