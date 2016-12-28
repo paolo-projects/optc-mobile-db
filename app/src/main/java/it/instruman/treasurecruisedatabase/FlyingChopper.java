@@ -21,6 +21,7 @@ import android.os.IBinder;
 import android.os.Parcel;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.text.Editable;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -36,6 +37,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.CookieManager;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
@@ -43,6 +45,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
@@ -151,20 +154,21 @@ public class FlyingChopper extends Service {
 
 
     private WindowManager windowManager;
-    private ImageView mainIcon, listIcon, dmgcalcIcon, ellipsisIcon;
+    private ImageView mainIcon, listIcon, dmgcalcIcon, calculatorIcon, ellipsisIcon;
     private boolean isClick = false;
     private boolean isCloseVisible = false;
     private Context context = this;
     private Service service = this;
     private View listInterfaceView = null;
     private View dmgCalcInterfaceView = null;
+    private View calcInterfaceView = null;
     private ImageView closeBtn;
     private ListView dbList;
     private ArrayList<HashMap> dbListItems, dbOriginalListItems;
     private listViewAdapterOverlay dbListAdapter;
     private ImageView sortName, sortType, sortHP, sortAtk, sortRCV, sortStars;
 
-    AnimationLayoutParams paramsMainIcon, paramsCloseBtn, paramsListInterface, paramsListIcon, paramsDmgCalcInterface, paramsDmgCalcIcon, paramsEllipsisIcon;
+    AnimationLayoutParams paramsMainIcon, paramsCloseBtn, paramsListInterface, paramsListIcon, paramsDmgCalcInterface, paramsDmgCalcIcon, paramsCalcIcon, paramsCalcInterface, paramsEllipsisIcon;
     int panelState = 0;  // state 0 = close
                     // state 1 = open
     @Override
@@ -196,6 +200,29 @@ public class FlyingChopper extends Service {
         display.getSize(size);
         return size.y;
     }
+    private int getSideTotalMargin() {
+        LinearLayout main = (LinearLayout) listInterfaceView.findViewById(R.id.maincontent_overlay);
+        int left = main.getPaddingLeft();
+        int right = main.getPaddingRight();
+        return left + right;
+    }
+
+    private void hideKeyboard() {
+        //  UNFOCUS TEXTBOX AND HIDE KEYBOARD
+        InputMethodManager inputManager = (InputMethodManager)
+                getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        inputManager.hideSoftInputFromWindow(listInterfaceView.getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+    private void showKeyboard() {
+        //SHOW KEYBOARD
+        filterText.requestFocus();
+        InputMethodManager keyboard = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        keyboard.showSoftInput(filterText, 0);
+    }
+
 
     private void thumbClick()
     {
@@ -211,15 +238,18 @@ public class FlyingChopper extends Service {
             animateFade(listInterfaceView, paramsListInterface, 0.0f, 100, true, new LinearInterpolator());
         if(panelSelection==SELECT_DMGCALC)
             animateFade(dmgCalcInterfaceView, paramsDmgCalcInterface, 0.0f, 100, true, new LinearInterpolator());
+        if(panelSelection==SELECT_CALCULATOR)
+            animateFade(calcInterfaceView, paramsCalcInterface, 0.0f, 100, true, new LinearInterpolator());
         int mainY = paramsMainIcon.y;
-        View[] toShrink = {listIcon, dmgcalcIcon};
-        AnimationLayoutParams[] paramsToShrink = {paramsListIcon, paramsDmgCalcIcon};
+        View[] toShrink = {listIcon, dmgcalcIcon, calculatorIcon};
+        AnimationLayoutParams[] paramsToShrink = {paramsListIcon, paramsDmgCalcIcon, paramsCalcIcon};
         animateSize(toShrink, paramsToShrink, mainIcon, paramsMainIcon);
         ObjectAnimator listAnim = getYAnimator(paramsListIcon, listIcon, mainY, 300, new LinearInterpolator(), true, null);
         ObjectAnimator dmgcalcAnim = getYAnimator(paramsDmgCalcIcon, dmgcalcIcon, mainY, 300, new LinearInterpolator(), true, null);
+        ObjectAnimator calculatorAnim = getYAnimator(paramsCalcIcon, calculatorIcon, mainY, 300, new LinearInterpolator(), true, null);
         ObjectAnimator ellipsisAnim = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY, 300, new LinearInterpolator(), true, null);
         AnimatorSet animSet = new AnimatorSet();
-        animSet.playTogether(listAnim, dmgcalcAnim, ellipsisAnim);
+        animSet.playTogether(listAnim, dmgcalcAnim, calculatorAnim, ellipsisAnim);
         animSet.start();
         panelState = 0;
         mainIcon.setOnTouchListener(mainiconClickAndMove);
@@ -227,6 +257,7 @@ public class FlyingChopper extends Service {
 
     private static final int SELECT_LIST = 1;
     private static final int SELECT_DMGCALC = 2;
+    private static final int SELECT_CALCULATOR = 3;
     private int panelSelection = SELECT_LIST;
     private void clickOpen()
     {
@@ -236,17 +267,25 @@ public class FlyingChopper extends Service {
             case SELECT_LIST: {
                 listOpen();
                 animateIconsDropping();
-                View[] toShrink = {mainIcon, dmgcalcIcon};
-                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsDmgCalcIcon};
+                View[] toShrink = {mainIcon, dmgcalcIcon, calculatorIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsDmgCalcIcon, paramsCalcIcon};
                 animateSize(toShrink, paramsToShrink, listIcon, paramsListIcon);
                 break;
             }
             case SELECT_DMGCALC: {
                 dmgcalcOpen();
                 animateIconsDropping();
-                View[] toShrink = {mainIcon, listIcon};
-                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon};
+                View[] toShrink = {mainIcon, listIcon, calculatorIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon, paramsCalcIcon};
                 animateSize(toShrink, paramsToShrink, dmgcalcIcon, paramsDmgCalcIcon);
+                break;
+            }
+            case SELECT_CALCULATOR: {
+                calculatorOpen();
+                animateIconsDropping();
+                View[] toShrink = {mainIcon, listIcon, dmgcalcIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon, paramsDmgCalcIcon};
+                animateSize(toShrink, paramsToShrink, calculatorIcon, paramsCalcIcon);
                 break;
             }
         }
@@ -307,6 +346,8 @@ public class FlyingChopper extends Service {
             windowManager.removeView(listInterfaceView);
         if((dmgCalcInterfaceView != null) && (dmgCalcInterfaceView.getWindowToken() != null))
             windowManager.removeView(dmgCalcInterfaceView);
+        if((calcInterfaceView != null) && (calcInterfaceView.getWindowToken() != null))
+            windowManager.removeView(calcInterfaceView);
         if(dmgCalcInterfaceView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             dmgCalcInterfaceView = layoutInflater.inflate(R.layout.activity_dmg_calc_overlay, null);
@@ -336,6 +377,325 @@ public class FlyingChopper extends Service {
         panelState = 1;
         mainIcon.setOnTouchListener(mainiconClickSimple);
     }
+
+    private void calculatorOpen()
+    {
+        if((listInterfaceView != null) && (listInterfaceView.getWindowToken() != null))
+            windowManager.removeView(listInterfaceView);
+        if((dmgCalcInterfaceView != null) && (dmgCalcInterfaceView.getWindowToken() != null))
+            windowManager.removeView(dmgCalcInterfaceView);
+        if((calcInterfaceView != null) && (calcInterfaceView.getWindowToken() != null))
+            windowManager.removeView(calcInterfaceView);
+        if(calcInterfaceView == null) {
+            LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+            calcInterfaceView = layoutInflater.inflate(R.layout.dialog_calculator, null);
+            initializeCalcDialog();
+        }
+        paramsCalcInterface = new AnimationLayoutParams(
+                WindowManager.LayoutParams.TYPE_SYSTEM_ALERT,
+                //WindowManager.LayoutParams.FLAG_DIM_BEHIND |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+                PixelFormat.TRANSLUCENT);
+        boolean left = (paramsMainIcon.x < getScreenWidth()/2);
+        if(left) {
+            paramsCalcInterface.gravity = Gravity.CENTER_VERTICAL;
+            paramsCalcInterface.x = dpToPx(INTERFACE_SPACING);
+        } else {
+            paramsCalcInterface.gravity = Gravity.START | Gravity.CENTER_VERTICAL;
+            paramsCalcInterface.x = 0;
+        }
+        paramsCalcInterface.width = (getScreenWidth()-dpToPx(INTERFACE_SPACING));
+        paramsCalcInterface.alpha = 0.0f;
+
+        if(calcInterfaceView.getWindowToken() == null)
+            windowManager.addView(calcInterfaceView, paramsCalcInterface);
+
+        animateFade(calcInterfaceView, paramsCalcInterface, 1.0f, 300, false, new LinearInterpolator());
+
+        panelState = 1;
+        mainIcon.setOnTouchListener(mainiconClickSimple);
+    }
+
+    private void initializeCalcDialog()
+    {
+        Button btn10cut = (Button)calcInterfaceView.findViewById(R.id.btn10cut);
+        Button btn20cut = (Button)calcInterfaceView.findViewById(R.id.btn20cut);
+        Button btn30cut = (Button)calcInterfaceView.findViewById(R.id.btn30cut);
+        Button btn40cut = (Button)calcInterfaceView.findViewById(R.id.btn40cut);
+
+        Button btn1 = (Button)calcInterfaceView.findViewById(R.id.btn1);
+        Button btn2 = (Button)calcInterfaceView.findViewById(R.id.btn2);
+        Button btn3 = (Button)calcInterfaceView.findViewById(R.id.btn3);
+        Button btn4 = (Button)calcInterfaceView.findViewById(R.id.btn4);
+        Button btn5 = (Button)calcInterfaceView.findViewById(R.id.btn5);
+        Button btn6 = (Button)calcInterfaceView.findViewById(R.id.btn6);
+        Button btn7 = (Button)calcInterfaceView.findViewById(R.id.btn7);
+        Button btn8 = (Button)calcInterfaceView.findViewById(R.id.btn8);
+        Button btn9 = (Button)calcInterfaceView.findViewById(R.id.btn9);
+        Button btn0 = (Button)calcInterfaceView.findViewById(R.id.btn0);
+        Button btnPoint = (Button)calcInterfaceView.findViewById(R.id.btnPoint);
+        Button btnEqual = (Button)calcInterfaceView.findViewById(R.id.btnEqual);
+
+        Button delLastBtn = (Button)calcInterfaceView.findViewById(R.id.btnDeleteLast);
+        Button btnDel = (Button)calcInterfaceView.findViewById(R.id.btnDel);
+        Button btnC = (Button)calcInterfaceView.findViewById(R.id.btnC);
+
+        Button btnPlus = (Button)calcInterfaceView.findViewById(R.id.btnPlus);
+        Button btnMinus = (Button)calcInterfaceView.findViewById(R.id.btnMinus);
+        Button btnTimes = (Button)calcInterfaceView.findViewById(R.id.btnTimes);
+        Button btnDivision = (Button)calcInterfaceView.findViewById(R.id.btnDivision);
+
+        Button btnX0_5 = (Button)calcInterfaceView.findViewById(R.id.btnX0_5);
+        Button btnX1_5 = (Button)calcInterfaceView.findViewById(R.id.btnX1_5);
+        Button btnX2 = (Button)calcInterfaceView.findViewById(R.id.btnX2);
+        Button btnX2_25 = (Button)calcInterfaceView.findViewById(R.id.btnX2_25);
+        Button btnX2_5 = (Button)calcInterfaceView.findViewById(R.id.btnX2_5);
+        Button btnX2_75 = (Button)calcInterfaceView.findViewById(R.id.btnX2_75);
+        Button btnX3 = (Button)calcInterfaceView.findViewById(R.id.btnX3);
+
+        btn1.setOnClickListener(numberOnClickListener);
+        btn2.setOnClickListener(numberOnClickListener);
+        btn3.setOnClickListener(numberOnClickListener);
+        btn4.setOnClickListener(numberOnClickListener);
+        btn5.setOnClickListener(numberOnClickListener);
+        btn6.setOnClickListener(numberOnClickListener);
+        btn7.setOnClickListener(numberOnClickListener);
+        btn8.setOnClickListener(numberOnClickListener);
+        btn9.setOnClickListener(numberOnClickListener);
+        btn0.setOnClickListener(numberOnClickListener);
+        btnPoint.setOnClickListener(numberOnClickListener);
+
+        delLastBtn.setOnClickListener(deleteLastOnClickListener);
+        btnDel.setOnClickListener(btnDelOnClickListener);
+
+        btnPlus.setOnClickListener(operationOnClickListener);
+        btnMinus.setOnClickListener(operationOnClickListener);
+        btnTimes.setOnClickListener(operationOnClickListener);
+        btnDivision.setOnClickListener(operationOnClickListener);
+
+        btnEqual.setOnClickListener(equalsOnClickListener);
+        btnC.setOnClickListener(clearOnClickListener);
+
+        btn10cut.setOnClickListener(cutOnClickListener);
+        btn20cut.setOnClickListener(cutOnClickListener);
+        btn30cut.setOnClickListener(cutOnClickListener);
+        btn40cut.setOnClickListener(cutOnClickListener);
+
+        btnX0_5.setOnClickListener(multiplyOnClickListener);
+        btnX1_5.setOnClickListener(multiplyOnClickListener);
+        btnX2.setOnClickListener(multiplyOnClickListener);
+        btnX2_25.setOnClickListener(multiplyOnClickListener);
+        btnX2_5.setOnClickListener(multiplyOnClickListener);
+        btnX2_75.setOnClickListener(multiplyOnClickListener);
+        btnX3.setOnClickListener(multiplyOnClickListener);
+
+                mainValue = (EditText)calcInterfaceView.findViewById(R.id.calcValue);
+    }
+
+    EditText mainValue;
+
+    private View.OnClickListener cutOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String main = mainValue.getText().toString();
+            if(!main.equals("0")) {
+                Double actual = getDouble(main);
+                Integer cut = Integer.parseInt((String)view.getTag());
+                Double factor = 1.0-(cut.doubleValue()/100);
+                mainValue.setText(formatNumber(actual*factor));
+                toClear=true;
+            }
+        }
+    };
+
+    private View.OnClickListener multiplyOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String main = mainValue.getText().toString();
+            if(!main.equals("0")) {
+                Double actual = getDouble(main);
+                Double factor = Double.parseDouble((String)view.getTag());
+                mainValue.setText(formatNumber(actual*factor));
+                toClear=true;
+            }
+        }
+    };
+
+    private View.OnClickListener numberOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(toClear) {
+                mainValue.setText("0");
+                toClear = false;
+            }
+            if(mainValue.getText().toString().equals("0"))
+                mainValue.setText("");
+            try {
+                String number = (String)view.getTag();
+                if(number.equals(".") && mainValue.getText().toString().equals(""))
+                    mainValue.setText("0.");
+                else {
+                    Editable actual = mainValue.getText();
+                    actual.append(number);
+                    mainValue.setText(actual);
+                }
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    private View.OnClickListener deleteLastOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            String actual = mainValue.getText().toString();
+            if(!actual.equals("0")) {
+                if(actual.length()==1)
+                    actual = "0";
+                else
+                    actual = actual.substring(0, actual.length() - 1);
+                mainValue.setText(actual);
+            }
+        }
+    };
+
+    private View.OnClickListener btnDelOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mainValue.setText("0");
+        }
+    };
+
+    private View.OnClickListener clearOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            mainValue.setText("0");
+            VALUE_STACK = "";
+            OPERATION_STACK = -1;
+            toClear = false;
+        }
+    };
+
+    private static final int OPERATION_SUM = 0;
+    private static final int OPERATION_SUBTRACTION = 1;
+    private static final int OPERATION_MULTIPLICATION = 2;
+    private static final int OPERATION_DIVISION = 3;
+    private int OPERATION_STACK = -1;
+    private boolean toClear = false;
+    private String VALUE_STACK = "";
+
+    private Double getDouble()
+    {
+        String actual = mainValue.getText().toString();
+        if (actual.substring(actual.length()-1, actual.length()).equals("."))
+            actual = actual.substring(0, actual.length()-1);
+        try {
+            return Double.parseDouble(actual);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+
+    private Double getDouble(String actual)
+    {
+        if (actual.length()>0 && actual.substring(actual.length()-1, actual.length()).equals("."))
+            actual = actual.substring(0, actual.length()-1);
+        try {
+            return Double.parseDouble(actual);
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return 0.0;
+        }
+    }
+
+    private View.OnClickListener operationOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(VALUE_STACK.equals(""))
+                VALUE_STACK = mainValue.getText().toString();
+            Double VALUE_STACK_D = getDouble(VALUE_STACK);
+            if(OPERATION_STACK != -1 && !toClear) {
+                switch(OPERATION_STACK) {
+                    case OPERATION_SUM:
+                        VALUE_STACK_D += getDouble();
+                        break;
+                    case OPERATION_SUBTRACTION:
+                        VALUE_STACK_D -= getDouble();
+                        break;
+                    case OPERATION_MULTIPLICATION:
+                        VALUE_STACK_D *= getDouble();
+                        break;
+                    case OPERATION_DIVISION:
+                        VALUE_STACK_D /= getDouble();
+                        break;
+                }
+                VALUE_STACK = formatNumber(VALUE_STACK_D);
+                mainValue.setText(VALUE_STACK);
+                OPERATION_STACK = -1;
+            }
+            String tag = (String) view.getTag();
+            switch (tag) {
+                case "+":
+                    OPERATION_STACK = OPERATION_SUM;
+                    break;
+                case "-":
+                    OPERATION_STACK = OPERATION_SUBTRACTION;
+                    break;
+                case "*":
+                    OPERATION_STACK = OPERATION_MULTIPLICATION;
+                    break;
+                case "/":
+                    OPERATION_STACK = OPERATION_DIVISION;
+                    break;
+            }
+            toClear = true;
+        }
+    };
+
+    private String formatNumber(Double d)
+    {
+        Integer i = d.intValue();
+        Double f = Math.abs(d - i);
+        if(f>0) {
+            String r = String.format(Locale.ENGLISH, "%.3f", d);
+            boolean isLastZero = r.substring(r.length()-1, r.length()).equals("0");
+            while(isLastZero) {
+                r = r.substring(0, r.length()-1);
+                isLastZero = r.substring(r.length()-1, r.length()).equals("0");
+            }
+            return r;
+        } else
+            return String.format(Locale.ENGLISH, "%.0f", d);
+    }
+
+    private View.OnClickListener equalsOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            Double VALUE_STACK_D = getDouble(VALUE_STACK);
+            if(OPERATION_STACK != -1 && !toClear) {
+                switch(OPERATION_STACK) {
+                    case OPERATION_SUM:
+                        VALUE_STACK_D += getDouble();
+                        break;
+                    case OPERATION_SUBTRACTION:
+                        VALUE_STACK_D -= getDouble();
+                        break;
+                    case OPERATION_MULTIPLICATION:
+                        VALUE_STACK_D *= getDouble();
+                        break;
+                    case OPERATION_DIVISION:
+                        VALUE_STACK_D /= getDouble();
+                        break;
+                }
+                VALUE_STACK = formatNumber(VALUE_STACK_D);
+                mainValue.setText(VALUE_STACK);
+                OPERATION_STACK = -1;
+                VALUE_STACK = "";
+            }
+            toClear = true;
+        }
+    };
 
     private String DMGCALC_URL = "http://optc-db.github.io/damage/";
     private void initializeDmgCalcDialog() {
@@ -369,6 +729,16 @@ public class FlyingChopper extends Service {
         final WebView webView = (WebView) dmgCalcInterfaceView.findViewById(R.id.web_view);
 
         WebSettings webSettings = webView.getSettings();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // chromium, enable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        } else {
+            // older android version, disable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
+
+        webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
 
         webView.setWebViewClient(new WebViewClient() {
             @SuppressWarnings("deprecation")
@@ -474,6 +844,9 @@ public class FlyingChopper extends Service {
         paramsDmgCalcIcon.x = mainX;
         paramsDmgCalcIcon.y = mainY;
 
+        paramsCalcIcon.x = mainX;
+        paramsCalcIcon.y = mainY;
+
         paramsEllipsisIcon.x = mainX;
         paramsEllipsisIcon.y = mainY;
 
@@ -483,18 +856,21 @@ public class FlyingChopper extends Service {
             //ANIMATE FALLING DOWN
             ObjectAnimator listAnimator = getYAnimator(paramsListIcon, listIcon, mainY+dpToPx(SIZE_NORMAL), 800, new BounceInterpolator(), false, null);
             ObjectAnimator dmgcalcAnimator = getYAnimator(paramsDmgCalcIcon, dmgcalcIcon, mainY+dpToPx(SIZE_NORMAL*2), 800, new BounceInterpolator(), false, null);
-            ObjectAnimator ellipsisAnimator = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY+dpToPx(SIZE_NORMAL*3), 800, new BounceInterpolator(), false, null);
-            animatorSet.playTogether(listAnimator, dmgcalcAnimator, ellipsisAnimator);
+            ObjectAnimator calculatorAnimator = getYAnimator(paramsCalcIcon, calculatorIcon, mainY+dpToPx(SIZE_NORMAL*3), 800, new BounceInterpolator(), false, null);
+            ObjectAnimator ellipsisAnimator = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY+dpToPx(SIZE_NORMAL*4), 800, new BounceInterpolator(), false, null);
+            animatorSet.playTogether(listAnimator, dmgcalcAnimator, calculatorAnimator, ellipsisAnimator);
         } else {
             //ANIMATE JUMPING UP
             ObjectAnimator listAnimator = getYAnimator(paramsListIcon, listIcon, mainY-dpToPx(SIZE_NORMAL), 800, new BounceInterpolator(), false, null);
             ObjectAnimator dmgcalcAnimator = getYAnimator(paramsDmgCalcIcon, dmgcalcIcon, mainY-dpToPx(SIZE_NORMAL*2), 800, new BounceInterpolator(), false, null);
-            ObjectAnimator ellipsisAnimator = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY-dpToPx(SIZE_NORMAL*3), 800, new BounceInterpolator(), false, null);
-            animatorSet.playTogether(listAnimator, dmgcalcAnimator, ellipsisAnimator);
+            ObjectAnimator calculatorAnimator = getYAnimator(paramsCalcIcon, calculatorIcon, mainY-dpToPx(SIZE_NORMAL*3), 800, new BounceInterpolator(), false, null);
+            ObjectAnimator ellipsisAnimator = getYAnimator(paramsEllipsisIcon, ellipsisIcon, mainY-dpToPx(SIZE_NORMAL*4), 800, new BounceInterpolator(), false, null);
+            animatorSet.playTogether(listAnimator, dmgcalcAnimator, calculatorAnimator, ellipsisAnimator);
         }
         try {
             windowManager.addView(listIcon, paramsListIcon);
             windowManager.addView(dmgcalcIcon, paramsDmgCalcIcon);
+            windowManager.addView(calculatorIcon, paramsCalcIcon);
             windowManager.addView(ellipsisIcon, paramsEllipsisIcon);
         } catch (Exception e) {
             e.printStackTrace();
@@ -508,6 +884,8 @@ public class FlyingChopper extends Service {
             windowManager.removeView(listInterfaceView);
         if((dmgCalcInterfaceView != null) && (dmgCalcInterfaceView.getWindowToken() != null))
             windowManager.removeView(dmgCalcInterfaceView);
+        if((calcInterfaceView != null) && (calcInterfaceView.getWindowToken() != null))
+            windowManager.removeView(calcInterfaceView);
         if(listInterfaceView == null) {
             LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
             listInterfaceView = layoutInflater.inflate(R.layout.activity_main_overlay, null);
@@ -538,6 +916,13 @@ public class FlyingChopper extends Service {
 
         initializeDbDialog();
         populateDbList();
+
+        LinearLayout list_size = (LinearLayout) listInterfaceView.findViewById(R.id.list_size_layout_overlay);
+
+        if (getScreenWidth() > dpToPx(600))
+            params.width = getScreenWidth() - getSideTotalMargin();
+        else params.width = dpToPx(550);
+        list_size.setLayoutParams(params);
         /*Intent i= new Intent(getBaseContext(), MainActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
         getApplication().startActivity(i);*/
@@ -634,6 +1019,7 @@ public class FlyingChopper extends Service {
         dbListItems = utils.sortList(listInterfaceView, v, dbListItems);
         dbListAdapter = new listViewAdapterOverlay(this, dbListItems);
         dbList.setAdapter(dbListAdapter);
+        hideKeyboard();
     }
 
     ImageButton resetBtn;
@@ -712,6 +1098,7 @@ public class FlyingChopper extends Service {
             @Override
             public void onClick(View v) {
                 rebuildList();
+                hideKeyboard();
             }
         });
         resetBtn.setOnClickListener(new View.OnClickListener() {
@@ -719,6 +1106,7 @@ public class FlyingChopper extends Service {
             public void onClick(View view) {
                 filterText.setText("");
                 rebuildList();
+                showKeyboard();
             }
         });
         dbList = (ListView) listInterfaceView.findViewById(R.id.listView1_overlay);
@@ -823,6 +1211,21 @@ public class FlyingChopper extends Service {
                 PixelFormat.TRANSLUCENT);
         paramsDmgCalcIcon.gravity = Gravity.TOP | Gravity.START;
 
+        calculatorIcon = new ImageView(this);
+
+        calculatorIcon.setImageResource(R.mipmap.ic_calculator);
+        calculatorIcon.setScaleType(ImageView.ScaleType.FIT_CENTER);
+
+        paramsCalcIcon = new AnimationLayoutParams(
+                /*WindowManager.LayoutParams.WRAP_CONTENT,
+                WindowManager.LayoutParams.WRAP_CONTENT,*/
+                dpToPx(SIZE_NORMAL),
+                dpToPx(SIZE_NORMAL),
+                WindowManager.LayoutParams.TYPE_PHONE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                PixelFormat.TRANSLUCENT);
+        paramsCalcIcon.gravity = Gravity.TOP | Gravity.START;
+
         ellipsisIcon = new ImageView(this);
 
         ellipsisIcon.setImageResource(R.mipmap.ic_ellipsis);
@@ -849,10 +1252,14 @@ public class FlyingChopper extends Service {
                     windowManager.removeView(listInterfaceView);
                 if(dmgCalcInterfaceView != null && dmgCalcInterfaceView.getWindowToken() != null)
                     windowManager.removeView(dmgCalcInterfaceView);
+                if(calcInterfaceView != null && calcInterfaceView.getWindowToken() != null)
+                    windowManager.removeView(calcInterfaceView);
                 if(listIcon != null && listIcon.getWindowToken() != null)
                     windowManager.removeView(listIcon);
                 if(dmgcalcIcon != null && dmgcalcIcon.getWindowToken() != null)
                     windowManager.removeView(dmgcalcIcon);
+                if(calculatorIcon != null && calculatorIcon.getWindowToken() != null)
+                    windowManager.removeView(calculatorIcon);
                 if(ellipsisIcon != null && ellipsisIcon.getWindowToken() != null)
                     windowManager.removeView(ellipsisIcon);
             }
@@ -881,6 +1288,7 @@ public class FlyingChopper extends Service {
             mainIcon.setOnTouchListener(mainiconClickAndMove);
             listIcon.setOnClickListener(listIconClick);
             dmgcalcIcon.setOnClickListener(dmgcalcIconClick);
+            calculatorIcon.setOnClickListener(calculatorIconClick);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1135,8 +1543,8 @@ public class FlyingChopper extends Service {
         public void onClick(View view) {
             if(panelSelection != SELECT_LIST) {
                 panelSelection = SELECT_LIST;
-                View[] toShrink = {mainIcon, dmgcalcIcon};
-                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsDmgCalcIcon};
+                View[] toShrink = {mainIcon, dmgcalcIcon, calculatorIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsDmgCalcIcon, paramsCalcIcon};
                 animateSize(toShrink, paramsToShrink, listIcon, paramsListIcon);
                 listOpen();
             }
@@ -1148,10 +1556,23 @@ public class FlyingChopper extends Service {
         public void onClick(View view) {
             if(panelSelection != SELECT_DMGCALC) {
                 panelSelection = SELECT_DMGCALC;
-                View[] toShrink = {mainIcon, listIcon};
-                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon};
+                View[] toShrink = {mainIcon, listIcon, calculatorIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon, paramsCalcIcon};
                 animateSize(toShrink, paramsToShrink, dmgcalcIcon, paramsDmgCalcIcon);
                 dmgcalcOpen();
+            }
+        }
+    };
+
+    View.OnClickListener calculatorIconClick = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if(panelSelection != SELECT_CALCULATOR) {
+                panelSelection = SELECT_CALCULATOR;
+                View[] toShrink = {mainIcon, listIcon, dmgcalcIcon};
+                AnimationLayoutParams[] paramsToShrink = {paramsMainIcon, paramsListIcon, paramsDmgCalcIcon};
+                animateSize(toShrink, paramsToShrink, calculatorIcon, paramsCalcIcon);
+                calculatorOpen();
             }
         }
     };

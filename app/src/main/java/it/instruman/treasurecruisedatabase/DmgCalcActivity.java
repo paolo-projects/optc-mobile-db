@@ -63,6 +63,16 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
 
         WebSettings webSettings = webView.getSettings();
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            // chromium, enable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+        } else {
+            // older android version, disable hardware acceleration
+            webView.setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        }
+
+        webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
+
         webView.setWebViewClient(new WebViewClient() {
             @SuppressWarnings("deprecation")
             @Override

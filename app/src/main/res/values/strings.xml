@@ -12,7 +12,7 @@
     <string name="sort_contDesc" translatable="false">Sort button pic</string>
 
     <string name="pref_name" translatable="false">optc_smart_db_setting</string>
-    <string name="tutorial_displayed" translatable="false">displayed_flyingchopperdmgcalc</string>
+    <string name="tutorial_displayed" translatable="false">displayed_flyingchoppercalculator</string>
     <string name="tutorial_drawer" translatable="false">displayed_newsettings_indrawer</string>
     <string name="lastupdate" translatable="false">date_last_update</string>
     <string name="theme_pref" translatable="false">theme_preference</string>
@@ -320,8 +320,19 @@
     <string name="pref_donation_cat">Support the app!</string>
     <string name="prefs_donation">Donate to support development</string>
     <string name="prefs_donation_desc">Next goal will be publishing app to Play Store</string>
-    <string name="prefs_donation_message">&lt;b>First of all, thank you for your support!&lt;/b>&lt;br/>\nOPTC Smart DB is an open source app, it\'s meant to be free and to continue being free.&lt;br/>\nI think the app now reached a very mature stage, so I (and all of you I guess) would be very happy to see it on Play Store, being updated without the need of a reminder.&lt;br/>\nThis however is not free, and google applies a fee to whoever starts publishing apps in the market. I personally have dedicated countless days and nights to program, test and improve this app, and I\'m surely not regretting it. My reward is people appreciation, and I\'m very glad that my work is becoming a milestone in optc community, I really don\'t need anything else but this!&lt;br/>\nHowever, while many users contributed by providing translations, design advices, or by reporting bugs (and I thank them all), you can also contribute by sending a small donation!&lt;br/>\nFrankly I could pay the fees with my money, but since this is not my job and I\'m not doing it for profit, I\'m not getting back the money I spend.&lt;br/>\nSo I thought that if each of us donates the amount of a coffee we can surely have the app published on Google Play market and probably even more improvements!&lt;br/>\nThank you for the time spent reading this and I hope you\'ll keep appreciating this app!&lt;br/>\n&lt;br/>\n&lt;b>To honor your privacy, if you want to be added to donors list, type in the \"Add a message\" field in PayPal donation page the nickname or real name you want to be shown in the credits! Leaving the field blank means you won\'t be added to donors list!&lt;br/>\nIf you have already sent a donation but you changed your mind, please email me at optc-smart-db@instruman.it with your new decision, providing the paypal email you used to send the donation.&lt;/b></string>
+    <string name="prefs_donation_message">&lt;b>Thank you for your support!&lt;/b>&lt;br/>\nI\'m really happy this app is helping so many people, and even though I\'m not asking any money for it, I\'m SUPER! gratified that you believe in this work enough to give a contribution. Thank you for your trust!</string>
     <string name="loading_manuals">Parsing and updating manual locations</string>
     <string name="manuals_locations">Skillbooks locations:</string>
     <string name="tab_manuals">Skillbooks</string>
+    <string name="feedback_rateapp">Please rate the app!</string>
+    <string name="feedback_leaveafeedback">Leave a feedback:</string>
+    <string name="feedback_next">Next</string>
+    <string name="feedback_nodonation">I don\'t want to donate</string>
+    <string name="feedback_donatemessage">Hey, thank you for using this app! \n If you find it useful why don\'t you consider donating a small sum to support development? With your donations I\'ll be able to publish this app to Play Store!</string>
+    <string name="feedback_displayed" translatable="false">displayed_feedback_screen</string>
+    <string name="feedback_moreinfo">Read more...</string>
+    <string name="feedback_viewdonations">View donations</string>
+    <string name="feedback_viewfeedbacks">View feedbacks</string>
+    <string name="feedback_donatemessage_extended" >I\'m really proud of this app, and I\'m surely happy when I see it helps so many people.\nHowever time spent to program and improve it is time I take away from something else, and even though I\'m a big OPTC player and I myself use the app, I\'m also a student, so I need time to attain my degree and to earn money to live.\nWhile I can surely keep improving the app as I did so far, donations help me in being more relaxed and in gaining more time for the app development. \nDonations are also needed to pay for services like Play Store. I think Play Store is an important upgrade this app needs since some people may have trouble installing it and some people may have concerns regarding its safety, issues that would be solved with the app released on Play Store.\n\nThat said, thank you all for using this app, I\'m really happy it helps!</string>
+    <string name="feedback_feedbacksareanonymous">Feedbacks are anonymous and no other kind of data is collected.\nA link to the page with your feedbacks is in the settings screen of this app</string>
 </resources>

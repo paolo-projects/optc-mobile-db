@@ -8,8 +8,8 @@ android {
         applicationId "it.instruman.treasurecruisedatabase"
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 23
-        versionName "3.8"
+        versionCode 24
+        versionName "3.9"
     }
     buildTypes {
         release {
@@ -30,5 +30,7 @@ dependencies {
     compile 'com.android.support:support-v4:25.0.1'
     compile 'com.android.support:support-vector-drawable:25.0.1'
     compile 'com.flaviofaria:kenburnsview:1.0.7'
+    compile 'com.loopj.android:android-async-http:1.4.9'
+    compile 'joda-time:joda-time:2.9.7'
 }
 

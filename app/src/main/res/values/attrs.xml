@@ -23,4 +23,8 @@
     <declare-styleable name="ImageListPreference">
         <attr name="entryImages" format="reference" />
     </declare-styleable>
+
+    <declare-styleable name="LockableViewPager">
+        <attr name="swipeLocked" format="boolean" />
+    </declare-styleable>
 </resources>

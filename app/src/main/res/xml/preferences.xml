@@ -53,6 +53,16 @@
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://github.com/paolo-optc/optc-mobile-db" />
         </Preference>
+        <Preference android:title="Your donations"
+            android:icon="@drawable/ic_web_black">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="http://www.instruman.it/assets/donations" />
+        </Preference>
+        <Preference android:title="Your feedbacks"
+            android:icon="@drawable/ic_web_black">
+        <intent android:action="android.intent.action.VIEW"
+            android:data="http://www.instruman.it/assets/feedback" />
+        </Preference>
         <Preference android:title="OPTC SmartDB Reddit page"
             android:icon="@drawable/ic_web_black">
             <intent android:action="android.intent.action.VIEW"

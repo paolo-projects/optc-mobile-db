@@ -32,7 +32,13 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentStatePagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.FileProvider;
+import android.support.v4.view.PagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
@@ -44,6 +50,7 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -74,6 +81,7 @@ import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 
+import org.joda.time.format.ISODateTimeFormat;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
@@ -109,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.8;
+private final static Double APP_VERSION = 3.9;
 /*
     ##################################################
 */
@@ -545,6 +553,14 @@ private final static Double APP_VERSION = 3.8;
         output = output.replace("<br>", System.getProperty("line.separator"));
         return output;
     }
+
+    private void feedbackDialog() {
+        FeedbackDialogFragment newFragment = FeedbackDialogFragment.newInstance();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        newFragment.show(ft, "dialog");
+    }
+
+
 
     private void launchDialog(int id) {
 
@@ -1380,6 +1396,7 @@ private final static Double APP_VERSION = 3.8;
         dmgCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                goingToSettings = true;
                 Intent intent = new Intent(MainActivity.this, DmgCalcActivity.class);
                 Bundle b = new Bundle();
                 b.putString("lan", locale.toLowerCase());
@@ -1478,9 +1495,9 @@ private final static Double APP_VERSION = 3.8;
         Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
         if (!displayedTutorial) {
             new ShowcaseView.Builder(this)
-                    .setContentTitle("Damage Calculator overlay available!")
-                    .setContentText("Flying chopper is now equipped with the Super damage calculator from the main optc-db! You can now quickly build up your team or calculate your specials\' damage directly from OPTC app!\nTry it!\n\n"
-                                    + "If you didn\'t enable floating icon yet, you can quickly do it in settings screen!")
+                    .setContentTitle("Fast Calculator available!")
+                    .setContentText("Flying chopper is now equipped with the super Fast Calculator!\n"
+                    +"You can now do your optc math quickly while playing the game!")
                     .setStyle(R.style.CustomShowcaseTheme2)
                     .hideOnTouchOutside()
                     .build();
@@ -1564,6 +1581,14 @@ private final static Double APP_VERSION = 3.8;
                         }).show();
             }
         });*/
+
+        Boolean displayed_feedback = mPrefs.getBoolean(getString(R.string.feedback_displayed), false);
+        if (!displayed_feedback) {
+            if(isNetworkConnected()) {
+                feedbackDialog();
+                mPrefs.edit().putBoolean(getString(R.string.feedback_displayed), true).apply();
+            }
+        }
     }
 
     private int getScreenWidth() {
@@ -2144,8 +2169,9 @@ private final static Double APP_VERSION = 3.8;
         try {
             FeedParser optc_db_check = new FeedParser(); // 2016-10-08T19:12:23+02:00
             String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("https://github.com/optc-db/optc-db.github.io/commits/master.atom"));
-            DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
-            lastupdate = df1.parse(update_date);
+            //DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
+            lastupdate = ISODateTimeFormat.dateTimeParser().parseDateTime(update_date).toDate();
+            //lastupdate = df1.parse(update_date);
         } catch (Exception e) {
             e.printStackTrace();
         }
