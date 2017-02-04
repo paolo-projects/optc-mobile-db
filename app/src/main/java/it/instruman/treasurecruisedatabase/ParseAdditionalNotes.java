@@ -10,6 +10,8 @@ import java.util.Map;
 
 public class ParseAdditionalNotes {
     private HashMap<String, String> notes = new HashMap<>();
+    private boolean isMixed = false;
+    private String stringPart = "";
 
     public ParseAdditionalNotes(Map<String, String> map) {
         for (Map.Entry<String, String> entry : map.entrySet()) {
@@ -19,7 +21,7 @@ public class ParseAdditionalNotes {
 
     public String parseNotes(String value) {
         if (!hasTag(value)) return value;
-        String result_string = "";
+        String result_string = isMixed ? stringPart+System.getProperty("line.separator") : "";
         ArrayList<String> tags = getTags(value);
 
         for (String tag : tags) {
@@ -40,7 +42,7 @@ public class ParseAdditionalNotes {
         return result_string.substring(0, result_string.length() - 1);
     }
 
-    private static int tagNumber(String value) {
+    private int tagNumber(String value) {
         if (!value.equals("") && value.replaceAll("^\\s+|\\s+$", "").substring(0, 1).equals("#")) {
             int result = 1;
             int index_start = value.indexOf("}", 0);
@@ -54,11 +56,28 @@ public class ParseAdditionalNotes {
                 } while (index != -1);
             }
             return result;
-        } else return 0;
+        } else if (!value.equals("") && value.contains("#")) {
+            isMixed = true;
+            stringPart = value.substring(0, value.indexOf("#"));
+            String nValue = value.replace(stringPart,"");
+            int result = 1;
+            int index_start = nValue.indexOf("}", 0);
+            int index;
+            index = nValue.indexOf("#", index_start);
+            if (index != -1) {
+                do {
+                    result += 1;
+                    index_start = nValue.indexOf("}", index);
+                    index = nValue.indexOf("#", index_start);
+                } while (index != -1);
+            }
+            return result;
+        } else
+            return 0;
     }
 
     private static boolean hasTag(String value) {
-        return !value.equals("") && value.replaceAll("^\\s+|\\s+$", "").substring(0, 1).equals("#");
+        return !value.equals("") && value.contains("#"); //value.replaceAll("^\\s+|\\s+$", "").substring(0, 1).equals("#");
     }
 
     private static ArrayList<String> getFlags(String value) {
@@ -81,7 +100,7 @@ public class ParseAdditionalNotes {
         return mList;
     }
 
-    private static ArrayList<String> getTags(String value) {
+    private ArrayList<String> getTags(String value) {
         ArrayList<String> tags_list = new ArrayList<>();
         int tagNumber = tagNumber(value);
         int[] tags = new int[50];

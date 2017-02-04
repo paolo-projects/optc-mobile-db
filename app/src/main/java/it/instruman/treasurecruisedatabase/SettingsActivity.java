@@ -41,6 +41,12 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
                                           String key) {
+        Boolean dbUpdate = sharedPreferences.getBoolean(getString(R.string.download_db), true);
+        Boolean appUpdate = sharedPreferences.getBoolean(getString(R.string.check_update), true);
+        if(dbUpdate || appUpdate)
+            findPreference(getString(R.string.update_wifi_only)).setEnabled(true);
+        else
+            findPreference(getString(R.string.update_wifi_only)).setEnabled(false);
         if(key.equals(getString(R.string.pref_language)))
         {
             returndata.putExtra(MainActivity.LANG_PREF_CHANGED, true);

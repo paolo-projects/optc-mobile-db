@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <Button android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/drawer_bar_bg_light_daynight"
+        android:textColor="@color/drawer_bar_btn_light_daynight"
+        android:textSize="14sp"
+        android:text="@string/bulletin_dialog_close_btn"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/bulletinBoardClose"/>
+
+    <TextView
+        android:id="@+id/bboard_title"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="@string/bulletin_dialog_title"
+        android:textSize="24sp"
+        android:layout_marginBottom="12dp"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:layout_alignParentTop="true" />
+    <ScrollView
+    android:id="@+id/bboard_scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_above="@+id/bulletinBoardClose"
+    android:layout_below="@id/bboard_title">
+    <LinearLayout
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/main_bulletin_content">
+
+    </LinearLayout></ScrollView>
+</RelativeLayout>

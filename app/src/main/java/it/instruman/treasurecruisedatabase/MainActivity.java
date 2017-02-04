@@ -20,6 +20,7 @@ import android.graphics.Point;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -82,6 +83,8 @@ import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
 
 import org.joda.time.format.ISODateTimeFormat;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
@@ -109,6 +112,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.jar.Attributes;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
@@ -117,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 3.9;
+private final static Double APP_VERSION = 4.0;
 /*
     ##################################################
 */
@@ -1119,6 +1123,18 @@ private final static Double APP_VERSION = 3.9;
             loadingdlg_hwnd.dismiss();
         }
     }
+
+    private boolean isWifiOn()
+    {
+        ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+
+        if (mWifi != null && mWifi.isConnected()) {
+            return true;
+        }
+        return false;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1236,9 +1252,11 @@ private final static Double APP_VERSION = 3.9;
         }
 
         setContentView(R.layout.activity_main);
-
-        boolean isDownloadEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true);
-        boolean isUpdatesCheckEnabled = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true);
+        boolean isDownloadWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.update_wifi_only), false);
+        boolean isDownloadEnabled = isDownloadWifiOnly ? (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true) && isWifiOn()) :
+                PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true);
+        boolean isUpdatesCheckEnabled = isDownloadWifiOnly ? (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true) && isWifiOn()) :
+                PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true);
 
 
 
@@ -1420,6 +1438,14 @@ private final static Double APP_VERSION = 3.9;
             }
         });
 
+        ImageButton bulletinBtn = (ImageButton) findViewById(R.id.bulletin_btn);
+        bulletinBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showBulletinBoard();
+            }
+        });
+
         Button tealBtn = (Button) findViewById(R.id.tealBtn);
         Button redBtn = (Button) findViewById(R.id.redBtn);
         Button amberBtn = (Button) findViewById(R.id.amberBtn);
@@ -1582,11 +1608,74 @@ private final static Double APP_VERSION = 3.9;
             }
         });*/
 
-        Boolean displayed_feedback = mPrefs.getBoolean(getString(R.string.feedback_displayed), false);
+        /*Boolean displayed_feedback = mPrefs.getBoolean(getString(R.string.feedback_displayed), false);
         if (!displayed_feedback) {
             if(isNetworkConnected()) {
                 feedbackDialog();
                 mPrefs.edit().putBoolean(getString(R.string.feedback_displayed), true).apply();
+            }
+        }*/
+
+        Boolean displayed_noticeboard = mPrefs.getBoolean(getString(R.string.noticeboard_displayed), false);
+        if (!displayed_noticeboard) {
+            final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), R.string.noticeboard_message, 8000);
+            msg.setAction("X", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    msg.dismiss();
+                }
+            });
+            msg.setActionTextColor(Color.YELLOW);
+            msg.show();
+            //Toast.makeText(context, R.string.noticeboard_message, Toast.LENGTH_LONG).show();
+            mPrefs.edit().putBoolean(getString(R.string.noticeboard_displayed), true).apply();
+        }
+    }
+
+    private void showBulletinBoard() {
+        final Dialog bulletinDialog = new Dialog(context);
+        bulletinDialog.setContentView(R.layout.bulletin_board);
+
+        LinearLayout mainBC = (LinearLayout)bulletinDialog.findViewById(R.id.main_bulletin_content);
+        String bulletinWeb;
+        bulletinWeb = isNetworkConnected() ? getFileURL("http://www.instruman.it/assets/notices.json") : "";
+        try {
+            JSONArray bulletinParsed = new JSONArray(bulletinWeb);
+            for(int i = 0; i < bulletinParsed.length(); i++) {
+
+                TextView entry = new TextView(context);
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+                params.setMargins(dpToPx(10), dpToPx(10), dpToPx(10), dpToPx(5));
+                params.gravity = Gravity.LEFT;
+                entry.setLayoutParams(params);
+                entry.setTextSize(dpToPx(6));
+                entry.setText(Html.fromHtml(bulletinParsed.getString(i), null, new ListTagHandler()));
+                mainBC.addView(entry);
+
+                View sepLine = new View(context);
+                LinearLayout.LayoutParams paramsLine = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(2));
+                paramsLine.setMargins(dpToPx(5), dpToPx(10), dpToPx(5), dpToPx(10));
+                sepLine.setLayoutParams(paramsLine);
+                sepLine.setBackgroundColor(Color.DKGRAY);
+                mainBC.addView(sepLine);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        Button closeBtn = (Button)bulletinDialog.findViewById(R.id.bulletinBoardClose);
+        closeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                bulletinDialog.dismiss();
+            }
+        });
+        bulletinDialog.show();
+        if (bulletinDialog.isShowing()) {
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
+            int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
+            if (bulletinDialog.getWindow() != null) {
+                bulletinDialog.getWindow().setLayout(width, height);
             }
         }
     }

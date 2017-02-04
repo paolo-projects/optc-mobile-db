@@ -196,4 +196,9 @@
     <string name="feedback_viewfeedbacks">Vedi feedback</string>
     <string name="feedback_donatemessage_extended" >"Sono davvero orgoglioso e sono super felice di quest'app!\nTuttavia il tempo che utilizzo per programmarla e migliorarla è tempo che tolgo ad altro, ed anche se sono un grande giocatore di OPTC e io stesso uso l'app, sono anche uno studente ed ho bisogno di tempo per laurearmi e guadagnarmi da vivere.\nPosso sicuramente continuare a migliorare l'app come ho fatto fin'ora, ma le donazioni mi aiuterebbero ad essere più rilassato ed a prendere un po' più di tempo per lo sviluppo dell'app.\nLe donazioni sono necessarie anche per alcuni servizi come la pubblicazione sul Play Store. Credo infatti che questo sia un miglioramento molto importante dato che ci sono persone che hanno problemi ad installarla, altre persone che hanno dubbi sulla sicurezza, e tutto questo può essere risolto pubblicando l'app sul Play Store.\n\nDetto questo, vi ringrazio tutti per aver scelto di usare l'app, sono davvero felice che sia di aiuto! "</string>
     <string name="feedback_feedbacksareanonymous">I feedback sono anonimi e nessun altro dato viene raccolto.\nUn link alla pagina con tutti i feedback è disponibile nelle impostazioni di quest\'app</string>
+    <string name="prefs_update_wifi_only">Wi-Fi update</string>
+    <string name="prefs_update_wifi_only_desc">Aggiorna solo se è acceso il WiFi</string>
+    <string name="bulletin_dialog_close_btn">Close</string>
+    <string name="bulletin_dialog_title">Avvisi</string>
+    <string name="noticeboard_message">Per piacere leggi un avviso importante aprendo la barra di navigazione a destra e premendo il pulsante degli annunci</string>
 </resources>

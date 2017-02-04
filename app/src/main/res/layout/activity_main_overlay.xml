@@ -50,6 +50,7 @@
 
                 <EditText
                     android:id="@+id/filterText_overlay"
+                    android:background="@android:color/transparent"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginRight="5dp"

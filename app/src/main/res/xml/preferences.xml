@@ -18,6 +18,13 @@
             android:icon="@drawable/ic_update_black"/>
         <SwitchPreference
             android:defaultValue="false"
+            android:title="@string/prefs_update_wifi_only"
+            android:key="@string/update_wifi_only"
+            android:summary="@string/prefs_update_wifi_only_desc"
+            android:icon="@drawable/ic_signal_wifi"
+            />
+        <SwitchPreference
+            android:defaultValue="false"
             android:title="@string/prefs_overlay"
             android:key="@string/pref_overlay"
             android:summary="@string/prefs_overlay_desc"

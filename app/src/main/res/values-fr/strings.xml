@@ -185,4 +185,9 @@
     <string name="feedback_viewfeedbacks">View feedbacks</string>
     <string name="feedback_donatemessage_extended" >I\'m really proud of this app, and I\'m surely happy when I see it helps so many people.\nHowever time spent to program and improve it is time I take away from something else, and even though I\'m a big OPTC player and I myself use the app, I\'m also a student, so I need time to attain my degree and to earn money to live.\nWhile I can surely keep improving the app as I did so far, donations help me in being more relaxed and in gaining more time for the app development. \nDonations are also needed to pay for services like Play Store. I think Play Store is an important upgrade this app needs since some people may have trouble installing it and some people may have concerns regarding its safety, issues that would be solved with the app released on Play Store.\n\nThat said, thank you all for using this app, I\'m really happy it helps!</string>
     <string name="feedback_feedbacksareanonymous">Feedbacks are anonymous and no other kind of data is collected.\nA link to the page with your feedbacks is in the settings screen of this app</string>
+    <string name="prefs_update_wifi_only">Wi-Fi update</string>
+    <string name="prefs_update_wifi_only_desc">Update only when WiFi is on</string>
+    <string name="bulletin_dialog_close_btn">Close</string>
+    <string name="bulletin_dialog_title">Notice board</string>
+    <string name="noticeboard_message">Please read an important notice by opening the right drawbar and touching the notice button</string>
 </resources>
