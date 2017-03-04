@@ -95,6 +95,15 @@ class DBHelper extends SQLiteOpenHelper {
     private final static String MANUALS_JAPAN = "japan";
     private final static String MANUALS_THUMB = "thumbnail";
 
+    // Table manual locations
+    private final static String CREWMATE_TABLE = "crewmate_abilities";
+    // Columns
+    private final static String CREWMATE_ID = "_id";
+    private final static String CREWMATE_CHARID = "char_id";
+    private final static String CREWMATE_DESCRIPTION = "crewmate_description";
+    private final static String CREWMATE_NOTES = "crewmate_notes";
+
+
     // Custom SQL
     //Drop tables
     private final static String DROP_UNITS = "DROP TABLE IF EXISTS " + UNITS_TABLE;
@@ -103,6 +112,7 @@ class DBHelper extends SQLiteOpenHelper {
     private final static String DROP_EVOLUTIONS = "DROP TABLE IF EXISTS " + EVOLUTIONS_TABLE;
     private final static String DROP_DROPS = "DROP TABLE IF EXISTS " + DROPS_TABLE;
     private final static String DROP_MANUALS = "DROP TABLE IF EXISTS " + MANUALS_TABLE;
+    private final static String DROP_CREWMATE = "DROP TABLE IF EXISTS " + CREWMATE_TABLE;
 
     // Create tables
     private final static String CREATE_TABLE_UNITS =
@@ -174,6 +184,13 @@ class DBHelper extends SQLiteOpenHelper {
                     MANUALS_JAPAN + " INT, " +
                     MANUALS_THUMB + " INT, " +
                     "PRIMARY KEY ( " + MANUALS_ID + " ))";
+    private final static String CREATE_TABLE_CREWMATE =
+            "CREATE TABLE " + CREWMATE_TABLE + " (" +
+                    CREWMATE_ID + " INTEGER, " +
+                    CREWMATE_CHARID + " INT, " +
+                    CREWMATE_DESCRIPTION + " TEXT, " +
+                    CREWMATE_NOTES + " TEXT, " +
+                    "PRIMARY KEY ( " + CREWMATE_ID + " ))";
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -188,6 +205,7 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_EVOLUTIONS);
         db.execSQL(DROP_DROPS);
         db.execSQL(DROP_MANUALS);
+        db.execSQL(DROP_CREWMATE);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
@@ -196,6 +214,7 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_EVOLUTIONS);
         db.execSQL(CREATE_TABLE_DROPS);
         db.execSQL(CREATE_TABLE_MANUALS);
+        db.execSQL(CREATE_TABLE_CREWMATE);
         db.close();
     }
 
@@ -227,6 +246,7 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_EVOLUTIONS);
         db.execSQL(DROP_DROPS);
         db.execSQL(DROP_MANUALS);
+        db.execSQL(DROP_CREWMATE);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
@@ -235,6 +255,7 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_EVOLUTIONS);
         db.execSQL(CREATE_TABLE_DROPS);
         db.execSQL(CREATE_TABLE_MANUALS);
+        db.execSQL(CREATE_TABLE_CREWMATE);
     }
 
     public static void insertIntoDrops(SQLiteDatabase db, Integer char_id, String drop_location, String chap_or_difficulty, boolean is_global, boolean is_japan, Integer thumbnail)
@@ -338,6 +359,16 @@ class DBHelper extends SQLiteOpenHelper {
         db.insert(CAPTAINS_TABLE, null, values);
     }
 
+    public static void insertIntoCrewmate(SQLiteDatabase db, Integer charid, String description, String notes) {
+        ContentValues values = new ContentValues();
+
+        values.put(CREWMATE_CHARID, charid);
+        values.put(CREWMATE_DESCRIPTION, description);
+        values.put(CREWMATE_NOTES, notes);
+
+        db.insert(CREWMATE_TABLE, null, values);
+    }
+
     public static void insertIntoEvolutions(SQLiteDatabase db, Integer charid, Integer evoid, Integer ev1, Integer ev2, Integer ev3, Integer ev4, Integer ev5) {
         ContentValues values = new ContentValues();
 
@@ -400,6 +431,10 @@ class DBHelper extends SQLiteOpenHelper {
                         MANUALS_GLOBAL, MANUALS_JAPAN, MANUALS_THUMB},
                 MANUALS_CHARID + " = ?", new String[]{String.valueOf(CharId)}, null, null, null, null);
         manuals_cursor.moveToFirst();
+
+        Cursor crewmate_cursor = db.query(CREWMATE_TABLE, new String[]{CREWMATE_DESCRIPTION, CREWMATE_NOTES},
+                CREWMATE_CHARID + " = ?", new String[]{String.valueOf(CharId)}, null, null, null, null);
+        crewmate_cursor.moveToFirst();
         
         ArrayList<CharacterSpecials> specials_data = new ArrayList<>();
         String special_name = "";
@@ -446,17 +481,25 @@ class DBHelper extends SQLiteOpenHelper {
             manuals_cursor.moveToNext();
         }
 
+        String cwDesc = null;
+        String cwNotes = null;
+        if(!crewmate_cursor.isAfterLast()) {
+            cwDesc = crewmate_cursor.getString(0);
+            cwNotes = crewmate_cursor.getString(1);
+        }
+
         units_cursor.close();
         specials_cursor.close();
         captain_cursor.close();
         evolutions_cursor.close();
         drops_cursor.close();
         manuals_cursor.close();
+        crewmate_cursor.close();
 
         return new CharacterInfo(captain_description, captain_notes, char_class1, char_class2, char_combo,
                 char_cost, id, char_evos, char_exptomax, CharId, char_lvl1atk, char_lvl1hp, char_lvl1rcv,
                 char_maxatk, char_maxhp, char_maxlvl, char_maxrcv, char_name, char_sockets, special_name, special_notes,
-                specials_data, char_stars, char_type, dropInfos, manualsInfos);
+                specials_data, char_stars, char_type, dropInfos, manualsInfos, cwDesc, cwNotes);
     }
 
     public static ArrayList<CharacterEvolutions> getEvolutions(SQLiteDatabase db, Integer charID)

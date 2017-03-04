@@ -17,7 +17,7 @@
     <string name="lastupdate" translatable="false">date_last_update</string>
     <string name="theme_pref" translatable="false">theme_preference</string>
 
-    <string name="rebuild_db" translatable="false">db_to_rebuild_3_8</string>
+    <string name="rebuild_db" translatable="false">db_to_rebuild_4_1</string>
     <string name="title_activity_settings" translatable="false">Settings</string>
 
     <string name="download_db" translatable="false">download_database_pref</string>
@@ -27,6 +27,8 @@
     <string name="pref_daynight_theme" translatable="false">preference_daynight_theme</string>
     <string name="pref_overlay" translatable="false">preference_overlay_button</string>
     <string name="pref_donation" translatable="false">preference_donate</string>
+    <string name="prefs_noticeboard_viewed" translatable="false">noticeboard_viewed_set</string>
+    <string name="pref_notification" translatable="false">preference_notification_shortcut</string>
     <!-- ###-->
 
     <!-- Character info dialog strings -->
@@ -342,4 +344,7 @@
     <string name="bulletin_dialog_title">Notice board</string>
     <string name="noticeboard_displayed" translatable="false">displayed_noticeboard_toast</string>
     <string name="noticeboard_message">Please read an important notice by opening the right drawbar and touching the notice button</string>
+    <string name="cw_text">"Crewmate ability: "</string>
+    <string name="prefs_notification">Show notification shortcut</string>
+    <string name="prefs_notification_desc">Show a shortcut to this app and OPTC app in the notification bar</string>
 </resources>

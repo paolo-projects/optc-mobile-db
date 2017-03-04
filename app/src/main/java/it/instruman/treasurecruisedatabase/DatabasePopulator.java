@@ -89,6 +89,13 @@ public class DatabasePopulator {
 
                     DBHelper.insertIntoCaptains(database, entry.getKey(), captain, captainnotes);
 
+                    String cwDesc = value.containsKey("sailor") ? (String)value.get("sailor") : null;
+                    String cwNotes = value.containsKey("sailorNotes") ? (String)value.get("sailorNotes") : null;
+
+                    if(cwDesc!=null) {
+                        DBHelper.insertIntoCrewmate(database, entry.getKey(), cwDesc, cwNotes);
+                    }
+
                     if ((special != null) && special.getClass().equals(NativeArray.class)) {
                         List<Map> specmulti = (List<Map>) special;
                         for (int n = 0; n < specmulti.size(); n++) {

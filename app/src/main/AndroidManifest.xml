@@ -46,6 +46,8 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"/>
         </provider>
+        <receiver android:name="MainActivity$openAppListener" />
+        <receiver android:name="MainActivity$openGameListener" />
     </application>
 
 </manifest>

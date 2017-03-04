@@ -9,6 +9,7 @@
     <attr name="list_sort_btn_disabled" format="reference|color" />
     <attr name="drawer_bar_bg" format="reference|color" />
     <attr name="drawer_bar_btn" format="reference|color" />
+    <attr name="drawer_bar_btn_highlight" format="reference|color" />
     <attr name="char_info_bg" format="reference|color" />
     <attr name="char_info_header_bg" format="reference|color" />
     <attr name="char_info_header_txt" format="reference|color" />

@@ -7,6 +7,11 @@ import android.animation.ObjectAnimator;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.ActivityNotFoundException;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -37,6 +42,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -68,6 +74,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RemoteViews;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -108,10 +115,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.regex.Pattern;
 
@@ -121,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 4.0;
+private final static Double APP_VERSION = 4.1;
 /*
     ##################################################
 */
@@ -818,6 +827,43 @@ private final static Double APP_VERSION = 4.0;
             }
         }
 
+        String cwDesc = charInfo.getCrewmateDescription();
+        String cwNotes = charInfo.getCrewmateNotes();
+        if(cwDesc!=null) {
+
+            LinearLayout specials_container = (LinearLayout) dialog.findViewById(R.id.specials_container);
+
+            View sep = new View(context);
+            LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
+            sepParams.setMargins(0, dpToPx(5), 0, dpToPx(5));
+            sep.setLayoutParams(sepParams);
+            sep.setBackgroundColor(Color.parseColor("#aaaaaa"));
+
+            specials_container.addView(sep);
+
+            TextView cw_title = new TextView(context);
+            cw_title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            cw_title.setBackgroundColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_bg)));
+            cw_title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+            cw_title.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            cw_title.setText(getString(R.string.cw_text));
+            specials_container.addView(cw_title);
+
+            TextView cw_description = new TextView(context);
+            cw_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            cw_description.setText(cwDesc);
+            cw_description.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+            specials_container.addView(cw_description);
+
+            if (cwNotes != null) {
+                TextView cw_notes = new TextView(context);
+                cw_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                cw_notes.setText(getString(R.string.notes_text) + cwNotes);
+                cw_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+                specials_container.addView(cw_notes);
+            }
+        }
+
         LinearLayout evolutions_content = (LinearLayout) dialog.findViewById(R.id.evolutions_content);
         List<CharacterEvolutions> evos = charInfo.getEvolutions();
 
@@ -1135,6 +1181,104 @@ private final static Double APP_VERSION = 4.0;
         return false;
     }
 
+    private NotificationCompat.Builder buildNotification() {
+        PendingIntent pIntent = PendingIntent.getActivity(
+                context,
+                879,
+                getIntent(),
+                PendingIntent.FLAG_UPDATE_CURRENT);
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context)
+                // Set Icon
+                .setSmallIcon(R.drawable.ic_appicon_notify)
+                // Set Ticker Message
+                .setTicker("OPTC SmartDB notification bar enabled!")
+                // Dismiss Notification
+                .setAutoCancel(true)
+                // Set PendingIntent into Notification
+                .setContentIntent(pIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
+            // build a complex notification, with buttons and such
+            //
+            builder = builder.setContent(getComplexNotificationView());
+        } else {
+            // Build a simpler notification, without buttons
+            //
+            builder = builder.setContentTitle(getTitle())
+                    .setContentText("Your device is not compatible with this feature...")
+                    .setSmallIcon(R.drawable.ic_denied);
+        }
+        return builder;
+    }
+
+    private void showNotification() {
+        NotificationCompat.Builder mBuilder = buildNotification();
+        NotificationManager mManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+        Notification notification = mBuilder.build();
+        notification.flags |= Notification.FLAG_ONGOING_EVENT; //keep on top
+        //notification.flags |= Notification.FLAG_NO_CLEAR; //Do not clear the notification
+        notification.defaults = 0; // no sound, vibrate, lights
+        mManager.notify(879, notification);
+    }
+
+    private RemoteViews getComplexNotificationView() {
+        // Using RemoteViews to bind custom layouts into Notification
+        Intent openappIntent = new Intent(this, openAppListener.class);
+        PendingIntent pendingOpenAppIntent = PendingIntent.getBroadcast(this, 0,
+                openappIntent, 0);
+
+        Intent opengameIntent = new Intent(this, openGameListener.class);
+        PendingIntent pendingOpenGameIntent = PendingIntent.getBroadcast(this, 0,
+                opengameIntent, 0);
+
+        RemoteViews notificationView = new RemoteViews(
+                context.getPackageName(),
+                R.layout.notification_custom
+        );
+        notificationView.setImageViewResource(R.id.openAppBtn, R.mipmap.ic_launcher);
+        notificationView.setImageViewResource(R.id.openGameBtn, R.drawable.ic_game);
+        notificationView.setOnClickPendingIntent(R.id.openAppBtn, pendingOpenAppIntent);
+        notificationView.setOnClickPendingIntent(R.id.openGameBtn, pendingOpenGameIntent);
+
+        return notificationView;
+    }
+
+    public static class openAppListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Intent i= new Intent(context, MainActivity.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            context.startActivity(i);
+            Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            context.sendBroadcast(it);
+        }
+    }
+
+    public static class openGameListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            PackageManager packageManager = context.getPackageManager();
+            String pk1 = "com.namcobandaigames.spmoja010E";
+            String pk2 = "com.namcobandaigames.spmoja010";
+            try
+            {
+                Intent int2 = packageManager.getLaunchIntentForPackage(pk1);
+                if(null != int2)
+                    context.startActivity(int2);
+                else {
+                    Intent int3 = packageManager.getLaunchIntentForPackage(pk2);
+                    if (null != int3)
+                        context.startActivity(int3);
+                }
+            }
+            catch (ActivityNotFoundException e)
+            {
+                e.printStackTrace();
+            }
+            Intent it = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            context.sendBroadcast(it);
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1143,6 +1287,28 @@ private final static Double APP_VERSION = 4.0;
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         final SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+
+        Set<String> nbViewed = mPrefs.getStringSet(getString(R.string.prefs_noticeboard_viewed), new HashSet<String>());
+        Boolean somethingNew = false;
+        String bulletinWeb = isNetworkConnected() ? getFileURL("http://www.instruman.it/assets/notices_t.json") : "";
+        try {
+            JSONArray bulletinParsed = new JSONArray(bulletinWeb);
+            for(int i = 0; i < bulletinParsed.length(); i++) {
+                JSONObject obj = bulletinParsed.getJSONObject(i);
+                Integer compare = (Integer)obj.get("key");
+                Boolean viewRes = false;
+                for(String c : nbViewed) {
+                    if(Integer.parseInt(c) == compare) {
+                        viewRes = true;
+                        break;
+                    }
+                }
+                if (!viewRes) {
+                    somethingNew = true;
+                    break;
+                }
+            }
+        } catch (Exception e) { e.printStackTrace(); }
 
         int currTheme;
 
@@ -1252,6 +1418,10 @@ private final static Double APP_VERSION = 4.0;
         }
 
         setContentView(R.layout.activity_main);
+
+        if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_notification), false))
+            showNotification();
+
         boolean isDownloadWifiOnly = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.update_wifi_only), false);
         boolean isDownloadEnabled = isDownloadWifiOnly ? (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true) && isWifiOn()) :
                 PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.download_db), true);
@@ -1445,6 +1615,8 @@ private final static Double APP_VERSION = 4.0;
                 showBulletinBoard();
             }
         });
+        if(somethingNew)
+            bulletinBtn.setBackgroundResource(R.drawable.ic_bulletin_new);
 
         Button tealBtn = (Button) findViewById(R.id.tealBtn);
         Button redBtn = (Button) findViewById(R.id.redBtn);
@@ -1638,9 +1810,17 @@ private final static Double APP_VERSION = 4.0;
 
         LinearLayout mainBC = (LinearLayout)bulletinDialog.findViewById(R.id.main_bulletin_content);
         String bulletinWeb;
-        bulletinWeb = isNetworkConnected() ? getFileURL("http://www.instruman.it/assets/notices.json") : "";
+        bulletinWeb = isNetworkConnected() ? getFileURL("http://www.instruman.it/assets/notices_t.json") : "";
         try {
             JSONArray bulletinParsed = new JSONArray(bulletinWeb);
+            SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+            Set<String> nbViewed = new HashSet<>();
+            for(int i = 0; i < bulletinParsed.length(); i++) {
+                nbViewed.add(String.valueOf(bulletinParsed.getJSONObject(i).getInt("key")));
+            }
+            mPrefs.edit().putStringSet(getString(R.string.prefs_noticeboard_viewed), nbViewed).apply();
+            ImageButton bulletinBtn = (ImageButton)findViewById(R.id.bulletin_btn);
+            bulletinBtn.setBackgroundResource(R.drawable.ic_bulletin);
             for(int i = 0; i < bulletinParsed.length(); i++) {
 
                 TextView entry = new TextView(context);
@@ -1652,7 +1832,7 @@ private final static Double APP_VERSION = 4.0;
                 params.gravity = Gravity.LEFT;
                 entry.setLayoutParams(params);
                 entry.setTextSize(dpToPx(6));
-                entry.setText(Html.fromHtml(bulletinParsed.getString(i), null, new ListTagHandler()));
+                entry.setText(Html.fromHtml(bulletinParsed.getJSONObject(i).getString("content"), null, new ListTagHandler()));
                 mainBC.addView(entry);
 
                 View sepLine = new View(context);

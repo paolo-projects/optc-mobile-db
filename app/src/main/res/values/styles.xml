@@ -19,6 +19,7 @@
         <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_teal</item>
         <item name="drawer_bar_bg">@color/drawer_bar_bg_teal</item>
         <item name="drawer_bar_btn">@color/drawer_bar_btn_teal</item>
+        <item name="drawer_bar_btn_highlight">@color/drawer_bar_btn_highlight_teal</item>
         <item name="char_info_bg">@color/char_info_bg_teal</item>
         <item name="char_info_header_bg">@color/char_info_header_bg_teal</item>
         <item name="char_info_header_txt">@color/char_info_header_txt_teal</item>
@@ -47,6 +48,7 @@
         <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_red</item>
         <item name="drawer_bar_bg">@color/drawer_bar_bg_red</item>
         <item name="drawer_bar_btn">@color/drawer_bar_btn_red</item>
+        <item name="drawer_bar_btn_highlight">@color/drawer_bar_btn_highlight_red</item>
         <item name="char_info_bg">@color/char_info_bg_red</item>
         <item name="char_info_header_bg">@color/char_info_header_bg_red</item>
         <item name="char_info_header_txt">@color/char_info_header_txt_red</item>
@@ -75,6 +77,7 @@
         <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_amber</item>
         <item name="drawer_bar_bg">@color/drawer_bar_bg_amber</item>
         <item name="drawer_bar_btn">@color/drawer_bar_btn_amber</item>
+        <item name="drawer_bar_btn_highlight">@color/drawer_bar_btn_highlight_amber</item>
         <item name="char_info_bg">@color/char_info_bg_amber</item>
         <item name="char_info_header_bg">@color/char_info_header_bg_amber</item>
         <item name="char_info_header_txt">@color/char_info_header_txt_amber</item>
@@ -103,6 +106,7 @@
         <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_light</item>
         <item name="drawer_bar_bg">@color/drawer_bar_bg_light</item>
         <item name="drawer_bar_btn">@color/drawer_bar_btn_light</item>
+        <item name="drawer_bar_btn_highlight">@color/drawer_bar_btn_highlight_light</item>
         <item name="char_info_bg">@color/char_info_bg_light</item>
         <item name="char_info_header_bg">@color/char_info_header_bg_light</item>
         <item name="char_info_header_txt">@color/char_info_header_txt_light</item>
@@ -131,6 +135,7 @@
         <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_dark</item>
         <item name="drawer_bar_bg">@color/drawer_bar_bg_dark</item>
         <item name="drawer_bar_btn">@color/drawer_bar_btn_dark</item>
+        <item name="drawer_bar_btn_highlight">@color/drawer_bar_btn_highlight_dark</item>
         <item name="char_info_bg">@color/char_info_bg_dark</item>
         <item name="char_info_header_bg">@color/char_info_header_bg_dark</item>
         <item name="char_info_header_txt">@color/char_info_header_txt_dark</item>
@@ -159,6 +164,7 @@
         <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_light_daynight</item>
         <item name="drawer_bar_bg">@color/drawer_bar_bg_light_daynight</item>
         <item name="drawer_bar_btn">@color/drawer_bar_btn_light_daynight</item>
+        <item name="drawer_bar_btn_highlight">@color/drawer_bar_btn_highlight_light_daynight</item>
         <item name="char_info_bg">@color/char_info_bg_light_daynight</item>
         <item name="char_info_header_bg">@color/char_info_header_bg_light_daynight</item>
         <item name="char_info_header_txt">@color/char_info_header_txt_light_daynight</item>
@@ -187,6 +193,7 @@
         <item name="list_sort_btn_disabled">@color/list_sort_btn_disabled_dark_daynight</item>
         <item name="drawer_bar_bg">@color/drawer_bar_bg_dark_daynight</item>
         <item name="drawer_bar_btn">@color/drawer_bar_btn_dark_daynight</item>
+        <item name="drawer_bar_btn_highlight">@color/drawer_bar_btn_highlight_dark_daynight</item>
         <item name="char_info_bg">@color/char_info_bg_dark_daynight</item>
         <item name="char_info_header_bg">@color/char_info_header_bg_dark_daynight</item>
         <item name="char_info_header_txt">@color/char_info_header_txt_dark_daynight</item>

@@ -31,6 +31,12 @@
             android:icon="@drawable/ic_star"/>
         <SwitchPreference
             android:defaultValue="false"
+            android:title="@string/prefs_notification"
+            android:key="@string/pref_notification"
+            android:summary="@string/prefs_notification_desc"
+            android:icon="@drawable/ic_notifications"/>
+        <SwitchPreference
+            android:defaultValue="false"
             android:title="@string/prefs_daynight_theme"
             android:key="@string/pref_daynight_theme"
             android:icon="@drawable/ic_moon" />

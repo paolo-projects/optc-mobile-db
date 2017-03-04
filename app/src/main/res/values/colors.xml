@@ -52,6 +52,7 @@
     <color name="list_sort_btn_disabled_teal">#99009688</color>
     <color name="drawer_bar_bg_teal">#009688</color>
     <color name="drawer_bar_btn_teal">#FFFFFF</color>
+    <color name="drawer_bar_btn_highlight_teal">#ffaa00</color>
     <color name="char_info_bg_teal">#B2DFDB</color>
     <color name="char_info_header_bg_teal">#80cbc4</color>
     <color name="char_info_header_txt_teal">#99000000</color>
@@ -72,6 +73,7 @@
     <color name="list_sort_btn_disabled_red">#99F44336</color>
     <color name="drawer_bar_bg_red">#F44336</color>
     <color name="drawer_bar_btn_red">#FFFFFF</color>
+    <color name="drawer_bar_btn_highlight_red">#ffaa00</color>
     <color name="char_info_bg_red">#FFCDD2</color>
     <color name="char_info_header_bg_red">#EF9A9A</color>
     <color name="char_info_header_txt_red">#99000000</color>
@@ -92,6 +94,7 @@
     <color name="list_sort_btn_disabled_amber">#99FFA000</color>
     <color name="drawer_bar_bg_amber">#FFC107</color>
     <color name="drawer_bar_btn_amber">#000000</color>
+    <color name="drawer_bar_btn_highlight_amber">#ff4000</color>
     <color name="char_info_bg_amber">#FFECB3</color>
     <color name="char_info_header_bg_amber">#FFE082</color>
     <color name="char_info_header_txt_amber">#99000000</color>
@@ -112,6 +115,7 @@
     <color name="list_sort_btn_disabled_light">#a2a2a2</color>
     <color name="drawer_bar_bg_light">#f3f3f3</color>
     <color name="drawer_bar_btn_light">#000000</color>
+    <color name="drawer_bar_btn_highlight_light">#e47200</color>
     <color name="char_info_bg_light">#DDDDDD</color>
     <color name="char_info_header_bg_light">#c9c9c9</color>
     <color name="char_info_header_txt_light">#99000000</color>
@@ -132,6 +136,7 @@
     <color name="list_sort_btn_disabled_dark">#99f3f3f3</color>
     <color name="drawer_bar_bg_dark">#333</color>
     <color name="drawer_bar_btn_dark">#F9F9F9</color>
+    <color name="drawer_bar_btn_highlight_dark">#ffaa00</color>
     <color name="char_info_bg_dark">#333</color>
     <color name="char_info_header_bg_dark">#33f6f6f6</color>
     <color name="char_info_header_txt_dark">#99FFFFFF</color>
@@ -152,6 +157,7 @@
     <color name="list_sort_btn_disabled_light_daynight">#a2a2a2</color>
     <color name="drawer_bar_bg_light_daynight">#2196F3</color>
     <color name="drawer_bar_btn_light_daynight">#fff</color>
+    <color name="drawer_bar_btn_highlight_light_daynight">#ffaa00</color>
     <color name="char_info_bg_light_daynight">#e3f2fd</color>
     <color name="char_info_header_bg_light_daynight">#90caf9</color>
     <color name="char_info_header_txt_light_daynight">#99000000</color>
@@ -172,6 +178,7 @@
     <color name="list_sort_btn_disabled_dark_daynight">#99f3f3f3</color>
     <color name="drawer_bar_bg_dark_daynight">#333</color>
     <color name="drawer_bar_btn_dark_daynight">#F9F9F9</color>
+    <color name="drawer_bar_btn_highlight_dark_daynight">#ffaa00</color>
     <color name="char_info_bg_dark_daynight">#333</color>
     <color name="char_info_header_bg_dark_daynight">#33f6f6f6</color>
     <color name="char_info_header_txt_dark_daynight">#99FFFFFF</color>

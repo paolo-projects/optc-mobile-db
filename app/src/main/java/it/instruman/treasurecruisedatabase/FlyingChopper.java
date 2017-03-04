@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.Typeface;
@@ -1796,6 +1797,43 @@ public class FlyingChopper extends Service {
                 coold_layout.setPadding(2, 8, 2, 8);
 
                 specials_container.addView(coold_layout);
+            }
+        }
+
+        String cwDesc = charInfo.getCrewmateDescription();
+        String cwNotes = charInfo.getCrewmateNotes();
+        if(cwDesc!=null) {
+
+            LinearLayout specials_container = (LinearLayout) dialog.findViewById(R.id.specials_container);
+
+            View sep = new View(context);
+            LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
+            sepParams.setMargins(0, dpToPx(5), 0, dpToPx(5));
+            sep.setLayoutParams(sepParams);
+            sep.setBackgroundColor(Color.parseColor("#aaaaaa"));
+
+            specials_container.addView(sep);
+
+            TextView cw_title = new TextView(context);
+            cw_title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+            cw_title.setBackgroundColor(getResources().getColor(R.color.char_info_header_bg_teal));
+            cw_title.setTextColor(getResources().getColor(R.color.char_info_header_txt_teal));
+            cw_title.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            cw_title.setText(getString(R.string.cw_text));
+            specials_container.addView(cw_title);
+
+            TextView cw_description = new TextView(context);
+            cw_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+            cw_description.setText(cwDesc);
+            cw_description.setTextColor(getResources().getColor(R.color.char_info_txt_teal));
+            specials_container.addView(cw_description);
+
+            if (cwNotes != null) {
+                TextView cw_notes = new TextView(context);
+                cw_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+                cw_notes.setText(getString(R.string.notes_text) + cwNotes);
+                cw_notes.setTextColor(getResources().getColor(R.color.char_info_header_txt_teal));
+                specials_container.addView(cw_notes);
             }
         }
 

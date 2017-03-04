@@ -201,4 +201,7 @@
     <string name="bulletin_dialog_close_btn">Close</string>
     <string name="bulletin_dialog_title">Avvisi</string>
     <string name="noticeboard_message">Per piacere leggi un avviso importante aprendo la barra di navigazione a destra e premendo il pulsante degli annunci</string>
+    <string name="cw_text">"Abilità ciurma: "</string>
+    <string name="prefs_notification">Mostra accesso rapido nelle notifiche</string>
+    <string name="prefs_notification_desc">Mostra una barra di accesso rapido a quest\'app e ad OPTC nella barra delle notifiche</string>
 </resources>

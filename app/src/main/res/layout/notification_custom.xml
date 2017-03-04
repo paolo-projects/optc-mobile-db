@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:id="@+id/layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="5dp"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:id="@+id/dummyIcon"
+        android:layout_alignParentLeft="true"
+        android:background="@android:color/transparent"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_centerInParent="true">
+            <ImageView
+            android:src="@mipmap/ic_launcher"
+            android:id="@+id/openAppBtn"
+            android:layout_width="52dp"
+            android:layout_height="match_parent" android:layout_marginRight="5dp"/>
+            <!--<View
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                android:background="@android:color/darker_gray"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"/>-->
+            <ImageView
+                android:src="@drawable/ic_game"
+                android:id="@+id/openGameBtn"
+                android:layout_width="52dp"
+                android:layout_height="match_parent" android:layout_marginLeft="5dp"/>
+        </LinearLayout>
+    </RelativeLayout>

@@ -31,6 +31,25 @@ public class CharacterInfo {
     private List<CharacterSpecials> Specials = new ArrayList<>();
     private String CaptainDescription = null;
     private String CaptainNotes = null;
+
+    public String getCrewmateDescription() {
+        return CrewmateDescription;
+    }
+
+    public void setCrewmateDescription(String crewmateDescription) {
+        CrewmateDescription = crewmateDescription;
+    }
+
+    public String getCrewmateNotes() {
+        return CrewmateNotes;
+    }
+
+    public void setCrewmateNotes(String crewmateNotes) {
+        CrewmateNotes = crewmateNotes;
+    }
+
+    private String CrewmateDescription = null;
+    private String CrewmateNotes = null;
     private List<CharacterEvolutions> Evolutions = new ArrayList<>();
     private ArrayList<DropInfo> dropInfos = new ArrayList<>();
 
@@ -58,7 +77,7 @@ public class CharacterInfo {
                          Integer lvl1ATK, Integer lvl1HP, Integer lvl1RCV, Integer maxATK,
                          Integer maxHP, Integer maxLvl, Integer maxRCV, String name, Integer sockets,
                          String specialName, String specialNotes, List<CharacterSpecials> specials,
-                         Integer stars, String type, ArrayList<DropInfo> DropInfos, ArrayList<DropInfo> ManualsInfos) {
+                         Integer stars, String type, ArrayList<DropInfo> DropInfos, ArrayList<DropInfo> ManualsInfos, String crewmateDescription, String crewmateNotes) {
         CaptainDescription = captainDescription;
         CaptainNotes = captainNotes;
         Class1 = class1;
@@ -85,6 +104,8 @@ public class CharacterInfo {
         Type = type;
         dropInfos = DropInfos;
         manualsInfos = ManualsInfos;
+        CrewmateDescription = crewmateDescription;
+        CrewmateNotes = crewmateNotes;
     }
 
     public CharacterInfo() {

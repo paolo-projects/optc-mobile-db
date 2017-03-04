@@ -202,4 +202,7 @@
     <string name="bulletin_dialog_close_btn">Close</string>
     <string name="bulletin_dialog_title">Notice board</string>
     <string name="noticeboard_message">Please read an important notice by opening the right drawbar and touching the notice button</string>
+    <string name="cw_text">"Crewmate ability: "</string>
+    <string name="prefs_notification">Show notification shortcut</string>
+    <string name="prefs_notification_desc">Show a shortcut to this app and OPTC app in the notification bar</string>
 </resources>
