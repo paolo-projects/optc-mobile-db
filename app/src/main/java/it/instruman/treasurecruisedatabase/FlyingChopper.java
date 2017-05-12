@@ -1698,16 +1698,18 @@ public class FlyingChopper extends Service {
         }
 
         Double ch_stars = charInfo.getStars();
+
+        DecimalFormat df = new DecimalFormat("0");
+        df.setRoundingMode(RoundingMode.DOWN);
+        String stars_p = df.format(ch_stars);
+
         if (ch_stars == 5.5)
             stars.setText("5+");
         else if (ch_stars == 6.5)
             stars.setText("6+");
         else
-            stars.setText(String.valueOf(ch_stars));
+            stars.setText(stars_p);
 
-        DecimalFormat df = new DecimalFormat("0");
-        df.setRoundingMode(RoundingMode.DOWN);
-        String stars_p = df.format(ch_stars);
         switch (stars_p) {
             case "1":
             case "2":
