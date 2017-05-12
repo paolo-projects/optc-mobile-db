@@ -104,9 +104,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -722,24 +725,33 @@ private final static Double APP_VERSION = 4.1;
                 break;
         }
 
-        Integer ch_stars = charInfo.getStars();
-        stars.setText(String.valueOf(ch_stars));
-        switch (ch_stars) {
-            case 1:
-            case 2:
+        Double ch_stars = charInfo.getStars();
+        if (ch_stars == 5.5)
+            stars.setText("5+");
+        else if (ch_stars == 6.5)
+            stars.setText("6+");
+        else
+            stars.setText(String.valueOf(ch_stars));
+
+        DecimalFormat df = new DecimalFormat("0");
+        df.setRoundingMode(RoundingMode.DOWN);
+        String stars_p = df.format(ch_stars);
+        switch (stars_p) {
+            case "1":
+            case "2":
                 stars.setBackgroundColor(getResources().getColor(R.color.bronze_bg));
                 stars.setTextColor(getResources().getColor(R.color.bronze_txt));
                 break;
-            case 3:
+            case "3":
                 stars.setBackgroundColor(getResources().getColor(R.color.silver_bg));
                 stars.setTextColor(getResources().getColor(R.color.silver_txt));
                 break;
-            case 4:
-            case 5:
+            case "4":
+            case "5":
                 stars.setBackgroundColor(getResources().getColor(R.color.gold_bg));
                 stars.setTextColor(getResources().getColor(R.color.gold_txt));
                 break;
-            case 6:
+            case "6":
                 stars.setBackgroundColor(getResources().getColor(R.color.red_bg));
                 stars.setTextColor(getResources().getColor(R.color.red_txt));
                 break;
@@ -1214,8 +1226,9 @@ private final static Double APP_VERSION = 4.1;
         NotificationCompat.Builder mBuilder = buildNotification();
         NotificationManager mManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
         Notification notification = mBuilder.build();
+        notification.flags = 0;
+        notification.flags |= Notification.FLAG_NO_CLEAR; //don't clear
         notification.flags |= Notification.FLAG_ONGOING_EVENT; //keep on top
-        //notification.flags |= Notification.FLAG_NO_CLEAR; //Do not clear the notification
         notification.defaults = 0; // no sound, vibrate, lights
         mManager.notify(879, notification);
     }
@@ -1230,16 +1243,30 @@ private final static Double APP_VERSION = 4.1;
         PendingIntent pendingOpenGameIntent = PendingIntent.getBroadcast(this, 0,
                 opengameIntent, 0);
 
+        Intent hidebarIntent = new Intent(this, hideBarListener.class);
+        PendingIntent pendingHideBarIntent = PendingIntent.getBroadcast(this, 0,
+                hidebarIntent, 0);
+
         RemoteViews notificationView = new RemoteViews(
                 context.getPackageName(),
                 R.layout.notification_custom
         );
         notificationView.setImageViewResource(R.id.openAppBtn, R.mipmap.ic_launcher);
         notificationView.setImageViewResource(R.id.openGameBtn, R.drawable.ic_game);
-        notificationView.setOnClickPendingIntent(R.id.openAppBtn, pendingOpenAppIntent);
-        notificationView.setOnClickPendingIntent(R.id.openGameBtn, pendingOpenGameIntent);
-
+        notificationView.setImageViewResource(R.id.hideBar, R.drawable.ic_hide);
+        notificationView.setOnClickPendingIntent(R.id.openAppBtnL, pendingOpenAppIntent);
+        notificationView.setOnClickPendingIntent(R.id.openGameBtnL, pendingOpenGameIntent);
+        notificationView.setOnClickPendingIntent(R.id.hideBarL, pendingHideBarIntent);
         return notificationView;
+    }
+
+    public static class hideBarListener extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String ns = Context.NOTIFICATION_SERVICE;
+            NotificationManager nMgr = (NotificationManager) context.getSystemService(ns);
+            nMgr.cancel(879);
+        }
     }
 
     public static class openAppListener extends BroadcastReceiver {

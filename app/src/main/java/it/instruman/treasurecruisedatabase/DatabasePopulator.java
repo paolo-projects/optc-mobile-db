@@ -27,7 +27,16 @@ public class DatabasePopulator {
                     List arr_2 = characters.get(i);
                     String name = (arr_2.get(0) == null) ? "" : (String) arr_2.get(0);
                     String type = (arr_2.get(1) == null) ? "" : (String) arr_2.get(1);
-                    Integer stars = (arr_2.get(3) == null) ? 1 : ((Double) arr_2.get(3)).intValue();
+                    //Integer stars = (arr_2.get(3) == null) ? 1 : ((arr_2.get(3))?((Double) arr_2.get(3)).intValue();
+                    Double stars = 1.0;
+                    Object stars_o = arr_2.get(3);
+                    if(stars_o != null) {
+                        if(stars_o.equals("5+"))
+                            stars = 5.5;
+                        else if (stars_o.equals("6+"))
+                            stars = 6.5;
+                        else stars = (Double)stars_o;
+                    }
                     Object classes = (arr_2.get(2) == null) ? null : arr_2.get(2);
                     Integer cost = (arr_2.get(4) == null) ? null : ((Double) arr_2.get(4)).intValue();
                     Integer combo = (arr_2.get(5) == null) ? null : ((Double) arr_2.get(5)).intValue();

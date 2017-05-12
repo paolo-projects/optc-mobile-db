@@ -48,6 +48,7 @@
         </provider>
         <receiver android:name="MainActivity$openAppListener" />
         <receiver android:name="MainActivity$openGameListener" />
+        <receiver android:name="MainActivity$hideBarListener" />
     </application>
 
 </manifest>

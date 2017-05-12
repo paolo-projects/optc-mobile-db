@@ -14,7 +14,7 @@ public class CharacterInfo {
     private String Type = null;
     private String Class1 = null;
     private String Class2 = null;
-    private Integer Stars = null;
+    private Double Stars = null;
     private Integer Cost = null;
     private Integer Combo = null;
     private Integer Sockets = null;
@@ -77,7 +77,7 @@ public class CharacterInfo {
                          Integer lvl1ATK, Integer lvl1HP, Integer lvl1RCV, Integer maxATK,
                          Integer maxHP, Integer maxLvl, Integer maxRCV, String name, Integer sockets,
                          String specialName, String specialNotes, List<CharacterSpecials> specials,
-                         Integer stars, String type, ArrayList<DropInfo> DropInfos, ArrayList<DropInfo> ManualsInfos, String crewmateDescription, String crewmateNotes) {
+                         Double stars, String type, ArrayList<DropInfo> DropInfos, ArrayList<DropInfo> ManualsInfos, String crewmateDescription, String crewmateNotes) {
         CaptainDescription = captainDescription;
         CaptainNotes = captainNotes;
         Class1 = class1;
@@ -295,11 +295,11 @@ public class CharacterInfo {
         Specials = specials;
     }
 
-    public Integer getStars() {
+    public Double getStars() {
         return Stars;
     }
 
-    public void setStars(Integer stars) {
+    public void setStars(Double stars) {
         Stars = stars;
     }
 

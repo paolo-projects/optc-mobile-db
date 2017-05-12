@@ -128,7 +128,7 @@ public class FilterClass {
                 values.add("6");
             }
             type_condition = type_condition.substring(0, type_condition.length() - 3);
-            type_condition += ") AND ";
+            type_condition += " OR "+ DBHelper.UNITS_STARS +" = 5.5 OR "+DBHelper.UNITS_STARS + " = 6.5) AND ";
         }
 
         if (class_filters.size() > 0) {
@@ -222,7 +222,7 @@ public class FilterClass {
             HashMap element = new HashMap();
             element.put(Constants.NAME, result.getString(0));
             element.put(Constants.TYPE, result.getString(1));
-            element.put(Constants.STARS, result.getInt(2));
+            element.put(Constants.STARS, result.getDouble(2));
             element.put(Constants.ID, result.getInt(3));
             element.put(Constants.MAXATK, result.getInt(4));
             element.put(Constants.MAXHP, result.getInt(5));

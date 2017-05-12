@@ -123,7 +123,7 @@ class DBHelper extends SQLiteOpenHelper {
                     UNITS_TYPE + " TEXT, " +
                     UNITS_CLASS1 + " TEXT, " +
                     UNITS_CLASS2 + " TEXT, " +
-                    UNITS_STARS + " INT, " +
+                    UNITS_STARS + " REAL, " +
                     UNITS_COST + " INT, " +
                     UNITS_COMBO + " INT, " +
                     UNITS_SOCKETS + " INT, " +
@@ -227,7 +227,7 @@ class DBHelper extends SQLiteOpenHelper {
             tmp.put(Constants.ID, entry.getInt(0));
             tmp.put(Constants.NAME, entry.getString(1));
             tmp.put(Constants.TYPE, entry.getString(2));
-            tmp.put(Constants.STARS, entry.getInt(3));
+            tmp.put(Constants.STARS, entry.getDouble(3));
             tmp.put(Constants.MAXATK, entry.getInt(4));
             tmp.put(Constants.MAXHP, entry.getInt(5));
             tmp.put(Constants.MAXRCV, entry.getInt(6));
@@ -309,7 +309,7 @@ class DBHelper extends SQLiteOpenHelper {
     }
 
     public static void insertIntoUnits(SQLiteDatabase db, Integer id, String name, String type, String class1, String class2,
-                                       Integer stars, Integer cost, Integer combo, Integer sockets, Integer maxlevel,
+                                       Double stars, Integer cost, Integer combo, Integer sockets, Integer maxlevel,
                                        Integer exptomax, Integer lvl1hp, Integer lvl1atk, Integer lvl1rcv, Integer maxhp,
                                        Integer maxatk, Integer maxrcv) {
 
@@ -396,7 +396,7 @@ class DBHelper extends SQLiteOpenHelper {
         String char_type = units_cursor.getString(2);
         String char_class1 = units_cursor.getString(3);
         String char_class2 = units_cursor.getString(4);
-        Integer char_stars = units_cursor.getInt(5);
+        Double char_stars = units_cursor.getDouble(5);
         Integer char_cost = units_cursor.getInt(6);
         Integer char_combo = units_cursor.getInt(7);
         Integer char_sockets = units_cursor.getInt(8);

@@ -59,6 +59,8 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -1695,24 +1697,33 @@ public class FlyingChopper extends Service {
                 break;
         }
 
-        Integer ch_stars = charInfo.getStars();
-        stars.setText(String.valueOf(ch_stars));
-        switch (ch_stars) {
-            case 1:
-            case 2:
+        Double ch_stars = charInfo.getStars();
+        if (ch_stars == 5.5)
+            stars.setText("5+");
+        else if (ch_stars == 6.5)
+            stars.setText("6+");
+        else
+            stars.setText(String.valueOf(ch_stars));
+
+        DecimalFormat df = new DecimalFormat("0");
+        df.setRoundingMode(RoundingMode.DOWN);
+        String stars_p = df.format(ch_stars);
+        switch (stars_p) {
+            case "1":
+            case "2":
                 stars.setBackgroundColor(getResources().getColor(R.color.bronze_bg));
                 stars.setTextColor(getResources().getColor(R.color.bronze_txt));
                 break;
-            case 3:
+            case "3":
                 stars.setBackgroundColor(getResources().getColor(R.color.silver_bg));
                 stars.setTextColor(getResources().getColor(R.color.silver_txt));
                 break;
-            case 4:
-            case 5:
+            case "4":
+            case "5":
                 stars.setBackgroundColor(getResources().getColor(R.color.gold_bg));
                 stars.setTextColor(getResources().getColor(R.color.gold_txt));
                 break;
-            case 6:
+            case "6":
                 stars.setBackgroundColor(getResources().getColor(R.color.red_bg));
                 stars.setTextColor(getResources().getColor(R.color.red_txt));
                 break;
