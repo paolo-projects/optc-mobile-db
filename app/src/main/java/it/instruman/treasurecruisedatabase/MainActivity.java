@@ -88,6 +88,9 @@ import com.flaviofaria.kenburnsview.RandomTransitionGenerator;
 import com.github.amlcurran.showcaseview.ShowcaseView;
 import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
+import com.google.android.gms.analytics.ExceptionReporter; //gitignore
+import com.google.android.gms.analytics.HitBuilders;    //gitignore
+import com.google.android.gms.analytics.Tracker;    //gitignore
 
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
@@ -133,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 4.1;
+private final static Double APP_VERSION = 4.4;
 /*
     ##################################################
 */
@@ -451,6 +454,7 @@ private final static Double APP_VERSION = 4.1;
     EditText filterText;
     Dialog dlg_hwnd = null;
     Dialog loadingdlg_hwnd = null;
+    Tracker mTracker; //gitignore
 
     private String UNITS_JS;
     private String DETAILS_JS;
@@ -693,6 +697,7 @@ private final static Double APP_VERSION = 4.1;
 
         if (charInfo == null) return;
 
+        mTracker.send(new HitBuilders.EventBuilder().setCategory("Character Open").setAction("Name: " + charInfo.getName()).build()); //gitignore
 
         title.setText(charInfo.getName());
         title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
@@ -1456,7 +1461,11 @@ private final static Double APP_VERSION = 4.1;
         boolean isUpdatesCheckEnabled = isDownloadWifiOnly ? (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true) && isWifiOn()) :
                 PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true);
 
+        SmartDBApplication application = (SmartDBApplication) getApplication(); //gitignore
+        mTracker = application.getDefaultTracker(); //gitignore
 
+        Thread.UncaughtExceptionHandler myHandler = new ExceptionReporter(mTracker, Thread.getDefaultUncaughtExceptionHandler(), context); //gitignore
+        Thread.setDefaultUncaughtExceptionHandler(myHandler); //gitignore
 
         sortName = (ImageView) findViewById(R.id.sortName);
         sortType = (ImageView) findViewById(R.id.sortType);
@@ -1916,6 +1925,7 @@ private final static Double APP_VERSION = 4.1;
         int width = getScreenWidth();
 
         LinearLayout list_size = (LinearLayout) findViewById(R.id.list_size_layout);
+        ViewGroup.LayoutParams params = list_size.getLayoutParams(); //gitignore
 
         if (width > dpToPx(600))
             params.width = width - getSideTotalMargin();
@@ -1927,6 +1937,8 @@ private final static Double APP_VERSION = 4.1;
         boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
         if(daynightTheme) theme_str = "daynight_theme";
 
+        mTracker.setScreenName("Main Screen"); //gitignore
+        mTracker.send(new HitBuilders.ScreenViewBuilder().setCustomDimension(1, theme_str).build()); //gitignore
 
         if(daynightTheme) {
             LinearLayout themeBtns = (LinearLayout)findViewById(R.id.themeBtns);

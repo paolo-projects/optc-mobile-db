@@ -19,20 +19,30 @@ import android.webkit.WebViewClient;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
 
+import com.google.android.gms.analytics.ExceptionReporter; //gitignore
+import com.google.android.gms.analytics.HitBuilders; //gitignore
+import com.google.android.gms.analytics.Tracker; //gitignore
 
 public class DmgCalcActivity extends AppCompatActivity {
 private String DMGCALC_URL = "http://optc-db.github.io/damage/";
+    Tracker mTracker; //gitignore
 
     @Override
     protected void onResume() {
         super.onResume();
+        mTracker.setScreenName("Online Damage Calculator"); //gitignore
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build()); //gitignore
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        SmartDBApplication application = (SmartDBApplication) getApplication(); //gitignore
+        mTracker = application.getDefaultTracker(); //gitignore
 
+        Thread.UncaughtExceptionHandler myHandler = new ExceptionReporter(mTracker, Thread.getDefaultUncaughtExceptionHandler(), this); //gitignore
+        Thread.setDefaultUncaughtExceptionHandler(myHandler); //gitignore
 
         Bundle b = getIntent().getExtras();
         String lan = "";

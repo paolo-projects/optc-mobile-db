@@ -138,6 +138,7 @@ public class FeedbackDialogFragment extends DialogFragment {
                 try {
                     //add data
                     List<NameValuePair> nameValuePairs = new ArrayList<>(1);
+                    nameValuePairs.add(new BasicNameValuePair("key", "d715f58d97ad1e66294944a9d874134f"));//gitignore
                     nameValuePairs.add(new BasicNameValuePair("stars", message[0]));
                     nameValuePairs.add(new BasicNameValuePair("message", message[1]));
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));

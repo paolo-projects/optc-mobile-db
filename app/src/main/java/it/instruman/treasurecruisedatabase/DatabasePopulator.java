@@ -144,11 +144,12 @@ public class DatabasePopulator {
                 Object evs = value.get("evolution");
                 if (evs.getClass().equals(Double.class)) {
                     //1 evolution
-                    List<Double> evolvers = (List<Double>) value.get("evolvers");
+                    List<Object> evolvers = (List<Object>) value.get("evolvers");
                     Integer[] evolvers_int = new Integer[5];
                     for (int i = 0; i < 5; i++) {
                         if (i < evolvers.size())
-                            evolvers_int[i] = evolvers.get(i).intValue();
+                            if(evolvers.get(i).getClass().equals(Double.class))
+                                evolvers_int[i] = ((Double)evolvers.get(i)).intValue();
                         else evolvers_int[i] = null;
                     }
                     DBHelper.insertIntoEvolutions(database, entry.getKey(), ((Double) evs).intValue(), evolvers_int[0],

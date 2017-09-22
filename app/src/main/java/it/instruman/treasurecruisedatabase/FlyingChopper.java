@@ -58,6 +58,8 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.google.android.gms.analytics.HitBuilders; //gitignore
+import com.google.android.gms.analytics.Tracker; //gitignore
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -170,6 +172,7 @@ public class FlyingChopper extends Service {
     private ArrayList<HashMap> dbListItems, dbOriginalListItems;
     private listViewAdapterOverlay dbListAdapter;
     private ImageView sortName, sortType, sortHP, sortAtk, sortRCV, sortStars;
+    private Tracker mTracker; //gitignore
 
     AnimationLayoutParams paramsMainIcon, paramsCloseBtn, paramsListInterface, paramsListIcon, paramsDmgCalcInterface, paramsDmgCalcIcon, paramsCalcIcon, paramsCalcInterface, paramsEllipsisIcon;
     int panelState = 0;  // state 0 = close
@@ -921,6 +924,7 @@ public class FlyingChopper extends Service {
         populateDbList();
 
         LinearLayout list_size = (LinearLayout) listInterfaceView.findViewById(R.id.list_size_layout_overlay);
+        ViewGroup.LayoutParams params = list_size.getLayoutParams(); //gitignore
 
         if (getScreenWidth() > dpToPx(600))
             params.width = getScreenWidth() - getSideTotalMargin();
@@ -1163,7 +1167,11 @@ public class FlyingChopper extends Service {
     public void onCreate() {
         super.onCreate();
 
+        SmartDBApplication application = (SmartDBApplication) getApplication(); //gitignore
+        mTracker = application.getDefaultTracker(); //gitignore
 
+        mTracker.setScreenName("Floating Icon"); //gitignore
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build()); //gitignore
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
