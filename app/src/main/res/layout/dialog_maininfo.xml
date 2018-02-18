@@ -495,4 +495,75 @@
             android:background="?char_info_stats_max_bg"
             android:textColor="?char_info_stats_max_txt" />
     </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@android:color/darker_gray"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="0dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="2dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/lvlLB"
+            android:gravity="center_horizontal"
+            android:background="?char_info_stats_lb_bg"
+            android:textColor="?char_info_stats_lb_txt" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/lvllbhpText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:background="?char_info_stats_lb_bg"
+            android:textColor="?char_info_stats_lb_txt" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/lvllbatkText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:background="?char_info_stats_lb_bg"
+            android:textColor="?char_info_stats_lb_txt" />
+
+        <View
+            android:layout_width="0.5dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="2dp"
+            android:layout_marginRight="2dp"
+            android:background="@android:color/darker_gray" />
+
+        <TextView
+            android:id="@+id/lvllbrcvText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center_horizontal"
+            android:background="?char_info_stats_lb_bg"
+            android:textColor="?char_info_stats_lb_txt" />
+    </LinearLayout>
 </LinearLayout>

@@ -17,8 +17,9 @@
     <string name="lastupdate" translatable="false">date_last_update</string>
     <string name="theme_pref" translatable="false">theme_preference</string>
 
-    <string name="rebuild_db" translatable="false">db_to_rebuild_4_1</string>
+    <string name="rebuild_db" translatable="false">db_to_rebuild_5_3</string>
     <string name="title_activity_settings" translatable="false">Settings</string>
+    <string name="pref_failedupdate" translatable="false">preference_update_failed</string>
 
     <string name="download_db" translatable="false">download_database_pref</string>
     <string name="check_update" translatable="false">check_updates_pref</string>
@@ -29,6 +30,7 @@
     <string name="pref_donation" translatable="false">preference_donate</string>
     <string name="prefs_noticeboard_viewed" translatable="false">noticeboard_viewed_set</string>
     <string name="pref_notification" translatable="false">preference_notification_shortcut</string>
+    <string name="prefClearThumbCacheKey" translatable="false">preference_clear_thumbnail_cache</string>
     <!-- ###-->
 
     <!-- Character info dialog strings -->
@@ -134,12 +136,16 @@
         <item>Positional captains</item>
         <item>\"Beneficial\" Orb captains</item>
         <item>Chain multipliers</item>
+        <item>Combo Boost Captains</item>
         <item>Cooldown reducers</item>
         <item>Damage reducers</item>
         <item>Healers</item>
         <item>Tankers</item>
         <item>Zombies</item>
         <item>End of Turn Damage Dealer</item>
+        <item>Beli Boosters</item>
+        <item>EXP Boosters</item>
+        <item>Drop Doublers</item>
     </string-array>
 
     <string name="spec_flags_title">Special ability</string>
@@ -152,6 +158,7 @@
         <item>Conditional ATK boosters</item>
         <item>Delayed ATK boosters</item>
         <item>Color Affinity boosters</item>
+        <item>Combo Boost Specials</item>
         <item>RCV boosters</item>
         <item>Orb lockers</item>
         <item>Orb boosters</item>
@@ -188,6 +195,9 @@
         <item>Zombies</item>
         <item>Special cooldown reducer</item>
         <item>Paralysis reducers</item>
+        <item>Chain Boosters</item>
+        <item>Chain Lockers</item>
+        <item>\"Beneficial\" Orb Enablers</item>
     </string-array>
 
     <string-array name="capt_flags_array_link" translatable="false">
@@ -206,12 +216,16 @@
         <item>Positional captains</item>
         <item>\"Beneficial\" Orb captains</item>
         <item>Chain multipliers</item>
+        <item>Combo Boost Captains</item>
         <item>Cooldown reducers</item>
         <item>Damage reducers</item>
         <item>Healers</item>
         <item>Tankers</item>
         <item>Zombies</item>
         <item>End of Turn Damage Dealer</item>
+        <item>Beli Boosters</item>
+        <item>EXP Boosters</item>
+        <item>Drop Doublers</item>
     </string-array>
 
     <string-array name="spec_flags_array_link" translatable="false">
@@ -224,6 +238,7 @@
         <item>Delayed ATK boosters</item>
         <item>Color Affinity boosters</item>
         <item>RCV boosters</item>
+        <item>Combo Boost Specials</item>
         <item>Orb lockers</item>
         <item>Orb boosters</item>
         <item>Orb chance boosters</item>
@@ -259,6 +274,9 @@
         <item>Zombies</item>
         <item>Special cooldown reducer</item>
         <item>Paralysis reducers</item>
+        <item>Chain Boosters</item>
+        <item>Chain Lockers</item>
+        <item>\"Beneficial\" Orb Enablers</item>
     </string-array>
 
     <string-array name="languages_array" translatable="false">
@@ -347,4 +365,23 @@
     <string name="cw_text">"Crewmate ability: "</string>
     <string name="prefs_notification">Show notification shortcut</string>
     <string name="prefs_notification_desc">Show a shortcut to this app and OPTC app in the notification bar</string>
+    <string name="tab_limitbreak">Limit Break</string>
+    <string name="limitbreak">Limit Break:</string>
+    <string name="potentials">Potential Abilities:</string>
+    <string name="limitnotes">Notes:</string>
+    <string name="prefScreenSendMessageTitle">Send a message</string>
+    <string name="prefScreenSendMessageSummary">Send suggestions, bugs, or a slice of pizza</string>
+    <string name="prefScreenAppIssuesTitle">App issues and bugs</string>
+    <string name="prefScreenAppIssuesSummary">Please if you have to report an issue or a bug use this link</string>
+    <string name="prefDonationsDisabledTitle">Temporarily disabled</string>
+    <string name="prefDonationsDisabledText">Donations temporarily disabled</string>
+    <string name="failedUpdateMsg">DB update failed!</string>
+    <string name="failedUpdateDialogMsg">The latest DB update failed to apply and made the app crash. This issue is currently being investigated and in the meantime DB updates have been disabled in your settings. App updates have been enabled and it\'s highly recommended to update the app as soon as an update is available to fix this issue</string>
+    <string name="failedUpdateDialogTitle">Update failed</string>
+    <string name="charpageBaseAbility">Base</string>
+    <string name="prefsClearThumbnailsCache">Clear thumbnails cache</string>
+    <string name="prefCatAdvanced">Advanced</string>
+    <string name="clearingThumbCacheToast">Clearing thumbnails cache...</string>
+    <string name="lvlLB">LB</string>
+    <string name="noLbStatsIncrease">/</string>
 </resources>

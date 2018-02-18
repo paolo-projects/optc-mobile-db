@@ -19,6 +19,8 @@
     <attr name="char_info_stats_max_bg" format="reference|color" />
     <attr name="char_info_stats_max_txt" format="reference|color" />
     <attr name="char_info_back_button" format="reference|color" />
+    <attr name="char_info_stats_lb_bg" format="reference|color" />
+    <attr name="char_info_stats_lb_txt" format="reference|color" />
     <attr name="hint_txt" format="reference|color" />
 
     <declare-styleable name="ImageListPreference">

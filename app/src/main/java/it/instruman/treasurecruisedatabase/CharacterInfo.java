@@ -31,6 +31,24 @@ public class CharacterInfo {
     private List<CharacterSpecials> Specials = new ArrayList<>();
     private String CaptainDescription = null;
     private String CaptainNotes = null;
+    private Limits CharLimits = null;
+    private Potentials CharPotentials = null;
+
+    public Limits getCharLimits() {
+        return CharLimits;
+    }
+
+    public void setCharLimits(Limits charLimits) {
+        CharLimits = charLimits;
+    }
+
+    public Potentials getCharPotentials() {
+        return CharPotentials;
+    }
+
+    public void setCharPotentials(Potentials charPotentials) {
+        CharPotentials = charPotentials;
+    }
 
     public String getCrewmateDescription() {
         return CrewmateDescription;
@@ -77,7 +95,8 @@ public class CharacterInfo {
                          Integer lvl1ATK, Integer lvl1HP, Integer lvl1RCV, Integer maxATK,
                          Integer maxHP, Integer maxLvl, Integer maxRCV, String name, Integer sockets,
                          String specialName, String specialNotes, List<CharacterSpecials> specials,
-                         Double stars, String type, ArrayList<DropInfo> DropInfos, ArrayList<DropInfo> ManualsInfos, String crewmateDescription, String crewmateNotes) {
+                         Double stars, String type, ArrayList<DropInfo> DropInfos, ArrayList<DropInfo> ManualsInfos,
+                         String crewmateDescription, String crewmateNotes, Limits CharLimits, Potentials CharPotentials) {
         CaptainDescription = captainDescription;
         CaptainNotes = captainNotes;
         Class1 = class1;
@@ -106,6 +125,8 @@ public class CharacterInfo {
         manualsInfos = ManualsInfos;
         CrewmateDescription = crewmateDescription;
         CrewmateNotes = crewmateNotes;
+        this.CharLimits = CharLimits;
+        this.CharPotentials = CharPotentials;
     }
 
     public CharacterInfo() {

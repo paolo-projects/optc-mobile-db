@@ -3,7 +3,6 @@ package it.instruman.treasurecruisedatabase;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.TimingLogger;
 
@@ -201,8 +200,12 @@ public class FilterClass {
                 type_condition += DBHelper.UNITS_CHARID + " = ? AND ";
                 values.add(filterText);
             } else {
-                type_condition += DBHelper.UNITS_NAME + " LIKE ? AND ";
+                type_condition += "( ( " + DBHelper.UNITS_NAME + " LIKE ? ) OR ( " + DBHelper.UNITS_CHARID +
+                        " IN ( SELECT " + DBHelper.ALIASES_CHARID + " FROM " + DBHelper.ALIASES_TABLE + " WHERE " + DBHelper.ALIASES_ALIAS + " LIKE ? ) ) ) AND ";
                 values.add("%" + filterText + "%");
+                values.add("%" + filterText + "%");
+                /*type_condition += DBHelper.UNITS_NAME + " LIKE ? AND ";
+                values.add("%" + filterText + "%");*/
             }
         }
         if (type_condition.equals("")) {

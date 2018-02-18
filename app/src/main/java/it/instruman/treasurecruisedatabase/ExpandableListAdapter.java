@@ -84,7 +84,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.exp_list_view_item, parent, false);
 
             view = new VHolder();
-            view.itemView = (CheckedTextView) convertView
+            view.itemView = convertView
                     .findViewById(R.id.lblListItem);
 
             convertView.setTag(view);
@@ -141,7 +141,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
             convertView = infalInflater.inflate(R.layout.exp_list_view_gh, parent, false);
         }
 
-        TextView lblListHeader = (TextView) convertView
+        TextView lblListHeader = convertView
                 .findViewById(R.id.lblListHeader);
         lblListHeader.setTypeface(null, Typeface.BOLD);
         lblListHeader.setText(headerTitle);

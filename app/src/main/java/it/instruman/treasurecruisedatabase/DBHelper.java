@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 /**
  * Created by Paolo on 31/10/2016.
@@ -103,6 +104,34 @@ class DBHelper extends SQLiteOpenHelper {
     private final static String CREWMATE_DESCRIPTION = "crewmate_description";
     private final static String CREWMATE_NOTES = "crewmate_notes";
 
+    // Table limit
+    private final static String LIMIT_TABLE = "char_limit";
+    // Columns
+    private final static String LIMIT_ID = "_id";
+    private final static String LIMIT_CHARID = "char_id";
+    private final static String LIMIT_DESCRIPTION = "description";
+    private final static String LIMIT_NOTES = "notes";
+
+    // Table potential
+    private final static String POTENTIAL_TABLE = "char_potential";
+    // Columns
+    private final static String POTENTIAL_ID = "_id";
+    private final static String POTENTIAL_CHARID = "char_id";
+    private final static String POTENTIAL_NAME = "name";
+    private final static String POTENTIAL_LVL1 = "lvl1";
+    private final static String POTENTIAL_LVL2 = "lvl2";
+    private final static String POTENTIAL_LVL3 = "lvl3";
+    private final static String POTENTIAL_LVL4 = "lvl4";
+    private final static String POTENTIAL_LVL5 = "lvl5";
+    private final static String POTENTIAL_NOTES = "notes";
+
+    // Table aliases
+    final static String ALIASES_TABLE = "aliases";
+    //Columns
+    final static String ALIASES_ID = "_id";
+    final static String ALIASES_CHARID = "char_id";
+    final static String ALIASES_ALIAS = "char_alias";
+
 
     // Custom SQL
     //Drop tables
@@ -113,6 +142,9 @@ class DBHelper extends SQLiteOpenHelper {
     private final static String DROP_DROPS = "DROP TABLE IF EXISTS " + DROPS_TABLE;
     private final static String DROP_MANUALS = "DROP TABLE IF EXISTS " + MANUALS_TABLE;
     private final static String DROP_CREWMATE = "DROP TABLE IF EXISTS " + CREWMATE_TABLE;
+    private final static String DROP_LIMIT = "DROP TABLE IF EXISTS " + LIMIT_TABLE;
+    private final static String DROP_POTENTIAL = "DROP TABLE IF EXISTS " + POTENTIAL_TABLE;
+    private final static String DROP_ALIASES = "DROP TABLE IF EXISTS " + ALIASES_TABLE;
 
     // Create tables
     private final static String CREATE_TABLE_UNITS =
@@ -191,6 +223,31 @@ class DBHelper extends SQLiteOpenHelper {
                     CREWMATE_DESCRIPTION + " TEXT, " +
                     CREWMATE_NOTES + " TEXT, " +
                     "PRIMARY KEY ( " + CREWMATE_ID + " ))";
+    private final static String CREATE_TABLE_LIMIT =
+            "CREATE TABLE " + LIMIT_TABLE + " (" +
+                    LIMIT_ID + " INTEGER, " +
+                    LIMIT_CHARID + " INT NOT NULL, " +
+                    LIMIT_DESCRIPTION + " TEXT NOT NULL, " +
+                    LIMIT_NOTES + " TEXT, " +
+                    "PRIMARY KEY ( " + SPECIALS_ID + " ))";
+    private final static String CREATE_TABLE_POTENTIAL =
+            "CREATE TABLE " + POTENTIAL_TABLE + " (" +
+                    POTENTIAL_ID + " INTEGER, " +
+                    POTENTIAL_CHARID + " INT NOT NULL, " +
+                    POTENTIAL_NAME + " TEXT NOT NULL, " +
+                    POTENTIAL_LVL1 + " TEXT NOT NULL, " +
+                    POTENTIAL_LVL2 + " TEXT NOT NULL, " +
+                    POTENTIAL_LVL3 + " TEXT NOT NULL, " +
+                    POTENTIAL_LVL4 + " TEXT NOT NULL, " +
+                    POTENTIAL_LVL5 + " TEXT NOT NULL, " +
+                    POTENTIAL_NOTES + " TEXT, " +
+                    "PRIMARY KEY ( " + SPECIALS_ID + " ))";
+    private final static String CREATE_TABLE_ALIASES =
+            "CREATE TABLE " + ALIASES_TABLE + " (" +
+                    ALIASES_ID + " INTEGER, " +
+                    ALIASES_CHARID + " INT NOT NULL, " +
+                    ALIASES_ALIAS + " TEXT NOT NULL, " +
+                    "PRIMARY KEY ( " + ALIASES_ID + " ))";
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -206,6 +263,9 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_DROPS);
         db.execSQL(DROP_MANUALS);
         db.execSQL(DROP_CREWMATE);
+        db.execSQL(DROP_LIMIT);
+        db.execSQL(DROP_POTENTIAL);
+        db.execSQL(DROP_ALIASES);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
@@ -215,6 +275,9 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_DROPS);
         db.execSQL(CREATE_TABLE_MANUALS);
         db.execSQL(CREATE_TABLE_CREWMATE);
+        db.execSQL(CREATE_TABLE_LIMIT);
+        db.execSQL(CREATE_TABLE_POTENTIAL);
+        db.execSQL(CREATE_TABLE_ALIASES);
         db.close();
     }
 
@@ -247,6 +310,9 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(DROP_DROPS);
         db.execSQL(DROP_MANUALS);
         db.execSQL(DROP_CREWMATE);
+        db.execSQL(DROP_LIMIT);
+        db.execSQL(DROP_POTENTIAL);
+        db.execSQL(DROP_ALIASES);
 
         //Create tables
         db.execSQL(CREATE_TABLE_UNITS);
@@ -256,6 +322,9 @@ class DBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_DROPS);
         db.execSQL(CREATE_TABLE_MANUALS);
         db.execSQL(CREATE_TABLE_CREWMATE);
+        db.execSQL(CREATE_TABLE_LIMIT);
+        db.execSQL(CREATE_TABLE_POTENTIAL);
+        db.execSQL(CREATE_TABLE_ALIASES);
     }
 
     public static void insertIntoDrops(SQLiteDatabase db, Integer char_id, String drop_location, String chap_or_difficulty, boolean is_global, boolean is_japan, Integer thumbnail)
@@ -383,6 +452,41 @@ class DBHelper extends SQLiteOpenHelper {
         db.insert(EVOLUTIONS_TABLE, null, values);
     }
 
+    public static void insertIntoLimit(SQLiteDatabase db, Integer charid, String description, String notes) {
+        ContentValues values = new ContentValues();
+
+        values.put(LIMIT_CHARID, charid);
+        values.put(LIMIT_DESCRIPTION, description);
+        values.put(LIMIT_NOTES, notes);
+
+        db.insert(LIMIT_TABLE, null, values);
+    }
+
+    public static void insertIntoPotential(SQLiteDatabase db, Integer charid, String name, String lvl1,
+                                           String lvl2, String lvl3, String lvl4, String lvl5, String notes) {
+        ContentValues values = new ContentValues();
+
+        values.put(POTENTIAL_CHARID, charid);
+        values.put(POTENTIAL_NAME, name);
+        values.put(POTENTIAL_LVL1, lvl1);
+        values.put(POTENTIAL_LVL2, lvl2);
+        values.put(POTENTIAL_LVL3, lvl3);
+        values.put(POTENTIAL_LVL4, lvl4);
+        values.put(POTENTIAL_LVL5, lvl5);
+        values.put(POTENTIAL_NOTES, notes);
+
+        db.insert(POTENTIAL_TABLE, null, values);
+    }
+
+    public static void insertIntoAliases(SQLiteDatabase db, Integer charid, String alias) {
+        ContentValues values = new ContentValues();
+
+        values.put(ALIASES_CHARID, charid);
+        values.put(ALIASES_ALIAS, alias);
+
+        db.insert(ALIASES_TABLE, null, values);
+    }
+
     public static CharacterInfo getCharacterInfo(SQLiteDatabase db, Integer CharId) {
         Cursor units_cursor = db.query(UNITS_TABLE, new String[]{UNITS_ID, UNITS_NAME, UNITS_TYPE, UNITS_CLASS1, UNITS_CLASS2,
                         UNITS_STARS, UNITS_COST, UNITS_COMBO, UNITS_SOCKETS, UNITS_MAXLEVEL, UNITS_EXPTOMAX,
@@ -435,6 +539,15 @@ class DBHelper extends SQLiteOpenHelper {
         Cursor crewmate_cursor = db.query(CREWMATE_TABLE, new String[]{CREWMATE_DESCRIPTION, CREWMATE_NOTES},
                 CREWMATE_CHARID + " = ?", new String[]{String.valueOf(CharId)}, null, null, null, null);
         crewmate_cursor.moveToFirst();
+
+        Cursor limit_cursor = db.query(LIMIT_TABLE, new String[]{LIMIT_DESCRIPTION, LIMIT_NOTES}, LIMIT_CHARID + " = ?",
+                new String[]{String.valueOf(CharId)}, null, null, null, null);
+        limit_cursor.moveToFirst();
+
+        Cursor potential_cursor = db.query(POTENTIAL_TABLE, new String[]{POTENTIAL_NAME, POTENTIAL_LVL1, POTENTIAL_LVL2,
+                        POTENTIAL_LVL3, POTENTIAL_LVL4, POTENTIAL_LVL5, POTENTIAL_NOTES}, POTENTIAL_CHARID + " = ?",
+                new String[]{String.valueOf(CharId)}, null, null, null, null);
+        potential_cursor.moveToFirst();
         
         ArrayList<CharacterSpecials> specials_data = new ArrayList<>();
         String special_name = "";
@@ -488,6 +601,45 @@ class DBHelper extends SQLiteOpenHelper {
             cwNotes = crewmate_cursor.getString(1);
         }
 
+        Limits charLimits = null;
+        if(limit_cursor.getCount()>0) {
+            charLimits = new Limits();
+            ArrayList<String> limitEntries = new ArrayList<>();
+            boolean isLimitFirst = true;
+            while (!limit_cursor.isAfterLast()) {
+                if (isLimitFirst) {
+                    charLimits.setLimitNotes(limit_cursor.getString(1));
+                    isLimitFirst = false;
+                }
+                limitEntries.add(limit_cursor.getString(0));
+                limit_cursor.moveToNext();
+            }
+            charLimits.setLimitEntries(limitEntries);
+        }
+
+        Potentials charPotentials = null;
+        if(potential_cursor.getCount()>0) {
+            charPotentials = new Potentials();
+            LinkedHashMap<String, ArrayList<String>> potentialsEntries = new LinkedHashMap<>();
+            boolean isPotentialFirst = true;
+            while (!potential_cursor.isAfterLast()) {
+                if (isPotentialFirst) {
+                    charPotentials.setPotentialNotes(potential_cursor.getString(6));
+                    isPotentialFirst = false;
+                }
+                String potName = potential_cursor.getString(0);
+                ArrayList<String> potLevels = new ArrayList<>();
+                potLevels.add(potential_cursor.getString(1));
+                potLevels.add(potential_cursor.getString(2));
+                potLevels.add(potential_cursor.getString(3));
+                potLevels.add(potential_cursor.getString(4));
+                potLevels.add(potential_cursor.getString(5));
+                potentialsEntries.put(potName, potLevels);
+                potential_cursor.moveToNext();
+            }
+            charPotentials.setPotentialEntries(potentialsEntries);
+        }
+
         units_cursor.close();
         specials_cursor.close();
         captain_cursor.close();
@@ -495,11 +647,13 @@ class DBHelper extends SQLiteOpenHelper {
         drops_cursor.close();
         manuals_cursor.close();
         crewmate_cursor.close();
+        limit_cursor.close();
+        potential_cursor.close();
 
         return new CharacterInfo(captain_description, captain_notes, char_class1, char_class2, char_combo,
                 char_cost, id, char_evos, char_exptomax, CharId, char_lvl1atk, char_lvl1hp, char_lvl1rcv,
                 char_maxatk, char_maxhp, char_maxlvl, char_maxrcv, char_name, char_sockets, special_name, special_notes,
-                specials_data, char_stars, char_type, dropInfos, manualsInfos, cwDesc, cwNotes);
+                specials_data, char_stars, char_type, dropInfos, manualsInfos, cwDesc, cwNotes, charLimits, charPotentials);
     }
 
     public static ArrayList<CharacterEvolutions> getEvolutions(SQLiteDatabase db, Integer charID)

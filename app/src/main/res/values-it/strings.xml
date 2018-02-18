@@ -120,12 +120,16 @@
         <item>Capitani basati sulla posizione</item>
         <item>Capitani con orb \"Benefiche\"</item>
         <item>Moltiplicatori di catena</item>
+        <item>Capitani che boostano la combo</item>
         <item>Riduttori di cooldown</item>
         <item>Riduttori di danno</item>
         <item>Guaritori</item>
         <item>Tankers</item>
         <item>Zombi</item>
         <item>Danno a fine turno</item>
+        <item>Boost Beli</item>
+        <item>Boost EXP</item>
+        <item>Drop aggiuntivo</item>
     </string-array>
 
     <string name="spec_flags_title">Abilità special</string>
@@ -138,6 +142,7 @@
         <item>Booster ATK condizionale</item>
         <item>Booster ATK sui nemici ritardati</item>
         <item>Booster dell\'affinità di colore</item>
+        <item>Booster della combo</item>
         <item>Booster RCV</item>
         <item>Blocca-orb</item>
         <item>Booster orb</item>
@@ -174,6 +179,9 @@
         <item>Zombi</item>
         <item>Riduttore cooldown special</item>
         <item>Riduttore paralisi</item>
+        <item>Booster della chain</item>
+        <item>Blocca la chain</item>
+        <item>Orb benefiche</item>
     </string-array>
     <string name="prefs_daynight_theme">Day / Night Theme</string>
     <string name="pref_donation_cat">Supporta l\'app!</string>
@@ -204,4 +212,23 @@
     <string name="cw_text">"Abilità ciurma: "</string>
     <string name="prefs_notification">Mostra accesso rapido nelle notifiche</string>
     <string name="prefs_notification_desc">Mostra una barra di accesso rapido a quest\'app e ad OPTC nella barra delle notifiche</string>
+    <string name="tab_limitbreak">Limit Break</string>
+    <string name="limitbreak">Limit Break:</string>
+    <string name="potentials">Abilità potenziali:</string>
+    <string name="limitnotes">Note:</string>
+    <string name="prefScreenSendMessageTitle">Invia messaggio</string>
+    <string name="prefScreenSendMessageSummary">Invia idee, suggerimenti, bug</string>
+    <string name="prefScreenAppIssuesTitle">Problemi e bug dell\'app</string>
+    <string name="prefScreenAppIssuesSummary">Se devi riportare un problema o un errore dell\'app usa questo link</string>
+    <string name="prefDonationsDisabledTitle">Temporaneamente disabilitate</string>
+    <string name="prefDonationsDisabledText">Le donazioni sono provvisoriamente disabilitate</string>
+    <string name="failedUpdateMsg">L\'aggiornamento del database è fallito!</string>
+    <string name="failedUpdateDialogMsg">L\'ultimo aggiornamento del DB è fallito ed ha fatto chiudere l\'app. Questo problema sta per essere risolto, e nel frattempo gli aggiornamenti del database sono stati disattivati nelle impostazioni. Gli aggiornamenti dell\'app sono stati attivati ed è altamente consigliato aggiornare l\'app appena un nuovo aggiornamento è disponibile</string>
+    <string name="failedUpdateDialogTitle">Aggiornamento fallito</string>
+    <string name="charpageBaseAbility">Base</string>
+    <string name="prefsClearThumbnailsCache">Svuota cache delle anteprime</string>
+    <string name="prefCatAdvanced">Avanzate</string>
+    <string name="clearingThumbCacheToast">Cancellando la cache delle anteprime</string>
+    <string name="lvlLB">LB</string>
+    <string name="noLbStatsIncrease">/</string>
 </resources>

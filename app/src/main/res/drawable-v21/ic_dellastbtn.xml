@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="false">
+        <layer-list>
+            <item android:drawable="@color/drawer_bar_bg_teal" />
+            <item android:drawable="@drawable/ic_delete_last" android:top="15dp" android:bottom="15dp" android:left="15dp" android:right="15dp"/>
+        </layer-list>
+    </item>
+    <item android:state_pressed="true" >
+        <layer-list>
+            <item android:drawable="@color/main_bg_teal" />
+            <item android:drawable="@drawable/ic_delete_last" android:top="35dp" android:bottom="35dp" android:left="30dp" android:right="30dp"/>
+        </layer-list>
+    </item>
+</selector>

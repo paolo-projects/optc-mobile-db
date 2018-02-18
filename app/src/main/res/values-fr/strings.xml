@@ -193,4 +193,23 @@
     <string name="cw_text">"Crewmate ability: "</string>
     <string name="prefs_notification">Show notification shortcut</string>
     <string name="prefs_notification_desc">Show a shortcut to this app and OPTC app in the notification bar</string>
+    <string name="tab_limitbreak">Limit Break</string>
+    <string name="limitbreak">Limit Break:</string>
+    <string name="potentials">Potential Abilities:</string>
+    <string name="limitnotes">Notes:</string>
+    <string name="prefScreenSendMessageTitle">Send a message</string>
+    <string name="prefScreenSendMessageSummary">Send suggestions, bugs, or a slice of pizza</string>
+    <string name="prefScreenAppIssuesTitle">App issues and bugs</string>
+    <string name="prefScreenAppIssuesSummary">Please if you have to report an issue or a bug use this link</string>
+    <string name="prefDonationsDisabledTitle">Temporarily disabled</string>
+    <string name="prefDonationsDisabledText">Donations temporarily disabled</string>
+    <string name="failedUpdateMsg">DB update failed!</string>
+    <string name="failedUpdateDialogMsg">The latest DB update failed to apply and made the app crash. This issue is currently being investigated and in the meantime DB updates have been disabled in your settings. App updates have been enabled and it\'s highly recommended to update the app as soon as an update is available to fix this issue</string>
+    <string name="failedUpdateDialogTitle">Update failed</string>
+    <string name="charpageBaseAbility">Base</string>
+    <string name="prefsClearThumbnailsCache">Clear thumbnails cache</string>
+    <string name="prefCatAdvanced">Advanced</string>
+    <string name="clearingThumbCacheToast">Clearing thumbnails cache...</string>
+    <string name="lvlLB">LB</string>
+    <string name="noLbStatsIncrease">/</string>
 </resources>

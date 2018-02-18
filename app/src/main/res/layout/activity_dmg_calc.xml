@@ -18,7 +18,9 @@
         android:id="@+id/dmgcalc_navigateback"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_arrow_back"
+        android:src="@drawable/ic_arrow_back"
+        android:background="@android:color/transparent"
+        android:tint="?drawer_bar_btn"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_marginRight="10dp"
@@ -27,14 +29,18 @@
         android:id="@+id/dmgcalc_navigateforward"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_arrow_forward"
+        android:src="@drawable/ic_arrow_forward"
+        android:background="@android:color/transparent"
+        android:tint="?drawer_bar_btn"
         android:layout_toRightOf="@id/dmgcalc_navigateback"
         android:layout_toEndOf="@id/dmgcalc_navigateback"/>
     <ImageButton
         android:id="@+id/dmgcalc_backBtn"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:background="@drawable/ic_back_dmg"
+        android:src="@drawable/ic_back_dmg"
+        android:background="@android:color/transparent"
+        android:tint="?drawer_bar_btn"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true" />
 

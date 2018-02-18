@@ -97,6 +97,12 @@
                             android:layout_width="match_parent" />
 
                         <include
+                            android:id="@+id/tab_limitbreak"
+                            layout="@layout/dialog_limitbreak_overlay"
+                            android:layout_height="match_parent"
+                            android:layout_width="match_parent" />
+
+                        <include
                             android:id="@+id/tab_evolutions"
                             layout="@layout/dialog_evolvers_overlay"
                             android:layout_height="match_parent"

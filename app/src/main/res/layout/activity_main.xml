@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -9,7 +10,6 @@
         android:layout_height="match_parent"
         android:id="@+id/mainBgImage" />
     <LinearLayout
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="?main_bg"
@@ -43,7 +43,9 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_gravity="center"
-                android:background="@drawable/ic_reset_btn"
+                android:src="@drawable/ic_reset_btn"
+                android:background="@android:color/transparent"
+                android:tint="?text_icons_searchbox"
                 android:contentDescription="@string/resetBtn_contDesc"
                 android:scaleType="fitCenter"
                 android:layout_marginRight="5dp" />
@@ -69,7 +71,9 @@
                 android:layout_width="28dp"
                 android:layout_height="28dp"
                 android:layout_gravity="center_vertical|center_horizontal"
-                android:background="@drawable/ic_search_btn"
+                android:background="@android:color/transparent"
+                android:src="@drawable/ic_search_btn"
+                android:tint="?text_icons_searchbox"
                 android:contentDescription="@string/filterBtn_contDesc"
                 android:scaleType="fitCenter" />
         </LinearLayout>
@@ -87,7 +91,7 @@
 
                 <LinearLayout
                     android:id="@+id/list_size_layout"
-                    android:layout_width="550dp"
+                    android:layout_width="700dp"
                     android:layout_height="26dp"
                     android:layout_marginTop="6dp"
                     android:background="?list_bg"
@@ -101,7 +105,7 @@
                     android:elevation="2dp">
 
                     <View
-                        android:layout_width="0.5dp"
+                        android:layout_width="20dp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="2dp"
                         android:layout_marginRight="2dp" />
@@ -109,7 +113,7 @@
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
+                        android:layout_weight="1.0"
                         android:gravity="center"
                         android:id="@+id/sortName_l"
                         android:layout_marginLeft="5dp"
@@ -330,7 +334,9 @@
                 android:layout_marginStart="10dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:background="@drawable/ic_cloud"
+                android:src="@drawable/ic_cloud"
+                android:background="@android:color/transparent"
+                android:tint="?drawer_bar_btn"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_database" />
 
@@ -342,7 +348,9 @@
                 android:layout_marginLeft="10dp"
                 android:layout_toEndOf="@id/reset_db"
                 android:layout_toRightOf="@id/reset_db"
-                android:background="@drawable/ic_calculator"
+                android:src="@drawable/ic_calculator"
+                android:background="@android:color/transparent"
+                android:tint="?drawer_bar_btn"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />
@@ -355,7 +363,9 @@
                 android:layout_marginLeft="10dp"
                 android:layout_toEndOf="@id/dmg_calculator"
                 android:layout_toRightOf="@id/dmg_calculator"
-                android:background="@drawable/ic_settings"
+                android:src="@drawable/ic_settings"
+                android:background="@android:color/transparent"
+                android:tint="?drawer_bar_btn"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />
@@ -368,7 +378,8 @@
                 android:layout_marginLeft="10dp"
                 android:layout_toEndOf="@id/settings_btn"
                 android:layout_toRightOf="@id/settings_btn"
-                android:background="@drawable/ic_bulletin"
+                android:src="@drawable/ic_bulletin"
+                android:background="@android:color/transparent"
                 android:scaleType="fitCenter"
                 android:contentDescription=""
                 style="?android:attr/buttonBarButtonStyle" />
@@ -381,7 +392,9 @@
                 android:layout_marginRight="10dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/ic_reset_bar"
+                android:src="@drawable/ic_reset_bar"
+                android:background="@android:color/transparent"
+                android:tint="?drawer_bar_btn"
                 android:scaleType="fitCenter"
                 android:contentDescription="@string/reset_filters"
                 style="?android:attr/buttonBarButtonStyle" />

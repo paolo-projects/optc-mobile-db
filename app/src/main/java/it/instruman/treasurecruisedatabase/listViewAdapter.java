@@ -4,7 +4,6 @@ package it.instruman.treasurecruisedatabase;
  * Created by Paolo on 05/10/2016.
  */
 
-import android.app.Activity;
 import android.app.Service;
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -21,7 +20,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
 
 public class listViewAdapter extends BaseAdapter {
     private ArrayList<HashMap> list;
@@ -59,13 +57,14 @@ public class listViewAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = inflater.inflate(R.layout.column_row, parent, false);
             holder = new ViewHolder();
-            holder.smallImg = (ImageView) convertView.findViewById(R.id.small_img);
-            holder.txtName = (TextView) convertView.findViewById(R.id.name);
-            holder.txtType = (TextView) convertView.findViewById(R.id.type);
-            holder.txtStars = (TextView) convertView.findViewById(R.id.stars);
-            holder.txtAtk = (TextView) convertView.findViewById(R.id.atk);
-            holder.txtHP = (TextView) convertView.findViewById(R.id.hp);
-            holder.txtRCV = (TextView) convertView.findViewById(R.id.rcv);
+            holder.charId = convertView.findViewById(R.id.char_id);
+            holder.smallImg = convertView.findViewById(R.id.small_img);
+            holder.txtName = convertView.findViewById(R.id.name);
+            holder.txtType = convertView.findViewById(R.id.type);
+            holder.txtStars = convertView.findViewById(R.id.stars);
+            holder.txtAtk = convertView.findViewById(R.id.atk);
+            holder.txtHP = convertView.findViewById(R.id.hp);
+            holder.txtRCV = convertView.findViewById(R.id.rcv);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -141,10 +140,14 @@ public class listViewAdapter extends BaseAdapter {
         holder.txtAtk.setText(map.containsKey(Constants.MAXATK) ? String.valueOf(map.get(Constants.MAXATK)) : "");
         holder.txtHP.setText(map.containsKey(Constants.MAXHP) ? String.valueOf(map.get(Constants.MAXHP)) : "");
         holder.txtRCV.setText(map.containsKey(Constants.MAXRCV) ? String.valueOf(map.get(Constants.MAXRCV)) : "");
+        holder.charId.setText(String.valueOf(map.get(Constants.ID)));
         return convertView;
     }
 
     private String convertID(Integer ID) {
+        if ((ID==574)||(ID==575)) {
+            return ("00" + ID.toString());
+        }
         if (ID < 10) return ("000" + ID.toString());
         else if (ID < 100) return ("00" + ID.toString());
         else if (ID < 1000) return ("0" + ID.toString());
@@ -152,6 +155,7 @@ public class listViewAdapter extends BaseAdapter {
     }
 
     private class ViewHolder {
+        TextView charId;
         ImageView smallImg;
         TextView txtName;
         TextView txtType;

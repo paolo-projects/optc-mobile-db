@@ -2,38 +2,36 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "it.instruman.treasurecruisedatabase"
         minSdkVersion 14
         targetSdkVersion 26
-        versionCode 29
-        versionName "4.4"
+        versionCode 40
+        versionName "5.5"
+        multiDexEnabled true
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    compile files('libs/rhino-1.7.7.1.jar')
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.github.bumptech.glide:glide:3.7.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
-    compile 'com.github.lzyzsd:circleprogress:1.1.0'
-    compile 'com.google.android.gms:play-services-analytics:11.0.4' //gitignore
-    compile 'com.android.support:support-v4:26.1.0'
-    compile 'com.android.support:support-vector-drawable:26.1.0'
-    compile 'com.flaviofaria:kenburnsview:1.0.7'
-    compile 'com.google.firebase:firebase-crash:9.8.0' //gitignore
-    compile 'com.loopj.android:android-async-http:1.4.9'
-    compile 'joda-time:joda-time:2.9.7'
+    implementation files('libs/rhino-1.7.8.jar')
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.android.support:design:26.1.0'
+    implementation 'com.github.amlcurran.showcaseview:library:5.4.3'
+    implementation 'com.github.lzyzsd:circleprogress:1.1.0'
+    implementation 'com.flaviofaria:kenburnsview:1.0.7'
+    implementation 'com.loopj.android:android-async-http:1.4.9'
+    implementation 'joda-time:joda-time:2.9.7'
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.google.guava:guava:24.0-android'
+    implementation 'com.google.firebase:firebase-core:11.8.0'
+    implementation 'com.android.support:multidex:1.0.2'
 }
-
-apply plugin: 'com.google.gms.google-services' //gitignore
+apply plugin: 'com.google.gms.google-services'

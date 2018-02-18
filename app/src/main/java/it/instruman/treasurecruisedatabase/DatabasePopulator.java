@@ -1,12 +1,15 @@
 package it.instruman.treasurecruisedatabase;
 
+import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
-import org.mozilla.javascript.tools.debugger.Main;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -37,7 +40,7 @@ public class DatabasePopulator {
                             stars = 6.5;
                         else stars = (Double)stars_o;
                     }
-                    Object classes = (arr_2.get(2) == null) ? null : arr_2.get(2);
+                    Object classes = arr_2.get(2);
                     Integer cost = (arr_2.get(4) == null) ? null : ((Double) arr_2.get(4)).intValue();
                     Integer combo = (arr_2.get(5) == null) ? null : ((Double) arr_2.get(5)).intValue();
                     Integer sockets = (arr_2.get(6) == null) ? null : ((Double) arr_2.get(6)).intValue();
@@ -72,7 +75,26 @@ public class DatabasePopulator {
         }
     }
 
-    static void populateAbilities(SQLiteDatabase database, Map<Integer, Map> details_js, ParseAdditionalNotes notes_parser, ArrayList<CoolDowns> cools_tmp) {
+    static void populateAliases(SQLiteDatabase database, Map<Integer, List> aliases) {
+        if(aliases != null && aliases.size()>0) {
+            database.beginTransaction();
+            try {
+                for (Map.Entry<Integer, List> entry : aliases.entrySet()) {
+                    Integer charId = entry.getKey();
+                    List<String> aliasesList = entry.getValue();
+                    for(String alias: aliasesList) {
+                        if(!TextUtils.isEmpty(alias))
+                            DBHelper.insertIntoAliases(database, charId, alias);
+                    }
+                }
+                database.setTransactionSuccessful();
+            } finally {
+                database.endTransaction();
+            }
+        }
+    }
+
+    static void populateAbilities(Context context, SQLiteDatabase database, Map<Integer, Map> details_js, ParseAdditionalNotes notes_parser, ArrayList<CoolDowns> cools_tmp) {
         if ((details_js != null) && (details_js.size() > 0)) {
             database.beginTransaction();
             try {
@@ -89,8 +111,22 @@ public class DatabasePopulator {
                             captain = (String) value.get("captain");
                         else if (captainObj.getClass().equals(NativeObject.class)) {
                             Map<String, String> captainMap = (Map<String, String>) captainObj;
-                            captain += "Global: " + captainMap.get("global") + System.getProperty("line.separator") +
-                                    "Japan: " + captainMap.get("japan");
+                            if(captainMap.get("global") != null) {
+                                captain += "Global: " + captainMap.get("global") + System.getProperty("line.separator") +
+                                        "Japan: " + captainMap.get("japan");
+                            } else if (captainMap.get("base") != null) {
+                                captain += String.format("<b>%s:</b> %s", context.getString(R.string.charpageBaseAbility), captainMap.get("base"));
+                                ArrayList<String> captLevels = new ArrayList<>();
+                                for (Map.Entry<String,String> e : captainMap.entrySet()) {
+                                    if(e.getKey().contains("level")) {
+                                        int lvl = Integer.parseInt(e.getKey().substring(5,6))-1;
+                                        captLevels.add(lvl, e.getValue());
+                                    }
+                                }
+                                for(int i = 0; i<captLevels.size(); i++) {
+                                    captain += "<br><b>"+(i+1)+":</b> "+captLevels.get(i);
+                                }
+                            }
                         }
                     }
                     String captainnotes = notes_parser.parseNotes(value.containsKey("captainNotes") ? (String) value.get("captainNotes") : "");
@@ -98,10 +134,31 @@ public class DatabasePopulator {
 
                     DBHelper.insertIntoCaptains(database, entry.getKey(), captain, captainnotes);
 
-                    String cwDesc = value.containsKey("sailor") ? (String)value.get("sailor") : null;
-                    String cwNotes = value.containsKey("sailorNotes") ? (String)value.get("sailorNotes") : null;
+                    String cwDesc = "";
+                    Object cwDescO = value.containsKey("sailor") ? value.get("sailor") : null;
+                    if(cwDescO!=null) {
+                        if (cwDescO.getClass().equals(String.class))
+                        {
+                            cwDesc = (String)cwDescO;
+                        } else if (cwDescO.getClass().equals(NativeObject.class)) {
+                            try {
+                                Map<String, String> cwDescH = (Map<String, String>) cwDescO;
+                                cwDesc = cwDescH.containsKey("base") ?
+                                        !cwDescH.get("base").equals("None") ? cwDescH.get("base") : String.format("<b>%s:</b> none",context.getString(R.string.charpageBaseAbility))
+                                        : String.format("<b>%s:</b> none",context.getString(R.string.charpageBaseAbility));
+                                for (Map.Entry<String, String> e : cwDescH.entrySet()) {
+                                    if (e.getKey().equals("base"))
+                                        continue;
+                                    cwDesc += String.format("<br><b>%s:</b> %s", e.getKey().replace("level",""), e.getValue());
+                                }
+                            } catch (ClassCastException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    String cwNotes = notes_parser.parseNotes(value.containsKey("sailorNotes") ? (String)value.get("sailorNotes") : null);
 
-                    if(cwDesc!=null) {
+                    if(!cwDesc.equals("")) {
                         DBHelper.insertIntoCrewmate(database, entry.getKey(), cwDesc, cwNotes);
                     }
 
@@ -128,6 +185,56 @@ public class DatabasePopulator {
                             cooldwn = cools_tmp.get(entry.getKey());
                         DBHelper.insertIntoSpecials(database, entry.getKey(), specialname, (String) special, cooldwn.init, cooldwn.max, specialnotes);
                     }
+
+                    if(value.containsKey("limit")) {
+                        if(value.get("limit").getClass().equals(NativeArray.class)) {
+                            List<Map<String, String>> limit = (List<Map<String, String>>) value.get("limit");
+                            String limitNotes = value.containsKey("limitnotes") ? (String) value.get("limitnotes") : "";
+                            boolean alreadyAdded = false;
+                            for (Map<String, String> limitEntry : limit) {
+                                try {
+                                    String description = limitEntry.get("description");
+                                    if (!alreadyAdded) {
+                                        DBHelper.insertIntoLimit(database, entry.getKey(), description, limitNotes);
+                                        alreadyAdded = true;
+                                    } else {
+                                        DBHelper.insertIntoLimit(database, entry.getKey(), description, "");
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        } else if (value.get("limit").getClass().equals(String.class)) {
+                            String limit = (String) value.get("limit");
+                            String limitNotes = notes_parser.parseNotes(value.containsKey("limitnotes") ? (String) value.get("limitnotes") : "");
+                            DBHelper.insertIntoLimit(database, entry.getKey(), limit, limitNotes);
+                        }
+                    }
+
+                    if(value.containsKey("potential")) {
+                        List<HashMap<String,Object>> potential = (List<HashMap<String,Object>>)value.get("potential");
+                        String potentialNotes = notes_parser.parseNotes(value.containsKey("potentialNotes") ? (String)value.get("potentialNotes") : "");
+                        boolean alreadyAdded = false;
+                        for(Map<String,Object> potentialEntry : potential) {
+                            try {
+                                String name = (String) potentialEntry.get("Name");
+                                List<String> lvlS = (List<String>) potentialEntry.get("description");
+                                String lvl1 = lvlS.get(0);
+                                String lvl2 = lvlS.get(1);
+                                String lvl3 = lvlS.get(2);
+                                String lvl4 = lvlS.get(3);
+                                String lvl5 = lvlS.get(4);
+                                if (!alreadyAdded) {
+                                    DBHelper.insertIntoPotential(database, entry.getKey(), name, lvl1, lvl2, lvl3,
+                                            lvl4, lvl5, potentialNotes);
+                                    alreadyAdded = true;
+                                } else {
+                                    DBHelper.insertIntoPotential(database, entry.getKey(), name, lvl1, lvl2, lvl3,
+                                            lvl4, lvl5, "");
+                                }
+                            } catch (Exception e) {e.printStackTrace(); }
+                        }
+                    }
                 }
                 database.setTransactionSuccessful();
             } finally {
@@ -150,6 +257,13 @@ public class DatabasePopulator {
                         if (i < evolvers.size())
                             if(evolvers.get(i).getClass().equals(Double.class))
                                 evolvers_int[i] = ((Double)evolvers.get(i)).intValue();
+                            else if (evolvers.get(i).getClass().equals(String.class)) {
+                                try {
+                                    evolvers_int[i] = SkullsHelper.getSkullId((String) evolvers.get(i));
+                                } catch (IOException e) {
+                                    evolvers_int[i] = null;
+                                    e.printStackTrace(); }
+                            }
                         else evolvers_int[i] = null;
                     }
                     DBHelper.insertIntoEvolutions(database, entry.getKey(), ((Double) evs).intValue(), evolvers_int[0],
@@ -192,11 +306,19 @@ public class DatabasePopulator {
                 {
                     if (pattern.matcher(String.valueOf(entry.getKey())).matches()) {
                         // it's a chapter
-                        List<Double> charIds = (List<Double>) entry.getValue();
-                        for(Double charId : charIds)
+                        List<Object> charIds = (List<Object>) entry.getValue();
+                        for(Object charId_o : charIds)
                         {
-                            if(charId>0)
-                                DBHelper.insertIntoDrops(database, charId.intValue(), location, String.valueOf(entry.getKey()), isGlobal, isJapan, thumb);
+                            if(charId_o.getClass().equals(Double.class)) {
+                                Double charId = (Double)charId_o;
+                                if (charId > 0)
+                                    DBHelper.insertIntoDrops(database, charId.intValue(), location, String.valueOf(entry.getKey()), isGlobal, isJapan, thumb);
+                            } else if (charId_o.getClass().equals(String.class)) {
+                                String charId = (String)charId_o;
+                                try {
+                                    DBHelper.insertIntoDrops(database, SkullsHelper.getSkullId(charId), location, String.valueOf(entry.getKey()), isGlobal, isJapan, thumb);
+                                } catch (IOException e) { DBHelper.insertIntoDrops(database, null, location, String.valueOf(entry.getKey()), isGlobal, isJapan, thumb); e.printStackTrace(); }
+                            }
                         }
                     }
                 }
@@ -325,11 +447,19 @@ public class DatabasePopulator {
                 Boolean isJapan = true;
                 if(element.containsKey(dropTypes.DROP_ALLDIFFS))
                 {
-                    List<Double> eliteDrops = (List<Double>)element.get(dropTypes.DROP_ALLDIFFS);
-                    for(Double charId : eliteDrops)
+                    List<Object> eliteDrops = (List<Object>)element.get(dropTypes.DROP_ALLDIFFS);
+                    for(Object charId_o : eliteDrops)
                     {
-                        if(charId>0)
-                            DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, dropTypes.DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb);
+                        if(charId_o.getClass().equals(Double.class)) {
+                            Double charId = (Double)charId_o;
+                            if (charId > 0)
+                                DBHelper.insertIntoDrops(database, charId.intValue(), drop_name, dropTypes.DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb);
+                        } else if (charId_o.getClass().equals(String.class)) {
+                            String charId = (String)charId_o;
+                            try {
+                                DBHelper.insertIntoDrops(database, SkullsHelper.getSkullId(charId), drop_name, dropTypes.DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb);
+                            } catch (IOException e) { DBHelper.insertIntoDrops(database, null, drop_name, dropTypes.DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb); e.printStackTrace(); }
+                        }
                     }
                 }
                 if(element.containsKey(dropTypes.DROP_COMPLETION))
@@ -392,11 +522,17 @@ public class DatabasePopulator {
                 {
                     if (pattern.matcher(String.valueOf(entry.getKey())).matches()) {
                         // it's a chapter
-                        List<Double> charIds = (List<Double>) entry.getValue();
-                        for(Double charId : charIds)
+                        List<Object> charIds = (List<Object>) entry.getValue();
+                        for(Object charId_o : charIds)
                         {
-                            if(charId<0)
-                                DBHelper.insertIntoManuals(database, -charId.intValue(), location, String.valueOf(entry.getKey()), isGlobal, isJapan, thumb);
+                            if(charId_o.getClass().equals(Double.class)) {
+                                Double charId = (Double) charId_o;
+                                if (charId < 0)
+                                    DBHelper.insertIntoManuals(database, -charId.intValue(), location, String.valueOf(entry.getKey()), isGlobal, isJapan, thumb);
+                            } else if (charId_o.getClass().equals(String.class)) {
+                                String charId = (String)charId_o;
+                                //TODO: insert skull code
+                            }
                         }
                     }
                 }
@@ -525,11 +661,17 @@ public class DatabasePopulator {
                 Boolean isJapan = true;
                 if(element.containsKey(dropTypes.DROP_ALLDIFFS))
                 {
-                    List<Double> eliteDrops = (List<Double>)element.get(dropTypes.DROP_ALLDIFFS);
-                    for(Double charId : eliteDrops)
+                    List<Object> eliteDrops = (List<Object>)element.get(dropTypes.DROP_ALLDIFFS);
+                    for(Object charId_o : eliteDrops)
                     {
-                        if(charId<0)
-                            DBHelper.insertIntoManuals(database, -charId.intValue(), drop_name, dropTypes.DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb);
+                        if(charId_o.getClass().equals(Double.class)) {
+                            Double charId = (Double) charId_o;
+                            if (charId < 0)
+                                DBHelper.insertIntoManuals(database, -charId.intValue(), drop_name, dropTypes.DROP_ALLDIFFS, isGlobal, isJapan, drop_thumb);
+                        } else if (charId_o.getClass().equals(String.class)) {
+                            String charId = (String)charId_o;
+                            //TODO: insert skull code
+                        }
                     }
                 }
                 if(element.containsKey(dropTypes.DROP_COMPLETION))

@@ -38,8 +38,8 @@ class CoolDowns implements Serializable {
                             type = 1;
                             break;
                         case 2:
-                            init = cd_list.get(0).intValue();
-                            max = cd_list.get(1).intValue();
+                            init = (cd_list.get(0)==null)?null:cd_list.get(0).intValue();
+                            max = (cd_list.get(1)==null)?null:cd_list.get(1).intValue();
                             type = 2;
                             break;
                         default:

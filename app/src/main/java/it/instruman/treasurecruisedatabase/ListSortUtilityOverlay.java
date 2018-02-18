@@ -1,9 +1,6 @@
 package it.instruman.treasurecruisedatabase;
 
-import android.app.Activity;
-import android.content.Context;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.util.ArrayList;
@@ -55,7 +52,7 @@ public class ListSortUtilityOverlay {
 
         ArrayList<HashMap> sorted = sortBy(list, SORT_TYPE, COLUMN_TAG);
 
-        ImageView finalView = (ImageView) root.findViewById(viewId);
+        ImageView finalView = root.findViewById(viewId);
         int finalState = R.drawable.ic_circle_overlay;
         switch (SORT_TYPE) {
             case SORT_ASCENDING:
@@ -64,12 +61,12 @@ public class ListSortUtilityOverlay {
             case SORT_DESCENDING:
                 finalState = R.drawable.ic_arrow_down_overlay;
         }
-        finalView.setBackgroundResource(finalState);
+        finalView.setImageResource(finalState);
         finalView.setTag(R.id.TAG_SORT_STATE, finalState);
         sortColumns.remove((Integer) viewId);
         for (int this_id : sortColumns) {
-            ImageView this_view = (ImageView) root.findViewById(this_id);
-            this_view.setBackgroundResource(R.drawable.ic_circle_overlay);
+            ImageView this_view = root.findViewById(this_id);
+            this_view.setImageResource(R.drawable.ic_circle_overlay);
             this_view.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle_overlay);
         }
         return sorted;

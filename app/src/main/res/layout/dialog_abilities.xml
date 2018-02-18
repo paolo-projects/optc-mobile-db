@@ -13,7 +13,7 @@
         android:background="?char_info_header_bg"
         android:textColor="?char_info_header_txt" />
 
-    <TextView
+    <it.instruman.treasurecruisedatabase.HtmlTextView
         android:id="@+id/captabilityText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

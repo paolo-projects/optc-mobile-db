@@ -6,43 +6,28 @@ import android.content.Intent;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.webkit.CookieManager;
 import android.webkit.SslErrorHandler;
-import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageButton;
-import android.widget.ProgressBar;
-
-import com.google.android.gms.analytics.ExceptionReporter; //gitignore
-import com.google.android.gms.analytics.HitBuilders; //gitignore
-import com.google.android.gms.analytics.Tracker; //gitignore
 
 public class DmgCalcActivity extends AppCompatActivity {
 private String DMGCALC_URL = "http://optc-db.github.io/damage/";
-    Tracker mTracker; //gitignore
 
     @Override
     protected void onResume() {
         super.onResume();
-        mTracker.setScreenName("Online Damage Calculator"); //gitignore
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build()); //gitignore
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        SmartDBApplication application = (SmartDBApplication) getApplication(); //gitignore
-        mTracker = application.getDefaultTracker(); //gitignore
-
-        Thread.UncaughtExceptionHandler myHandler = new ExceptionReporter(mTracker, Thread.getDefaultUncaughtExceptionHandler(), this); //gitignore
-        Thread.setDefaultUncaughtExceptionHandler(myHandler); //gitignore
 
         Bundle b = getIntent().getExtras();
         String lan = "";
@@ -69,7 +54,7 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
 
         setContentView(R.layout.activity_dmg_calc);
 
-        final WebView webView = (WebView) findViewById(R.id.web_view);
+        final WebView webView = findViewById(R.id.web_view);
 
         WebSettings webSettings = webView.getSettings();
 
@@ -159,7 +144,7 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
         CookieManager.allowFileSchemeCookies();
         CookieManager.getInstance().setAcceptCookie(true);
 
-        ImageButton backBtn = (ImageButton)findViewById(R.id.dmgcalc_backBtn);
+        ImageButton backBtn = findViewById(R.id.dmgcalc_backBtn);
         backBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -167,8 +152,8 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
             }
         });
 
-        ImageButton navigateBackBtn = (ImageButton)findViewById(R.id.dmgcalc_navigateback);
-        ImageButton navigateForwardBtn = (ImageButton)findViewById(R.id.dmgcalc_navigateforward);
+        ImageButton navigateBackBtn = findViewById(R.id.dmgcalc_navigateback);
+        ImageButton navigateForwardBtn = findViewById(R.id.dmgcalc_navigateforward);
         navigateBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

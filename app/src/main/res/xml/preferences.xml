@@ -4,38 +4,38 @@
 
     <PreferenceCategory android:title="@string/prefs_cat_appsettings">
 
-        <SwitchPreference
+        <it.instruman.treasurecruisedatabase.ModSwitchPreference
             android:defaultValue="true"
             android:title="@string/prefs_update_db"
             android:key="@string/download_db"
             android:summary="@string/prefs_update_db_desc"
             android:icon="@drawable/ic_cloud_black"/>
-        <SwitchPreference
+        <it.instruman.treasurecruisedatabase.ModSwitchPreference
             android:defaultValue="true"
             android:title="@string/prefs_check_updates"
             android:key="@string/check_update"
             android:summary="@string/prefs_check_updates_desc"
             android:icon="@drawable/ic_update_black"/>
-        <SwitchPreference
+        <it.instruman.treasurecruisedatabase.ModSwitchPreference
             android:defaultValue="false"
             android:title="@string/prefs_update_wifi_only"
             android:key="@string/update_wifi_only"
             android:summary="@string/prefs_update_wifi_only_desc"
             android:icon="@drawable/ic_signal_wifi"
             />
-        <SwitchPreference
+        <it.instruman.treasurecruisedatabase.ModSwitchPreference
             android:defaultValue="false"
             android:title="@string/prefs_overlay"
             android:key="@string/pref_overlay"
             android:summary="@string/prefs_overlay_desc"
             android:icon="@drawable/ic_star"/>
-        <SwitchPreference
+        <it.instruman.treasurecruisedatabase.ModSwitchPreference
             android:defaultValue="false"
             android:title="@string/prefs_notification"
             android:key="@string/pref_notification"
             android:summary="@string/prefs_notification_desc"
             android:icon="@drawable/ic_notifications"/>
-        <SwitchPreference
+        <it.instruman.treasurecruisedatabase.ModSwitchPreference
             android:defaultValue="false"
             android:title="@string/prefs_daynight_theme"
             android:key="@string/pref_daynight_theme"
@@ -66,16 +66,29 @@
             <intent android:action="android.intent.action.VIEW"
                 android:data="https://github.com/paolo-optc/optc-mobile-db" />
         </Preference>
+        <Preference android:title="@string/prefScreenSendMessageTitle"
+            android:summary="@string/prefScreenSendMessageSummary"
+            android:icon="@drawable/ic_message" >
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://www.reddit.com/message/compose/?to=pablo-optc" />
+        </Preference>
+        <Preference android:title="@string/prefScreenAppIssuesTitle"
+            android:summary="@string/prefScreenAppIssuesSummary"
+            android:icon="@drawable/ic_bugs"
+            android:layout="@layout/layout_pref_bugs">
+            <intent android:action="android.intent.action.VIEW"
+                android:data="https://github.com/paolo-optc/optc-mobile-db/issues" />
+        </Preference>
         <Preference android:title="Your donations"
             android:icon="@drawable/ic_web_black">
             <intent android:action="android.intent.action.VIEW"
-                android:data="http://www.instruman.it/assets/donations" />
+                android:data="https://paolo-optc.github.io/extra/donations.html" />
         </Preference>
-        <Preference android:title="Your feedbacks"
+        <!--<Preference android:title="Your feedbacks"
             android:icon="@drawable/ic_web_black">
         <intent android:action="android.intent.action.VIEW"
-            android:data="http://www.instruman.it/assets/feedback" />
-        </Preference>
+            android:data="https://paolo-optc.github.io/extra/feedback" />
+        </Preference>-->
         <Preference android:title="OPTC SmartDB Reddit page"
             android:icon="@drawable/ic_web_black">
             <intent android:action="android.intent.action.VIEW"
@@ -91,4 +104,9 @@
             android:key="@string/pref_update_app">
         </Preference>
     </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/prefCatAdvanced"/>
+    <Preference android:title="@string/prefsClearThumbnailsCache"
+        android:icon="@drawable/ic_thumbs"
+        android:key="@string/prefClearThumbCacheKey"/>
 </PreferenceScreen>

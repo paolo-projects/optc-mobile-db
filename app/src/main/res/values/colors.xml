@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="splashBg_1">#FFFFFF</color>
+    <color name="splashBg_2">#BBBBBB</color>
 
     <!-- TYPE COLORS -->
     <!-- STR -->
@@ -61,6 +63,8 @@
     <color name="char_info_stats_min_txt_teal">#de000000</color>
     <color name="char_info_stats_max_bg_teal">#ffe082</color>
     <color name="char_info_stats_max_txt_teal">#de000000</color>
+    <color name="char_info_stats_lb_bg_teal">#ffca28</color>
+    <color name="char_info_stats_lb_txt_teal">#de000000</color>
 
     <!-- RED THEME -->
     <color name="main_bg_red">#F44336</color>
@@ -82,6 +86,8 @@
     <color name="char_info_stats_min_txt_red">#DE000000</color>
     <color name="char_info_stats_max_bg_red">#FF8A80</color>
     <color name="char_info_stats_max_txt_red">#DE000000</color>
+    <color name="char_info_stats_lb_bg_red">#e53935</color>
+    <color name="char_info_stats_lb_txt_red">#deffffff</color>
 
     <!-- AMBER THEME -->
     <color name="main_bg_amber">#FFC107</color>
@@ -103,6 +109,8 @@
     <color name="char_info_stats_min_txt_amber">#DE000000</color>
     <color name="char_info_stats_max_bg_amber">#FFC400</color>
     <color name="char_info_stats_max_txt_amber">#DE000000</color>
+    <color name="char_info_stats_lb_bg_amber">#ffab00</color>
+    <color name="char_info_stats_lb_txt_amber">#de000000</color>
 
     <!-- LIGHT THEME -->
     <color name="main_bg_light">#FFF</color>
@@ -124,6 +132,8 @@
     <color name="char_info_stats_min_txt_light">#DE000000</color>
     <color name="char_info_stats_max_bg_light">#f6f6f6</color>
     <color name="char_info_stats_max_txt_light">#DE000000</color>
+    <color name="char_info_stats_lb_bg_light">#bdbdbd</color>
+    <color name="char_info_stats_lb_txt_light">#de000000</color>
 
     <!-- DARK THEME -->
     <color name="main_bg_dark">#111</color>
@@ -145,6 +155,8 @@
     <color name="char_info_stats_min_txt_dark">#DED1D1D1</color>
     <color name="char_info_stats_max_bg_dark">#c9c9c9</color>
     <color name="char_info_stats_max_txt_dark">#222</color>
+    <color name="char_info_stats_lb_bg_dark">#efebe9</color>
+    <color name="char_info_stats_lb_txt_dark">#de000000</color>
 
     <!-- LIGHT THEME DAYNIGHT-->
     <color name="main_bg_light_daynight">#FFF</color>
@@ -166,6 +178,8 @@
     <color name="char_info_stats_min_txt_light_daynight">#DE000000</color>
     <color name="char_info_stats_max_bg_light_daynight">#42a5f5</color>
     <color name="char_info_stats_max_txt_light_daynight">#fff</color>
+    <color name="char_info_stats_lb_bg_light_daynight">#1e88e5</color>
+    <color name="char_info_stats_lb_txt_light_daynight">#deffffff</color>
 
     <!-- DARK THEME DAYNIGHT -->
     <color name="main_bg_dark_daynight">#111</color>
@@ -187,4 +201,6 @@
     <color name="char_info_stats_min_txt_dark_daynight">#DED1D1D1</color>
     <color name="char_info_stats_max_bg_dark_daynight">#c9c9c9</color>
     <color name="char_info_stats_max_txt_dark_daynight">#222</color>
+    <color name="char_info_stats_lb_bg_dark_daynight">#efebe9</color>
+    <color name="char_info_stats_lb_txt_dark_daynight">#de000000</color>
 </resources>

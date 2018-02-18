@@ -18,8 +18,11 @@ public class ParseAdditionalNotes {
         }
     }
 
+    public ParseAdditionalNotes() {
+    }
+
     public String parseNotes(String value) {
-        if((value==null) || value.equals("")) return value;
+        if((value==null) || value.equals("") || notes.size()==0) return value;
         Pattern patt = Pattern.compile("#\\{(.+?)\\}");
         Matcher matcher = patt.matcher(value.trim());
         StringBuffer sb = new StringBuffer();

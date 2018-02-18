@@ -8,7 +8,7 @@
     </item>
     <item android:state_pressed="true" >
         <layer-list>
-            <item android:drawable="@color/main_bg_teal" />
+            <item android:drawable="@color/drawer_bar_bg_teal" />
             <item android:drawable="@drawable/ic_delete_last" android:top="35dp" android:bottom="35dp" android:left="30dp" android:right="30dp"/>
         </layer-list>
     </item>

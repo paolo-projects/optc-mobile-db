@@ -28,7 +28,9 @@
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:layout_gravity="end"
-            android:background="@drawable/ic_back"
+            android:src="@drawable/ic_back"
+            android:background="@android:color/transparent"
+            android:tint="?char_info_back_button"
             android:scaleType="fitCenter"
             android:contentDescription="@string/backbutton" />
     </LinearLayout>
@@ -91,6 +93,12 @@
                         <include
                             android:id="@+id/tab_abilities"
                             layout="@layout/dialog_abilities"
+                            android:layout_height="match_parent"
+                            android:layout_width="match_parent" />
+
+                        <include
+                            android:id="@+id/tab_limitbreak"
+                            layout="@layout/dialog_limitbreak"
                             android:layout_height="match_parent"
                             android:layout_width="match_parent" />
 

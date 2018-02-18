@@ -87,7 +87,7 @@
 
                 <LinearLayout
                     android:id="@+id/list_size_layout_overlay"
-                    android:layout_width="550dp"
+                    android:layout_width="600dp"
                     android:layout_height="26dp"
                     android:layout_marginTop="6dp"
                     android:background="@color/list_bg_teal"
@@ -101,7 +101,7 @@
                     android:elevation="2dp">
 
                     <View
-                        android:layout_width="0.5dp"
+                        android:layout_width="50dp"
                         android:layout_height="match_parent"
                         android:layout_marginLeft="2dp"
                         android:layout_marginRight="2dp" />

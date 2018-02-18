@@ -1,5 +1,9 @@
 <resources>
 
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen</item>
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppThemeTeal" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -28,6 +32,8 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_teal</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_teal</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_teal</item>
+        <item name="char_info_stats_lb_bg">@color/char_info_stats_lb_bg_teal</item>
+        <item name="char_info_stats_lb_txt">@color/char_info_stats_lb_txt_teal</item>
     </style>
 
     <style name="AppThemeRed" parent="Theme.AppCompat.Light.NoActionBar">
@@ -57,6 +63,8 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_red</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_red</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_red</item>
+        <item name="char_info_stats_lb_bg">@color/char_info_stats_lb_bg_red</item>
+        <item name="char_info_stats_lb_txt">@color/char_info_stats_lb_txt_red</item>
     </style>
 
     <style name="AppThemeAmber" parent="Theme.AppCompat.Light.NoActionBar">
@@ -86,6 +94,8 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_amber</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_amber</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_amber</item>
+        <item name="char_info_stats_lb_bg">@color/char_info_stats_lb_bg_amber</item>
+        <item name="char_info_stats_lb_txt">@color/char_info_stats_lb_txt_amber</item>
     </style>
 
     <style name="AppThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
@@ -115,6 +125,8 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_light</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_light</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_light</item>
+        <item name="char_info_stats_lb_bg">@color/char_info_stats_lb_bg_light</item>
+        <item name="char_info_stats_lb_txt">@color/char_info_stats_lb_txt_light</item>
     </style>
 
     <style name="AppThemeDark" parent="Theme.AppCompat.Light.NoActionBar">
@@ -144,6 +156,8 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_dark</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_dark</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_dark</item>
+        <item name="char_info_stats_lb_bg">@color/char_info_stats_lb_bg_dark</item>
+        <item name="char_info_stats_lb_txt">@color/char_info_stats_lb_txt_dark</item>
     </style>
 
     <style name="AppThemeLightDayNight" parent="Theme.AppCompat.Light.NoActionBar">
@@ -173,6 +187,8 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_light_daynight</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_light_daynight</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_light_daynight</item>
+        <item name="char_info_stats_lb_bg">@color/char_info_stats_lb_bg_light_daynight</item>
+        <item name="char_info_stats_lb_txt">@color/char_info_stats_lb_txt_light_daynight</item>
     </style>
 
     <style name="AppThemeDarkDayNight" parent="Theme.AppCompat.Light.NoActionBar">
@@ -202,6 +218,8 @@
         <item name="char_info_stats_min_txt">@color/char_info_stats_min_txt_dark_daynight</item>
         <item name="char_info_stats_max_bg">@color/char_info_stats_max_bg_dark_daynight</item>
         <item name="char_info_stats_max_txt">@color/char_info_stats_max_txt_dark_daynight</item>
+        <item name="char_info_stats_lb_bg">@color/char_info_stats_lb_bg_dark_daynight</item>
+        <item name="char_info_stats_lb_txt">@color/char_info_stats_lb_txt_dark_daynight</item>
     </style>
 
     <style name="CustomShowcaseTheme2" parent="ShowcaseView">

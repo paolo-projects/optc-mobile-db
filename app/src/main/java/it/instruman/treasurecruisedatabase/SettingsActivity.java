@@ -17,14 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
-import android.text.Html;
-import android.text.Spanned;
 import android.view.View;
-
-import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
-
-import org.mozilla.javascript.tools.debugger.Main;
 
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -34,19 +27,12 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     @TargetApi(Build.VERSION_CODES.M)
     public static boolean isSystemAlertPermissionGranted(Context context) {
-        final boolean result = Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context);
-        return result;
+        return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(context);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
                                           String key) {
-        Boolean dbUpdate = sharedPreferences.getBoolean(getString(R.string.download_db), true);
-        Boolean appUpdate = sharedPreferences.getBoolean(getString(R.string.check_update), true);
-        if(dbUpdate || appUpdate)
-            findPreference(getString(R.string.update_wifi_only)).setEnabled(true);
-        else
-            findPreference(getString(R.string.update_wifi_only)).setEnabled(false);
         if(key.equals(getString(R.string.pref_language)))
         {
             returndata.putExtra(MainActivity.LANG_PREF_CHANGED, true);
@@ -60,6 +46,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             if(sharedPreferences.getBoolean(key, false)) {
                 if ((Build.VERSION.SDK_INT >= 23) && !isSystemAlertPermissionGranted(this)) {
                     (new AlertDialog.Builder(this)).setMessage(getString(R.string.overlay_message_string)).setPositiveButton(getString(R.string.enable_unknown_sources_btn), new DialogInterface.OnClickListener() {
+                        @TargetApi(23)
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             Intent myIntent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName()));
@@ -85,7 +72,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         getDelegate().onCreate(savedInstanceState);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
-        Toolbar actToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar actToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(actToolbar);
         android.support.v7.app.ActionBar actionBar = getDelegate().getSupportActionBar();
         if(actionBar!=null) {
@@ -99,7 +86,6 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
             });
         }
         addPreferencesFromResource(R.xml.preferences);
-        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
         Preference upd_pref = findPreference(getString(R.string.pref_update_app));
         upd_pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -114,7 +100,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
         donate_pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                Spanned result;
+                /*Spanned result;
                 (new AlertDialog.Builder(context)).setTitle("Thank you!").setMessage(Html.fromHtml(getString(R.string.prefs_donation_message)))
                         .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
@@ -124,8 +110,24 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                         f.setData(Uri.parse(url));
                         startActivity(f);
                     }
-                }).setIcon(R.drawable.ic_happy).show();
-                return false;
+                }).setIcon(R.drawable.ic_happy).show();*/
+                (new AlertDialog.Builder(context)).setTitle(R.string.prefDonationsDisabledTitle).setMessage(R.string.prefDonationsDisabledText)
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+
+                            }
+                        }).setIcon(android.R.drawable.ic_delete).show();
+                return true;
+            }
+        });
+        Preference clearThumbCache = findPreference(getString(R.string.prefClearThumbCacheKey));
+        clearThumbCache.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                returndata.putExtra(MainActivity.CLEAR_THUMB_CACHE_PREF, true);
+                finish();
+                return true;
             }
         });
     }
@@ -138,6 +140,7 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
 
     @Override
     public void setContentView(@LayoutRes int layoutResID) {
+        super.setContentView(layoutResID);
         getDelegate().setContentView(layoutResID);
     }
 
@@ -174,5 +177,17 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     public void finish() {
         setResult(0, returndata);
         super.finish();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        PreferenceManager.getDefaultSharedPreferences(this).registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
     }
 }

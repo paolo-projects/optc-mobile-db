@@ -53,7 +53,7 @@ public class ListSortUtility {
 
         ArrayList<HashMap> sorted = sortBy(list, SORT_TYPE, COLUMN_TAG);
 
-        ImageView finalView = (ImageView) activity.findViewById(viewId);
+        ImageView finalView = activity.findViewById(viewId);
         int finalState = R.drawable.ic_circle;
         switch (SORT_TYPE) {
             case SORT_ASCENDING:
@@ -62,13 +62,13 @@ public class ListSortUtility {
             case SORT_DESCENDING:
                 finalState = R.drawable.ic_arrow_down;
         }
-        finalView.setBackgroundResource(finalState);
+        finalView.setImageDrawable(SortImageHelper.getTintDrawable(activity, finalState));
         finalView.setTag(R.id.TAG_SORT_STATE, finalState);
 
         sortColumns.remove((Integer) viewId);
         for (int this_id : sortColumns) {
-            ImageView this_view = (ImageView) activity.findViewById(this_id);
-            this_view.setBackgroundResource(R.drawable.ic_circle);
+            ImageView this_view = activity.findViewById(this_id);
+            this_view.setImageDrawable(SortImageHelper.getTintCircleDrawable(activity));
             this_view.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
         }
         return sorted;

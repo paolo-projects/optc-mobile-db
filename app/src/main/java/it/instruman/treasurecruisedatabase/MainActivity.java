@@ -22,8 +22,10 @@ import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -33,19 +35,15 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.multidex.MultiDex;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.FileProvider;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.AlertDialog;
@@ -57,7 +55,6 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -86,34 +83,29 @@ import com.bumptech.glide.request.FutureTarget;
 import com.flaviofaria.kenburnsview.KenBurnsView;
 import com.flaviofaria.kenburnsview.RandomTransitionGenerator;
 import com.github.amlcurran.showcaseview.ShowcaseView;
-import com.github.amlcurran.showcaseview.targets.ViewTarget;
 import com.github.lzyzsd.circleprogress.ArcProgress;
-import com.google.android.gms.analytics.ExceptionReporter; //gitignore
-import com.google.android.gms.analytics.HitBuilders;    //gitignore
-import com.google.android.gms.analytics.Tracker;    //gitignore
+import com.google.common.base.Charsets;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import org.joda.time.format.ISODateTimeFormat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mozilla.javascript.NativeArray;
-import org.mozilla.javascript.NativeObject;
 import org.mozilla.javascript.Scriptable;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -127,7 +119,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.Attributes;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
@@ -136,7 +128,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 4.4;
+private final static Double APP_VERSION = 5.5;
 /*
     ##################################################
 */
@@ -283,12 +275,16 @@ private final static Double APP_VERSION = 4.4;
         POSITIONAL_CAPTAINS("Positional captains", "(after scoring|following a chain|perfect|great|good)", "(dopo aver fatto|seguendo l'ordine|Dopo aver fatto.+ Good|Dopo aver fatto.+ Great|Dopo aver fatto.+ Perfect)"),
         BENEFICIAL_ORB_CAPTAINS("\"Beneficial\" Orb captains", "\"beneficial", "Gli orb ((STR|DEX|QCK|PSY|INT|\\[RCV\\]|\\[TND\\])|((STR|DEX|QCK|PSY|INT|\\[RCV\\]|\\[TND\\]) e (STR|DEX|QCK|PSY|INT|\\[RCV\\]|\\[TND\\]))) funzionano come se fossero positivi"),
         CHAIN_MULTIPLIERS("Chain multipliers", "Boosts.+chain multiplier", "Aumenta.+moltiplicatore.+della catena"),
+        COMBO_BOOSTERS("Combo Boost Captains", "Boosts.+hit in the chain", ""),
         COOLDOWN_REDUCERS("Cooldown reducers", "reduces.+cooldown", "Riduce.+turn.+attacchi speciali"),
         DAMAGE_REDUCERS("Damage reducers", "Reduces (any )?damage received", "Riduce (qualsiasi )?il danno ricevuto"),
         HEALERS("Healers", "Recovers", "Recupera"),
         TANKERS("Tankers", "Reduces (any )?damage.+if HP.+99", "Riduce (qualsiasi )?il danno.+se gli HP.+99"),
         ZOMBIES("Zombies", "Protects from defeat", "Protegge dalla sconfitta"),
-        END_OF_TURN_DAMAGE_DEALER("End of Turn Damage Dealer", "deals.+end of each turn", "Infligge.+alla fine di ogni turno");
+        END_OF_TURN_DAMAGE_DEALER("End of Turn Damage Dealer", "deals.+end of each turn", "Infligge.+alla fine di ogni turno"),
+        BELI_BOOSTERS("Beli Boosters", "boosts.+Beli", ""),
+        EXP_BOOSTERS("EXP Boosters", "boosts.+EXP", ""),
+        DROP_DOUBLERS("Drop Doublers", "duplicating a drop", "");
 
         private String text;
         private String matcher, matcher_it;
@@ -350,6 +346,7 @@ private final static Double APP_VERSION = 4.4;
         CONDITIONAL_ATK_BOOSTERS("Conditional ATK boosters", "Boosts ATK.+against.+enemies", "Aumenta ATK.+contro.+nemici"),
         DELAYED_ATK_BOOSTERS("Delayed ATK boosters", "(Following the activation.+boosts.+ATK|If during that turn.+boosts.+ATK)", "(Dopo l'attivazione.+aumenta.+ATK|Se durante il turno.+aumenta.+ATK)"),
         COLOR_AFFINITY_BOOSTERS("Color Affinity boosters", "Boosts the Color Affinity", "\\\"l\\'affinità di colore\\\""),
+        COMBO_BOOSTERS("Combo Boost Specials", "Boost.+hit in the chain", ""),
         RCV_BOOSTERS("RCV boosters", "Boosts RCV", "Aumenta RCV"),
         ORB_LOCKERS("Orb lockers", "locks.+orbs", "Blocca.+orbs"),
         ORB_BOOSTERS("Orb boosters", "amplifies.+orb", "Amplifica.+orb"),
@@ -385,7 +382,10 @@ private final static Double APP_VERSION = 4.4;
         POISON_REMOVERS("Poison removers", "removes.+poison", "Rimuove il veleno"),
         ZOMBIES("Zombies", "Protects from defeat", "Protegge dalla sconfitta"),
         SPECIAL_COOLDOWN_REDUCER("Special cooldown reducer", "reduces special cooldown", "Riduce di.+turn.+special"),
-        PARALYSIS_REDUCERS("Paralysis reducers", "(reduces|removes).+Paralysis", "Riduce.+durata.+paralisi");
+        PARALYSIS_REDUCERS("Paralysis reducers", "(reduces|removes).+Paralysis", "Riduce.+durata.+paralisi"),
+        CHAIN_BOOSTERS("Chain Boosters", "Adds.+to Chain", ""),
+        CHAIN_LOCKERS("Chain Lockers", "Locks the chain multiplier", ""),
+        BENEFICIAL_ORB_ENABLERS("\"Beneficial\" Orb Enablers", "\"beneficial", "");
 
         private String text;
         private String matcher, matcher_it;
@@ -454,9 +454,9 @@ private final static Double APP_VERSION = 4.4;
     EditText filterText;
     Dialog dlg_hwnd = null;
     Dialog loadingdlg_hwnd = null;
-    Tracker mTracker; //gitignore
 
     private String UNITS_JS;
+    private String ALIASES_JS;
     private String DETAILS_JS;
     private String COOLDOWNS_JS;
     private String EVOLUTIONS_JS;
@@ -599,7 +599,7 @@ private final static Double APP_VERSION = 4.4;
         boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
         if(daynightTheme) {
             int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-            LinearLayout mainContent = (LinearLayout)dialog.findViewById(R.id.charInfoMainContent);
+            LinearLayout mainContent = dialog.findViewById(R.id.charInfoMainContent);
             /*if((8<=hour)&&(hour<20))
             {
                 //DAYLIGHT
@@ -614,7 +614,7 @@ private final static Double APP_VERSION = 4.4;
             }*/
         }
 
-        final TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
+        final TabHost tabs = dialog.findViewById(R.id.tabs_host);
         tabs.setup();
 
         TabHost.TabSpec main_info = tabs.newTabSpec("MAIN_INFO");
@@ -627,35 +627,41 @@ private final static Double APP_VERSION = 4.4;
         abilities.setContent(R.id.tab_abilities);
         tabs.addTab(abilities);
 
+        TabHost.TabSpec limitbreak_tab = tabs.newTabSpec("LIMIT_BREAK");
+        limitbreak_tab.setIndicator(getString(R.string.tab_limitbreak));
+        limitbreak_tab.setContent(R.id.tab_limitbreak);
+        tabs.addTab(limitbreak_tab);
+        tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
+
         TabHost.TabSpec evolutions_tab = tabs.newTabSpec("EVOLUTIONS");
         evolutions_tab.setIndicator(getString(R.string.tab_evolutions));
         evolutions_tab.setContent(R.id.tab_evolutions);
         tabs.addTab(evolutions_tab);
-        tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
+        tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.GONE);
 
         TabHost.TabSpec drops_tab = tabs.newTabSpec("DROPS");
         drops_tab.setIndicator(getString(R.string.tab_drops));
         drops_tab.setContent(R.id.tab_drops);
         tabs.addTab(drops_tab);
-        tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.GONE);
+        tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.GONE);
 
         TabHost.TabSpec manuals_tab = tabs.newTabSpec("MANUALS");
         manuals_tab.setIndicator(getString(R.string.tab_manuals));
         manuals_tab.setContent(R.id.tab_manuals);
         tabs.addTab(manuals_tab);
-        tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.GONE);
+        tabs.getTabWidget().getChildTabViewAt(5).setVisibility(View.GONE);
 
         tabs.setCurrentTab(0);
 
         for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
-            TextView tv = (TextView) tabs.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
+            TextView tv = tabs.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
             tv.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
         }
 
-        TextView title = (TextView) dialog.findViewById(R.id.titleText);
+        TextView title = dialog.findViewById(R.id.titleText);
 
         // set the custom dialog components - text, image and button
-        ImageView image = (ImageView) dialog.findViewById(R.id.char_img_big);
+        ImageView image = dialog.findViewById(R.id.char_img_big);
 
         Glide
                 .with(context)
@@ -665,29 +671,33 @@ private final static Double APP_VERSION = 4.4;
         dialog.setCanceledOnTouchOutside(true);
 
         //NOW WE SHOULD SET EVERYTHING (OUCH!)
-        TextView class1 = (TextView) dialog.findViewById(R.id.class1Text);
-        TextView class2 = (TextView) dialog.findViewById(R.id.class2Text);
-        TextView type = (TextView) dialog.findViewById(R.id.typeText);
-        TextView stars = (TextView) dialog.findViewById(R.id.starsText);
-        TextView cost = (TextView) dialog.findViewById(R.id.costText);
+        TextView class1 = dialog.findViewById(R.id.class1Text);
+        TextView class2 = dialog.findViewById(R.id.class2Text);
+        TextView type = dialog.findViewById(R.id.typeText);
+        TextView stars = dialog.findViewById(R.id.starsText);
+        TextView cost = dialog.findViewById(R.id.costText);
 
-        TextView combo = (TextView) dialog.findViewById(R.id.comboText);
-        TextView slots = (TextView) dialog.findViewById(R.id.slotsText);
-        TextView maxlevel = (TextView) dialog.findViewById(R.id.maxlevelText);
-        TextView exptomax = (TextView) dialog.findViewById(R.id.exptomaxText);
+        TextView combo = dialog.findViewById(R.id.comboText);
+        TextView slots = dialog.findViewById(R.id.slotsText);
+        TextView maxlevel = dialog.findViewById(R.id.maxlevelText);
+        TextView exptomax = dialog.findViewById(R.id.exptomaxText);
 
-        TextView lvl1hp = (TextView) dialog.findViewById(R.id.lvl1hpText);
-        TextView lvl1atk = (TextView) dialog.findViewById(R.id.lvl1atkText);
-        TextView lvl1rcv = (TextView) dialog.findViewById(R.id.lvl1rcvText);
+        TextView lvl1hp = dialog.findViewById(R.id.lvl1hpText);
+        TextView lvl1atk = dialog.findViewById(R.id.lvl1atkText);
+        TextView lvl1rcv = dialog.findViewById(R.id.lvl1rcvText);
 
-        TextView maxhp = (TextView) dialog.findViewById(R.id.lvlmaxhpText);
-        TextView maxatk = (TextView) dialog.findViewById(R.id.lvlmaxatkText);
-        TextView maxrcv = (TextView) dialog.findViewById(R.id.lvlmaxrcvText);
-        TextView lvlmax = (TextView) dialog.findViewById(R.id.lvlmaxtext);
+        TextView maxhp = dialog.findViewById(R.id.lvlmaxhpText);
+        TextView maxatk = dialog.findViewById(R.id.lvlmaxatkText);
+        TextView maxrcv = dialog.findViewById(R.id.lvlmaxrcvText);
+        TextView lvlmax = dialog.findViewById(R.id.lvlmaxtext);
 
-        TextView captability = (TextView) dialog.findViewById(R.id.captabilityText);
-        TextView captnotes = (TextView) dialog.findViewById(R.id.capt_notes);
-        TextView specname = (TextView) dialog.findViewById(R.id.specnameText);
+        TextView lbhp = dialog.findViewById(R.id.lvllbhpText);
+        TextView lbatk = dialog.findViewById(R.id.lvllbatkText);
+        TextView lbrcv = dialog.findViewById(R.id.lvllbrcvText);
+
+        HtmlTextView captability = dialog.findViewById(R.id.captabilityText);
+        TextView captnotes = dialog.findViewById(R.id.capt_notes);
+        TextView specname = dialog.findViewById(R.id.specnameText);
 
         DBHelper db = new DBHelper(context);
         SQLiteDatabase database = db.getReadableDatabase();
@@ -696,8 +706,6 @@ private final static Double APP_VERSION = 4.4;
         db.close();
 
         if (charInfo == null) return;
-
-        mTracker.send(new HitBuilders.EventBuilder().setCategory("Character Open").setAction("Name: " + charInfo.getName()).build()); //gitignore
 
         title.setText(charInfo.getName());
         title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
@@ -778,6 +786,51 @@ private final static Double APP_VERSION = 4.4;
         maxatk.setText(charInfo.getMaxATK().toString());
         maxrcv.setText(charInfo.getMaxRCV().toString());
 
+        Limits charLimits = charInfo.getCharLimits();
+        Potentials charPotentials = charInfo.getCharPotentials();
+
+        int additionalHP = 0;
+        int additionalATK = 0;
+        int additionalRCV = 0;
+        if(charLimits!=null) {
+            String pattern = "Boosts base %s by (\\d+)";
+            Pattern atkP = Pattern.compile(String.format(pattern, "ATK"));
+            Pattern hpP = Pattern.compile(String.format(pattern, "HP"));
+            Pattern rcvP = Pattern.compile(String.format(pattern, "RCV"));
+            for(String lE : charLimits.getLimitEntries()) {
+                try {
+                    Matcher hpM = hpP.matcher(lE);
+                    if (hpM.matches()) {
+                        additionalHP += Integer.parseInt(hpM.group(1));
+                        continue;
+                    }
+                    Matcher atkM = atkP.matcher(lE);
+                    if (atkM.matches()) {
+                        additionalATK += Integer.parseInt(atkM.group(1));
+                        continue;
+                    }
+                    Matcher rcvM = rcvP.matcher(lE);
+                    if (rcvM.matches())
+                        additionalRCV += Integer.parseInt(rcvM.group(1));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if(additionalHP>0)
+            lbhp.setText(String.valueOf(charInfo.getMaxHP()+additionalHP));
+        else
+            lbhp.setText(R.string.noLbStatsIncrease);
+        if(additionalATK>0)
+            lbatk.setText(String.valueOf(charInfo.getMaxATK()+additionalATK));
+        else
+            lbatk.setText(R.string.noLbStatsIncrease);
+        if(additionalRCV>0)
+            lbrcv.setText(String.valueOf(charInfo.getMaxRCV()+additionalRCV));
+        else
+            lbrcv.setText(R.string.noLbStatsIncrease);
+
         captability.setText(charInfo.getCaptainDescription());
         String capt_notes = charInfo.getCaptainNotes();
         if (!capt_notes.equals("")) {
@@ -788,7 +841,7 @@ private final static Double APP_VERSION = 4.4;
         List<CharacterSpecials> char_specials = charInfo.getSpecials();
         if (char_specials.size() > 0) {
             specname.setText(charInfo.getSpecialName());
-            LinearLayout specials_container = (LinearLayout) dialog.findViewById(R.id.specials_container);
+            LinearLayout specials_container = dialog.findViewById(R.id.specials_container);
             for (CharacterSpecials special : char_specials) {
                 TextView special_description = new TextView(context);
                 special_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -849,7 +902,7 @@ private final static Double APP_VERSION = 4.4;
         String cwNotes = charInfo.getCrewmateNotes();
         if(cwDesc!=null) {
 
-            LinearLayout specials_container = (LinearLayout) dialog.findViewById(R.id.specials_container);
+            LinearLayout specials_container = dialog.findViewById(R.id.specials_container);
 
             View sep = new View(context);
             LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
@@ -867,14 +920,14 @@ private final static Double APP_VERSION = 4.4;
             cw_title.setText(getString(R.string.cw_text));
             specials_container.addView(cw_title);
 
-            TextView cw_description = new TextView(context);
+            HtmlTextView cw_description = new HtmlTextView(context);
             cw_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
             cw_description.setText(cwDesc);
             cw_description.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
             specials_container.addView(cw_description);
 
             if (cwNotes != null) {
-                TextView cw_notes = new TextView(context);
+                HtmlTextView cw_notes = new HtmlTextView(context);
                 cw_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
                 cw_notes.setText(getString(R.string.notes_text) + cwNotes);
                 cw_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
@@ -882,7 +935,81 @@ private final static Double APP_VERSION = 4.4;
             }
         }
 
-        LinearLayout evolutions_content = (LinearLayout) dialog.findViewById(R.id.evolutions_content);
+        if(charLimits != null) {
+            LinearLayout limitbreak_content = dialog.findViewById(R.id.limitbreak_content);
+            /*ScrollView limitbreakScroll = new ScrollView(context);
+            limitbreakScroll.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT));*/
+            LinearLayout limitbreakContent = new LinearLayout(context);
+            limitbreakContent.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            limitbreakContent.setOrientation(LinearLayout.VERTICAL
+            );
+            ArrayList<String> limEntries = charLimits.getLimitEntries();
+            for(String entry : limEntries) {
+                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                limitRow.setText(entry);
+                limitRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+                limitbreakContent.addView(limitRow);
+            }
+            String limitNotes = charLimits.getLimitNotes();
+            if((limitNotes!= null) && (!limitNotes.equals(""))) {
+                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                limitRow.setText(getResources().getString(R.string.limitnotes)+" "+limitNotes);
+                limitRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+                limitbreakContent.addView(limitRow);
+            }
+
+            if(charPotentials != null) {
+                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                limitRow.setText(getResources().getString(R.string.potentials));
+                limitRow.setTypeface(limitRow.getTypeface(), Typeface.BOLD);
+                limitRow.setGravity(Gravity.CENTER);
+                limitRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+                limitbreakContent.addView(limitRow);
+                LinkedHashMap<String, ArrayList<String>> potEntries = charPotentials.getPotentialEntries();
+                for(Map.Entry<String,ArrayList<String>> potEntry : potEntries.entrySet()) {
+                    TextView limitPRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                    limitPRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
+                    limitPRow.setText(potEntry.getKey());
+                    limitPRow.setTypeface(limitPRow.getTypeface(), Typeface.BOLD);
+                    limitPRow.setBackgroundColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_bg)));
+                    limitPRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+                    limitbreakContent.addView(limitPRow);
+
+                    ArrayList<String> potEntryList = potEntry.getValue();
+                    for(String potValue : potEntryList) {
+                        TextView limitP2Row = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                        limitP2Row.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                        limitP2Row.setText(potValue);
+                        limitP2Row.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
+                        limitbreakContent.addView(limitP2Row);
+                    }
+                }
+                String potentialNotes = charPotentials.getPotentialNotes();
+                if((potentialNotes!= null) && (!potentialNotes.equals(""))) {
+                    TextView limitNRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                    limitNRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
+                    limitNRow.setText(getResources().getString(R.string.limitnotes)+" "+potentialNotes);
+                    limitNRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
+                    limitbreakContent.addView(limitNRow);
+                }
+            }
+            /*limitbreakScroll.addView(limitbreakContent);*/
+            limitbreak_content.addView(limitbreakContent);
+            tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
+        }
+
+        LinearLayout evolutions_content = dialog.findViewById(R.id.evolutions_content);
         List<CharacterEvolutions> evos = charInfo.getEvolutions();
 
         if (evos.size() > 0) {
@@ -933,7 +1060,10 @@ private final static Double APP_VERSION = 4.4;
                 params1.setMargins(dpToPx(5), 5, dpToPx(5), 5);
                 params1.gravity = Gravity.CENTER;
                 evo_text.setLayoutParams(params1);
-                evo_text.setBackgroundResource(R.drawable.ic_left_arrow);
+                Drawable imgDrw = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_left_arrow));
+                DrawableCompat.setTintMode(imgDrw, PorterDuff.Mode.SRC_IN);
+                DrawableCompat.setTint(imgDrw, getResources().getColor(getResIdFromAttribute(this, R.attr.char_info_txt)));
+                evo_text.setImageDrawable(imgDrw);
                 evolution_row.addView(evo_text);
 
                 List<Integer> evolvers = evos.get(i).getEvolvers();
@@ -949,29 +1079,45 @@ private final static Double APP_VERSION = 4.4;
                         evolver_pic.setLayoutParams(params2); // SET WIDTH AND HEIGHT OF PIC
                         evolver_pic.setPadding(0, 0, 0, 0);
                         evolver_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                        Glide
-                                .with(context)
-                                .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver) + ".png")
-                                .dontTransform()
-                                .override(thumbnail_width, thumbnail_height)
-                                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                                .into(evolver_pic); //ADD PIC
-                        evolver_pic.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                launchDialog(evolver);
-                            }
-                        });
+                        if(evolver>0) {
+                            Glide
+                                    .with(context)
+                                    .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver) + ".png")
+                                    .dontTransform()
+                                    .override(thumbnail_width, thumbnail_height)
+                                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                                    .into(evolver_pic); //ADD PIC
+                            evolver_pic.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    launchDialog(evolver);
+                                }
+                            });
+                        } else {
+                            Glide
+                                    .with(context)
+                                    .load(SkullsHelper.getThumbFromId(evolver))
+                                    .dontTransform()
+                                    .override(thumbnail_width, thumbnail_height)
+                                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                                    .into(evolver_pic); //ADD PIC
+                            evolver_pic.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    //null
+                                }
+                            });
+                        }
                         evolution_row.addView(evolver_pic);
                     }
                 }
                 evolution_scroll.addView(evolution_row);
                 evolutions_content.addView(evolution_scroll);
             }
-            tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
+            tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.VISIBLE);
         }
 
-        LinearLayout drops_content = (LinearLayout) dialog.findViewById(R.id.drops_content);
+        LinearLayout drops_content = dialog.findViewById(R.id.drops_content);
         List<DropInfo> drops = charInfo.getDropInfo();
 
         if (drops.size() > 0) {
@@ -997,13 +1143,23 @@ private final static Double APP_VERSION = 4.4;
                 evo_pic.setPadding(0, 0, 0, 0);
                 evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
                 Integer cont_id = this_drops.getDropThumbnail();
-                Glide
-                        .with(context)
-                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
-                        .dontTransform()
-                        .override(thumbnail_width, thumbnail_height)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                        .into(evo_pic); //ADD PIC
+                if(cont_id>0) {
+                    Glide
+                            .with(context)
+                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
+                            .dontTransform()
+                            .override(thumbnail_width, thumbnail_height)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .into(evo_pic); //ADD PIC
+                } else {
+                    Glide
+                            .with(context)
+                            .load(SkullsHelper.getThumbFromId(cont_id))
+                            .dontTransform()
+                            .override(thumbnail_width, thumbnail_height)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .into(evo_pic); //ADD PIC
+                }
                 drops_row.addView(evo_pic);
 
                 TextView drop_name = new TextView(context);
@@ -1046,10 +1202,10 @@ private final static Double APP_VERSION = 4.4;
                 drops_content.addView(drops_row);
                 if(!drop_notes.getText().equals("")) drops_content.addView(drop_notes);
             }
-            tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.VISIBLE);
+            tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.VISIBLE);
         }
 
-        LinearLayout manuals_content = (LinearLayout) dialog.findViewById(R.id.manuals_content);
+        LinearLayout manuals_content = dialog.findViewById(R.id.manuals_content);
         List<DropInfo> manuals = charInfo.getManualsInfos();
 
         if (manuals.size() > 0) {
@@ -1124,14 +1280,14 @@ private final static Double APP_VERSION = 4.4;
                 manuals_content.addView(manuals_row);
                 if(!manual_notes.getText().equals("")) manuals_content.addView(manual_notes);
             }
-            tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.VISIBLE);
+            tabs.getTabWidget().getChildTabViewAt(5).setVisibility(View.VISIBLE);
         }
 
-        HorizontalScrollView scr = (HorizontalScrollView) dialog.findViewById(R.id.tabs_scrollview);
+        HorizontalScrollView scr = dialog.findViewById(R.id.tabs_scrollview);
         scr.invalidate();
         scr.requestLayout();
 
-        ImageButton backbtn = (ImageButton) dialog.findViewById(R.id.backBtn);
+        ImageButton backbtn = dialog.findViewById(R.id.backBtn);
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -1193,10 +1349,7 @@ private final static Double APP_VERSION = 4.4;
         ConnectivityManager connManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo mWifi = connManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
 
-        if (mWifi != null && mWifi.isConnected()) {
-            return true;
-        }
-        return false;
+        return mWifi != null && mWifi.isConnected();
     }
 
     private NotificationCompat.Builder buildNotification() {
@@ -1323,7 +1476,7 @@ private final static Double APP_VERSION = 4.4;
 
         Set<String> nbViewed = mPrefs.getStringSet(getString(R.string.prefs_noticeboard_viewed), new HashSet<String>());
         Boolean somethingNew = false;
-        String bulletinWeb = isNetworkConnected() ? getFileURL("http://www.instruman.it/assets/notices_t.json") : "";
+        String bulletinWeb = isNetworkConnected() ? getFileURL("https://paolo-optc.github.io/json/notices.json") : "";
         try {
             JSONArray bulletinParsed = new JSONArray(bulletinWeb);
             for(int i = 0; i < bulletinParsed.length(); i++) {
@@ -1417,15 +1570,17 @@ private final static Double APP_VERSION = 4.4;
 
         switch (locale.toLowerCase()) {
             case "es":
-                UNITS_JS = "https://optc-sp.github.io/common/data/units.js";
-                COOLDOWNS_JS = "https://optc-sp.github.io/common/data/cooldowns.js";
-                DETAILS_JS = "https://optc-sp.github.io/common/data/details.js";
-                EVOLUTIONS_JS = "https://optc-sp.github.io/common/data/evolutions.js";
-                DIRECTIVES_JS = "https://optc-sp.github.io/common/js/directives.js";
-                DROPS_JS = "https://optc-sp.github.io/common/data/drops.js";
+                UNITS_JS = "http://optc-sp.github.io/common/data/units.js";
+                ALIASES_JS = "http://optc-sp.github.io/common/data/aliases.js";
+                COOLDOWNS_JS = "http://optc-sp.github.io/common/data/cooldowns.js";
+                DETAILS_JS = "http://optc-sp.github.io/common/data/details.js";
+                EVOLUTIONS_JS = "http://optc-sp.github.io/common/data/evolutions.js";
+                DIRECTIVES_JS = "http://optc-sp.github.io/common/js/directives.js";
+                DROPS_JS = "http://optc-sp.github.io/common/data/drops.js";
                 break;
             case "it":
                 UNITS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/units.js";
+                ALIASES_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/aliases.js";
                 COOLDOWNS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/cooldowns.js";
                 DETAILS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/details.js";
                 EVOLUTIONS_JS = "http://www.one-piece-treasure-cruise-italia.org/common/data/evolutions.js";
@@ -1441,16 +1596,39 @@ private final static Double APP_VERSION = 4.4;
                                     "Tutte le difficoltà");
                 break;
             default:
-                UNITS_JS = "https://optc-db.github.io/common/data/units.js";
-                COOLDOWNS_JS = "https://optc-db.github.io/common/data/cooldowns.js";
-                DETAILS_JS = "https://optc-db.github.io/common/data/details.js";
-                EVOLUTIONS_JS = "https://optc-db.github.io/common/data/evolutions.js";
-                DIRECTIVES_JS = "https://optc-db.github.io/common/js/directives.js";
-                DROPS_JS = "https://optc-db.github.io/common/data/drops.js";
+                UNITS_JS = "http://optc-db.github.io/common/data/units.js";
+                ALIASES_JS = "http://optc-db.github.io/common/data/aliases.js";
+                COOLDOWNS_JS = "http://optc-db.github.io/common/data/cooldowns.js";
+                DETAILS_JS = "http://optc-db.github.io/common/data/details.js";
+                EVOLUTIONS_JS = "http://optc-db.github.io/common/data/evolutions.js";
+                DIRECTIVES_JS = "http://optc-db.github.io/common/js/directives.js";
+                DROPS_JS = "http://optc-db.github.io/common/data/drops.js";
                 break;
         }
 
         setContentView(R.layout.activity_main);
+
+        boolean failedPrevUpdate = mPrefs.getBoolean(getString(R.string.pref_failedupdate), false);
+        if(failedPrevUpdate) {
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.download_db), false).commit();
+            PreferenceManager.getDefaultSharedPreferences(this).edit().putBoolean(getString(R.string.check_update), true).commit();
+            mPrefs.edit().putBoolean(getString(R.string.pref_failedupdate), false).apply();
+            final Snackbar msg = Snackbar.make(findViewById(R.id.maincontent), R.string.failedUpdateMsg, 8000);
+            msg.setAction("READ MORE", new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    (new AlertDialog.Builder(context)).setTitle(R.string.failedUpdateDialogTitle)
+                            .setMessage(R.string.failedUpdateDialogMsg)
+                            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    dialogInterface.dismiss();
+                                }
+                            }).show();
+                }
+            });
+            msg.show();
+        }
 
         if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_notification), false))
             showNotification();
@@ -1461,50 +1639,44 @@ private final static Double APP_VERSION = 4.4;
         boolean isUpdatesCheckEnabled = isDownloadWifiOnly ? (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true) && isWifiOn()) :
                 PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.check_update), true);
 
-        SmartDBApplication application = (SmartDBApplication) getApplication(); //gitignore
-        mTracker = application.getDefaultTracker(); //gitignore
-
-        Thread.UncaughtExceptionHandler myHandler = new ExceptionReporter(mTracker, Thread.getDefaultUncaughtExceptionHandler(), context); //gitignore
-        Thread.setDefaultUncaughtExceptionHandler(myHandler); //gitignore
-
-        sortName = (ImageView) findViewById(R.id.sortName);
-        sortType = (ImageView) findViewById(R.id.sortType);
-        sortStars = (ImageView) findViewById(R.id.sortStars);
-        sortAtk = (ImageView) findViewById(R.id.sortAtk);
-        sortHP = (ImageView) findViewById(R.id.sortHp);
-        sortRCV = (ImageView) findViewById(R.id.sortRcv);
+        sortName = findViewById(R.id.sortName);
+        sortType = findViewById(R.id.sortType);
+        sortStars = findViewById(R.id.sortStars);
+        sortAtk = findViewById(R.id.sortAtk);
+        sortHP = findViewById(R.id.sortHp);
+        sortRCV = findViewById(R.id.sortRcv);
 
 
-        sortName.setBackgroundResource(R.drawable.ic_circle);
+        sortName.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortName.setTag(R.id.TAG_SORT_ID, R.id.sortName);
         sortName.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortType.setBackgroundResource(R.drawable.ic_circle);
+        sortType.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortType.setTag(R.id.TAG_SORT_ID, R.id.sortType);
         sortType.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortStars.setBackgroundResource(R.drawable.ic_circle);
+        sortStars.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortStars.setTag(R.id.TAG_SORT_ID, R.id.sortStars);
         sortStars.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortAtk.setBackgroundResource(R.drawable.ic_circle);
+        sortAtk.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortAtk.setTag(R.id.TAG_SORT_ID, R.id.sortAtk);
         sortAtk.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortHP.setBackgroundResource(R.drawable.ic_circle);
+        sortHP.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortHP.setTag(R.id.TAG_SORT_ID, R.id.sortHp);
         sortHP.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortRCV.setBackgroundResource(R.drawable.ic_circle);
+        sortRCV.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortRCV.setTag(R.id.TAG_SORT_ID, R.id.sortRcv);
         sortRCV.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        LinearLayout sortNamel = (LinearLayout) findViewById(R.id.sortName_l);
-        LinearLayout sortTypel = (LinearLayout) findViewById(R.id.sortType_l);
-        LinearLayout sortStarsl = (LinearLayout) findViewById(R.id.sortStars_l);
-        LinearLayout sortAtkl = (LinearLayout) findViewById(R.id.sortAtk_l);
-        LinearLayout sortHPl = (LinearLayout) findViewById(R.id.sortHp_l);
-        LinearLayout sortRCVl = (LinearLayout) findViewById(R.id.sortRcv_l);
+        LinearLayout sortNamel = findViewById(R.id.sortName_l);
+        LinearLayout sortTypel = findViewById(R.id.sortType_l);
+        LinearLayout sortStarsl = findViewById(R.id.sortStars_l);
+        LinearLayout sortAtkl = findViewById(R.id.sortAtk_l);
+        LinearLayout sortHPl = findViewById(R.id.sortHp_l);
+        LinearLayout sortRCVl = findViewById(R.id.sortRcv_l);
 
         sortNamel.setOnClickListener(sortNameOnClick);
         sortTypel.setOnClickListener(sortTypeOnClick);
@@ -1513,9 +1685,9 @@ private final static Double APP_VERSION = 4.4;
         sortHPl.setOnClickListener(sortHPOnClick);
         sortRCVl.setOnClickListener(sortRCVOnClick);
 
-        final ImageButton filterBtn = (ImageButton) findViewById(R.id.filterBtn);
-        ImageButton resetBtn = (ImageButton) findViewById(R.id.resetBtn);
-        filterText = (EditText) findViewById(R.id.filterText);
+        final ImageButton filterBtn = findViewById(R.id.filterBtn);
+        ImageButton resetBtn = findViewById(R.id.resetBtn);
+        filterText = findViewById(R.id.filterText);
         filterText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -1527,7 +1699,7 @@ private final static Double APP_VERSION = 4.4;
                 return handled;
             }
         });
-        final LinearLayout F_TEXT = (LinearLayout) findViewById(R.id.filtertext_layout);
+        final LinearLayout F_TEXT = findViewById(R.id.filtertext_layout);
         filterText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
@@ -1566,7 +1738,7 @@ private final static Double APP_VERSION = 4.4;
             }
         });
 
-        lview = (ListView) findViewById(R.id.listView1);
+        lview = findViewById(R.id.listView1);
 
         directives = new HashMap<>();
 
@@ -1576,7 +1748,7 @@ private final static Double APP_VERSION = 4.4;
 
         //Add data to navigation drawer
         // get the listview
-        expListView = (ExpandableListView) findViewById(R.id.left_drawer_list);
+        expListView = findViewById(R.id.left_drawer_list);
         // preparing list data
         prepareListData();
         explistAdapter = new ExpandableListAdapter(this, explistDataHeader, explistDataChild);
@@ -1584,7 +1756,7 @@ private final static Double APP_VERSION = 4.4;
         expListView.setAdapter(explistAdapter);
         expListView.setOnChildClickListener(setFlags);
 
-        ImageButton filterReset = (ImageButton) findViewById(R.id.reset_filters);
+        ImageButton filterReset = findViewById(R.id.reset_filters);
         filterReset.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1592,7 +1764,7 @@ private final static Double APP_VERSION = 4.4;
             }
         });
 
-        ImageButton resetDb = (ImageButton) findViewById(R.id.reset_db);
+        ImageButton resetDb = findViewById(R.id.reset_db);
         resetDb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1617,7 +1789,7 @@ private final static Double APP_VERSION = 4.4;
             }
         });
 
-        ImageButton dmgCalc = (ImageButton) findViewById(R.id.dmg_calculator);
+        ImageButton dmgCalc = findViewById(R.id.dmg_calculator);
         dmgCalc.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1631,7 +1803,7 @@ private final static Double APP_VERSION = 4.4;
             }
         });
 
-        ImageButton settBtn = (ImageButton) findViewById(R.id.settings_btn);
+        ImageButton settBtn = findViewById(R.id.settings_btn);
         final int currThemeGlobal = currTheme;
         settBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -1645,21 +1817,32 @@ private final static Double APP_VERSION = 4.4;
             }
         });
 
-        ImageButton bulletinBtn = (ImageButton) findViewById(R.id.bulletin_btn);
+        ImageButton bulletinBtn = findViewById(R.id.bulletin_btn);
         bulletinBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showBulletinBoard();
             }
         });
-        if(somethingNew)
-            bulletinBtn.setBackgroundResource(R.drawable.ic_bulletin_new);
+        if(somethingNew) {
+            Drawable ntcBtn = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_bulletin));
+            int color = getResources().getColor(getResIdFromAttribute(this, R.attr.drawer_bar_btn_highlight));
+            DrawableCompat.setTintMode(ntcBtn, PorterDuff.Mode.SRC_IN);
+            DrawableCompat.setTint(ntcBtn, color);
+            bulletinBtn.setImageDrawable(ntcBtn);
+        } else {
+            Drawable ntcBtn = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_bulletin));
+            int color = getResources().getColor(getResIdFromAttribute(this, R.attr.drawer_bar_btn));
+            DrawableCompat.setTintMode(ntcBtn, PorterDuff.Mode.SRC_IN);
+            DrawableCompat.setTint(ntcBtn, color);
+            bulletinBtn.setImageDrawable(ntcBtn);
+        }
 
-        Button tealBtn = (Button) findViewById(R.id.tealBtn);
-        Button redBtn = (Button) findViewById(R.id.redBtn);
-        Button amberBtn = (Button) findViewById(R.id.amberBtn);
-        Button lightBtn = (Button) findViewById(R.id.lightBtn);
-        Button darkBtn = (Button) findViewById(R.id.darkBtn);
+        Button tealBtn = findViewById(R.id.tealBtn);
+        Button redBtn = findViewById(R.id.redBtn);
+        Button amberBtn = findViewById(R.id.amberBtn);
+        Button lightBtn = findViewById(R.id.lightBtn);
+        Button darkBtn = findViewById(R.id.darkBtn);
 
         tealBtn.setOnClickListener(new Button.OnClickListener() {
             @Override
@@ -1724,7 +1907,7 @@ private final static Double APP_VERSION = 4.4;
             mPrefs.edit().putBoolean(getString(R.string.rebuild_db), false).commit();
         }
 
-        TextView placeholder = (TextView) findViewById(R.id.placeholder);
+        TextView placeholder = findViewById(R.id.placeholder);
         placeholder.setX(getScreenWidth());
         placeholder.setY(getScreenHeight() / 2);
         Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
@@ -1740,7 +1923,7 @@ private final static Double APP_VERSION = 4.4;
             mEditor.putBoolean(getString(R.string.tutorial_displayed), true).apply();
         }
 
-        DrawerLayout mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout mDrawerLayout = findViewById(R.id.drawer_layout);
 
         mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -1824,30 +2007,15 @@ private final static Double APP_VERSION = 4.4;
                 mPrefs.edit().putBoolean(getString(R.string.feedback_displayed), true).apply();
             }
         }*/
-
-        Boolean displayed_noticeboard = mPrefs.getBoolean(getString(R.string.noticeboard_displayed), false);
-        if (!displayed_noticeboard) {
-            final Snackbar msg = Snackbar.make(findViewById(android.R.id.content), R.string.noticeboard_message, 8000);
-            msg.setAction("X", new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    msg.dismiss();
-                }
-            });
-            msg.setActionTextColor(Color.YELLOW);
-            msg.show();
-            //Toast.makeText(context, R.string.noticeboard_message, Toast.LENGTH_LONG).show();
-            mPrefs.edit().putBoolean(getString(R.string.noticeboard_displayed), true).apply();
-        }
     }
 
     private void showBulletinBoard() {
         final Dialog bulletinDialog = new Dialog(context);
         bulletinDialog.setContentView(R.layout.bulletin_board);
 
-        LinearLayout mainBC = (LinearLayout)bulletinDialog.findViewById(R.id.main_bulletin_content);
+        LinearLayout mainBC = bulletinDialog.findViewById(R.id.main_bulletin_content);
         String bulletinWeb;
-        bulletinWeb = isNetworkConnected() ? getFileURL("http://www.instruman.it/assets/notices_t.json") : "";
+        bulletinWeb = isNetworkConnected() ? getFileURL("https://paolo-optc.github.io/json/notices.json") : "";
         try {
             JSONArray bulletinParsed = new JSONArray(bulletinWeb);
             SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
@@ -1856,8 +2024,12 @@ private final static Double APP_VERSION = 4.4;
                 nbViewed.add(String.valueOf(bulletinParsed.getJSONObject(i).getInt("key")));
             }
             mPrefs.edit().putStringSet(getString(R.string.prefs_noticeboard_viewed), nbViewed).apply();
-            ImageButton bulletinBtn = (ImageButton)findViewById(R.id.bulletin_btn);
-            bulletinBtn.setBackgroundResource(R.drawable.ic_bulletin);
+            ImageButton bulletinBtn = findViewById(R.id.bulletin_btn);
+            Drawable ntcBtn = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_bulletin));
+            int color = getResources().getColor(getResIdFromAttribute(this, R.attr.drawer_bar_btn));
+            DrawableCompat.setTintMode(ntcBtn, PorterDuff.Mode.SRC_IN);
+            DrawableCompat.setTint(ntcBtn, color);
+            bulletinBtn.setImageDrawable(ntcBtn);
             for(int i = 0; i < bulletinParsed.length(); i++) {
 
                 TextView entry = new TextView(context);
@@ -1880,7 +2052,7 @@ private final static Double APP_VERSION = 4.4;
                 mainBC.addView(sepLine);
             }
         } catch (Exception e) { e.printStackTrace(); }
-        Button closeBtn = (Button)bulletinDialog.findViewById(R.id.bulletinBoardClose);
+        Button closeBtn = bulletinDialog.findViewById(R.id.bulletinBoardClose);
         closeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1913,7 +2085,7 @@ private final static Double APP_VERSION = 4.4;
 
 
     private int getSideTotalMargin() {
-        LinearLayout main = (LinearLayout) findViewById(R.id.maincontent);
+        LinearLayout main = findViewById(R.id.maincontent);
         int left = main.getPaddingLeft();
         int right = main.getPaddingRight();
         return left + right;
@@ -1924,8 +2096,8 @@ private final static Double APP_VERSION = 4.4;
         stopService(new Intent(context, FlyingChopper.class));
         int width = getScreenWidth();
 
-        LinearLayout list_size = (LinearLayout) findViewById(R.id.list_size_layout);
-        ViewGroup.LayoutParams params = list_size.getLayoutParams(); //gitignore
+        LinearLayout list_size = findViewById(R.id.list_size_layout);
+        ViewGroup.LayoutParams params = list_size.getLayoutParams();
 
         if (width > dpToPx(600))
             params.width = width - getSideTotalMargin();
@@ -1937,25 +2109,22 @@ private final static Double APP_VERSION = 4.4;
         boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
         if(daynightTheme) theme_str = "daynight_theme";
 
-        mTracker.setScreenName("Main Screen"); //gitignore
-        mTracker.send(new HitBuilders.ScreenViewBuilder().setCustomDimension(1, theme_str).build()); //gitignore
-
         if(daynightTheme) {
-            LinearLayout themeBtns = (LinearLayout)findViewById(R.id.themeBtns);
+            LinearLayout themeBtns = findViewById(R.id.themeBtns);
             themeBtns.setVisibility(View.GONE);
             int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-            LinearLayout mainContent = (LinearLayout)findViewById(R.id.maincontent);
+            LinearLayout mainContent = findViewById(R.id.maincontent);
             if((8<=hour)&&(hour<20))
             {
                 //DAYLIGHT
-                KenBurnsView bgImg = (KenBurnsView) findViewById(R.id.mainBgImage);
+                KenBurnsView bgImg = findViewById(R.id.mainBgImage);
                 bgImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_sunny_sky));
                 RandomTransitionGenerator generator = new RandomTransitionGenerator(20000, new AccelerateDecelerateInterpolator());
                 bgImg.setTransitionGenerator(generator);
                 bgImg.resume();
             } else {
                 //NIGHT
-                KenBurnsView bgImg = (KenBurnsView) findViewById(R.id.mainBgImage);
+                KenBurnsView bgImg = findViewById(R.id.mainBgImage);
                 bgImg.setImageDrawable(getResources().getDrawable(R.drawable.ic_night));
                 RandomTransitionGenerator generator = new RandomTransitionGenerator(20000, new AccelerateDecelerateInterpolator());
                 bgImg.setTransitionGenerator(generator);
@@ -1977,7 +2146,7 @@ private final static Double APP_VERSION = 4.4;
         boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
         if(daynightTheme)
         {
-            KenBurnsView bgImg = (KenBurnsView) findViewById(R.id.mainBgImage);
+            KenBurnsView bgImg = findViewById(R.id.mainBgImage);
             bgImg.pause();
         }
         goingToSettings = false;
@@ -2082,8 +2251,9 @@ private final static Double APP_VERSION = 4.4;
     }
 
     private String getFileURL(String uri) {
-        try {
+        /*try {
             URL url = new URL(uri);
+
             InputStream is = url.openStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String line;
@@ -2097,7 +2267,17 @@ private final static Double APP_VERSION = 4.4;
         } catch (Exception e) {
             e.printStackTrace();
             return "";
+        }*/
+
+        try {
+            URL fileURL = new URL(uri);
+            return com.google.common.io.Resources.toString(fileURL, Charsets.UTF_8);
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return null;
     }
 
     public Object parseJScript(String uri, String objname) {
@@ -2113,6 +2293,8 @@ private final static Double APP_VERSION = 4.4;
 
         rhino.setOptimizationLevel(-1);
 
+        Object result = null;
+
         try {
             Scriptable scope = rhino.initStandardObjects();
 
@@ -2122,13 +2304,13 @@ private final static Double APP_VERSION = 4.4;
             // Get the functionName defined in JavaScriptCode
             Object x = scope.get("window", scope);
             Map<String, Object> y = (Map<String, Object>) x;
-            return y.get(objname);
+            result = y.get(objname);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             org.mozilla.javascript.Context.exit();
         }
-        return null;
+        return result;
     }
 
     private boolean isNetworkConnected() {
@@ -2138,7 +2320,9 @@ private final static Double APP_VERSION = 4.4;
     }
 
     public String convertID(Integer ID) {
-        if ((ID==574)||(ID==575)) return ("00" + ID.toString());
+        if ((ID==574)||(ID==575)) {
+            return ("00" + ID.toString());
+        }
         if (ID < 10) return ("000" + ID.toString());
         else if (ID < 100) return ("00" + ID.toString());
         else if (ID < 1000) return ("0" + ID.toString());
@@ -2168,22 +2352,29 @@ private final static Double APP_VERSION = 4.4;
     }
 
     private class CacheImages extends Thread {
+        private boolean interrupt = false;
         public void run() {
             for (int n = 0; n < original_list.size(); n++) {
-                //WORKAROUND TO PRE-CACHE ICONS
-                try {
-                    FutureTarget<GlideDrawable> future = Glide
-                            .with(context)
-                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(n + 1) + ".png")
-                            .dontTransform()
-                            .override(thumbnail_width, thumbnail_height)
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                            .into(thumbnail_width, thumbnail_height);
-                    GlideDrawable cacheFile = future.get();
-                } catch (Exception e) {
-                    Log.e("ERR", "Pic not found");
+                if(!interrupt) {
+                    //WORKAROUND TO PRE-CACHE ICONS
+                    try {
+                        FutureTarget<GlideDrawable> future = Glide
+                                .with(context)
+                                .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(n + 1) + ".png")
+                                .dontTransform()
+                                .override(thumbnail_width, thumbnail_height)
+                                .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                                .into(thumbnail_width, thumbnail_height);
+                        GlideDrawable cacheFile = future.get();
+                    } catch (Exception e) {
+                        Log.e("ERR", "Pic not found");
+                    }
                 }
             }
+        }
+
+        public void cancel() {
+            interrupt = true;
         }
     }
 
@@ -2191,23 +2382,26 @@ private final static Double APP_VERSION = 4.4;
 
     private void addProgress(String value) {
         if ((loading != null) && loading.isShowing()) {
-            ArcProgress progress = (ArcProgress) loading.findViewById(R.id.loading_bar);
+            ArcProgress progress = loading.findViewById(R.id.loading_bar);
             ObjectAnimator anim = ObjectAnimator.ofInt(progress, "progress", progress_val.intValue(), progress_val.intValue() + 100/10);
             progress_val = progress_val + 100/10;
             anim.setInterpolator(new DecelerateInterpolator());
             anim.setDuration(200);
             anim.start();
-            TextView progtext = (TextView) loading.findViewById(R.id.loading_text);
+            TextView progtext = loading.findViewById(R.id.loading_text);
             progtext.setText(value);
         }
     }
+
+    CacheImages cacheImagesThread;
 
     class LoadFromDB extends AsyncTask<Void, Void, ArrayList<HashMap>> {
 
         protected void onPostExecute(ArrayList<HashMap> hashMaps) {
             list = original_list = hashMaps;
 
-            (new CacheImages()).start();
+            cacheImagesThread = new CacheImages();
+            cacheImagesThread.start();
 
             adapter = new listViewAdapter(activity, list);
             lview.setAdapter(adapter);
@@ -2260,7 +2454,10 @@ private final static Double APP_VERSION = 4.4;
             if (doDownload) hideLoading();
         }
 
+        @SuppressWarnings("ApplySharedPref")
         private void downloadData() {
+            SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
+            mPrefs.edit().putBoolean(getString(R.string.pref_failedupdate), true).commit();
             DBHelper db = new DBHelper(context);
 
             SQLiteDatabase database = db.getWritableDatabase();
@@ -2271,11 +2468,16 @@ private final static Double APP_VERSION = 4.4;
 
             DatabasePopulator.populateCharacters(database, characters);
 
+            Map<Integer, List> aliases = (Map<Integer, List>) parseJScript(ALIASES_JS, "aliases");
+
+            DatabasePopulator.populateAliases(database, aliases);
+
             publishProgress(getString(R.string.downloading_cooldowns));
 
             Map<String, String> directives_js = (Map<String, String>) parseDirectives(DIRECTIVES_JS, "notes");
 
-            ParseAdditionalNotes notes_parser = new ParseAdditionalNotes(directives_js);
+            ParseAdditionalNotes notes_parser = new ParseAdditionalNotes();
+            notes_parser = new ParseAdditionalNotes(directives_js);
 
             List<Object> coolds = (List) parseJScript(COOLDOWNS_JS, "cooldowns");
 
@@ -2292,8 +2494,8 @@ private final static Double APP_VERSION = 4.4;
                         cools_tmp.add(new CoolDowns(((Double) coolds.get(i)).intValue()));
                     else if (entry.getClass().equals(NativeArray.class)) {
                         List<Double> entry_array = (List<Double>) coolds.get(i);
-                        Integer a = entry_array.get(0).intValue();
-                        Integer b = entry_array.get(1).intValue();
+                        Integer a = (entry_array.get(0)==null) ? null:entry_array.get(0).intValue();
+                        Integer b = (entry_array.get(1)==null) ? null:entry_array.get(1).intValue();
                         cools_tmp.add(new CoolDowns(a, b));
                     } else {
                         Log.d("DBG", "Object type determination failed!");
@@ -2306,7 +2508,7 @@ private final static Double APP_VERSION = 4.4;
             Map<Integer, Map> details_js = (Map<Integer, Map>) parseJScript(DETAILS_JS, "details");
             publishProgress(getString(R.string.loading_abilities));
 
-            DatabasePopulator.populateAbilities(database, details_js, notes_parser, cools_tmp);
+            DatabasePopulator.populateAbilities(activity, database, details_js, notes_parser, cools_tmp);
 
             publishProgress(getString(R.string.downloading_evolutions));
 
@@ -2326,6 +2528,7 @@ private final static Double APP_VERSION = 4.4;
 
             database.close();
             db.close();
+            mPrefs.edit().putBoolean(getString(R.string.pref_failedupdate), false).commit();
             isDownloaded = true;
             publishProgress("");
         }
@@ -2413,26 +2616,51 @@ private final static Double APP_VERSION = 4.4;
     }
 
     private String getFileURLD(String uri) {
-        try {
+        /*try {
             URL url = new URL(uri);
+            URLConnection urlC = url.openConnection();
+            urlC.setConnectTimeout(5000);
+            urlC.setReadTimeout(5000);
+            urlC.connect();
+
             InputStream is = url.openStream();
             BufferedReader br = new BufferedReader(new InputStreamReader(is));
             String line;
             StringBuilder bdr = new StringBuilder();
             String endLine = System.getProperty("line.separator");
-            br.readLine();
+            //br.readLine();
             while ((line = br.readLine()) != null) {
-                bdr.append(line + endLine);
-                if (line.equals("};")) break;
+                bdr.append(line);
+                bdr.append(endLine);
+                //if (line.equals("};")) break;
             }
 
             br.close();
             is.close();
-            return bdr.toString();
+            String result = bdr.toString();
+            Pattern regex = Pattern.compile("(var notes[\\s\\S]*?\\})", Pattern.CASE_INSENSITIVE);
+            Matcher m = regex.matcher(result);
+            if(m.find())
+                return m.group(1);
+            else return "";
         } catch (Exception e) {
             e.printStackTrace();
             return "";
+        }*/
+        String data = "";
+        try {
+            URL fileURL = new URL(uri);
+            data = com.google.common.io.Resources.toString(fileURL, Charsets.UTF_8);
+        } catch(MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        Pattern regex = Pattern.compile("(var notes[\\s\\S]*?\\})", Pattern.CASE_INSENSITIVE);
+        Matcher m = regex.matcher(data);
+        if(m.find())
+            return m.group(1);
+        return null;
     }
 
     private Object parseDirectives(String uri, String objname) {
@@ -2448,6 +2676,8 @@ private final static Double APP_VERSION = 4.4;
 
         rhino.setOptimizationLevel(-1);
 
+        Object result = null;
+
         try {
             Scriptable scope = rhino.initStandardObjects();
 
@@ -2455,13 +2685,21 @@ private final static Double APP_VERSION = 4.4;
             // been compressed to only one line using something like YUI
             rhino.evaluateString(scope, dump, "JavaScript", 1, null);
             // Get the functionName defined in JavaScriptCode
-            return scope.get(objname, scope);
+            result =  scope.get(objname, scope);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             org.mozilla.javascript.Context.exit();
         }
-        return null;
+        if(result==null) {
+            Pattern p = Pattern.compile("var notes.+?(\\{[\\s\\S]+?\\})");
+            Matcher m = p.matcher(dump);
+            if(m.find()) {
+                String jsonObject = m.group(1);
+                result = new Gson().fromJson(jsonObject, new TypeToken<HashMap<String,String>>(){}.getType());
+            }
+        }
+        return result;
     }
 
     private ArrayList<HashMap> getFromDB() {
@@ -2706,22 +2944,22 @@ private final static Double APP_VERSION = 4.4;
         adapter = new listViewAdapter(activity, list);
         lview.setAdapter(adapter);
 
-        sortName.setBackgroundResource(R.drawable.ic_circle);
+        sortName.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortName.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortType.setBackgroundResource(R.drawable.ic_circle);
+        sortType.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortType.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortStars.setBackgroundResource(R.drawable.ic_circle);
+        sortStars.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortStars.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortAtk.setBackgroundResource(R.drawable.ic_circle);
+        sortAtk.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortAtk.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortHP.setBackgroundResource(R.drawable.ic_circle);
+        sortHP.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortHP.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
 
-        sortRCV.setBackgroundResource(R.drawable.ic_circle);
+        sortRCV.setImageDrawable(SortImageHelper.getTintCircleDrawable(this));
         sortRCV.setTag(R.id.TAG_SORT_STATE, R.drawable.ic_circle);
     }
 
@@ -2759,7 +2997,7 @@ private final static Double APP_VERSION = 4.4;
 
     private void setProgressInt(Integer value) {
         if ((loading != null) && loading.isShowing()) {
-            ArcProgress progress = (ArcProgress) loading.findViewById(R.id.loading_bar);
+            ArcProgress progress = loading.findViewById(R.id.loading_bar);
             ObjectAnimator anim = ObjectAnimator.ofInt(progress, "progress", progress_val_2, value);
             progress_val_2 = value;
             anim.setInterpolator(new DecelerateInterpolator());
@@ -2780,10 +3018,7 @@ private final static Double APP_VERSION = 4.4;
 
     public boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        if (Environment.MEDIA_MOUNTED.equals(state)) {
-            return true;
-        }
-        return false;
+        return Environment.MEDIA_MOUNTED.equals(state);
     }
 
     public File getApkPath(String apkName) {
@@ -2924,6 +3159,7 @@ private final static Double APP_VERSION = 4.4;
     private static final int EXTERNAL_OVERLAY_PREFERENCE = 103;
     public static final String LANG_PREF_CHANGED = "result_lang_pref_changed";
     public static final String UPDATE_APP_PREF = "result_update_app_preference";
+    public static final String CLEAR_THUMB_CACHE_PREF = "preference_clear_thumbnails_cache";
     public static final String THEMEDAYNIGHT_CHANGED = "result_daynight_theme_changed";
     private String apk_file = "";
 
@@ -2950,8 +3186,31 @@ private final static Double APP_VERSION = 4.4;
                     }
                     if (data.getBooleanExtra(UPDATE_APP_PREF, false))
                         (new CheckUpdates(true)).execute();
+                    if (data.getBooleanExtra(CLEAR_THUMB_CACHE_PREF, false)) {
+                        Toast.makeText(activity, R.string.clearingThumbCacheToast, Toast.LENGTH_SHORT).show();
+                        if(cacheImagesThread!=null && cacheImagesThread.isAlive())
+                            cacheImagesThread.cancel();
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                Glide.get(activity).clearDiskCache();
+                                activity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Glide.get(activity).clearMemory();
+                                    }
+                                });
+                            }
+                        }.start();
+                    }
                 }
                 break;
         }
+    }
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(newBase);
+        MultiDex.install(this);
     }
 }

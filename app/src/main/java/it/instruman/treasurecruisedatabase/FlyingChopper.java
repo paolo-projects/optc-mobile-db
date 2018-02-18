@@ -58,17 +58,19 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.google.android.gms.analytics.HitBuilders; //gitignore
-import com.google.android.gms.analytics.Tracker; //gitignore
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static it.instruman.treasurecruisedatabase.MainActivity.thumbnail_height;
 import static it.instruman.treasurecruisedatabase.MainActivity.thumbnail_width;
@@ -172,7 +174,6 @@ public class FlyingChopper extends Service {
     private ArrayList<HashMap> dbListItems, dbOriginalListItems;
     private listViewAdapterOverlay dbListAdapter;
     private ImageView sortName, sortType, sortHP, sortAtk, sortRCV, sortStars;
-    private Tracker mTracker; //gitignore
 
     AnimationLayoutParams paramsMainIcon, paramsCloseBtn, paramsListInterface, paramsListIcon, paramsDmgCalcInterface, paramsDmgCalcIcon, paramsCalcIcon, paramsCalcInterface, paramsEllipsisIcon;
     int panelState = 0;  // state 0 = close
@@ -207,7 +208,7 @@ public class FlyingChopper extends Service {
         return size.y;
     }
     private int getSideTotalMargin() {
-        LinearLayout main = (LinearLayout) listInterfaceView.findViewById(R.id.maincontent_overlay);
+        LinearLayout main = listInterfaceView.findViewById(R.id.maincontent_overlay);
         int left = main.getPaddingLeft();
         int right = main.getPaddingRight();
         return left + right;
@@ -424,40 +425,40 @@ public class FlyingChopper extends Service {
 
     private void initializeCalcDialog()
     {
-        Button btn10cut = (Button)calcInterfaceView.findViewById(R.id.btn10cut);
-        Button btn20cut = (Button)calcInterfaceView.findViewById(R.id.btn20cut);
-        Button btn30cut = (Button)calcInterfaceView.findViewById(R.id.btn30cut);
-        Button btn40cut = (Button)calcInterfaceView.findViewById(R.id.btn40cut);
+        Button btn10cut = calcInterfaceView.findViewById(R.id.btn10cut);
+        Button btn20cut = calcInterfaceView.findViewById(R.id.btn20cut);
+        Button btn30cut = calcInterfaceView.findViewById(R.id.btn30cut);
+        Button btn40cut = calcInterfaceView.findViewById(R.id.btn40cut);
 
-        Button btn1 = (Button)calcInterfaceView.findViewById(R.id.btn1);
-        Button btn2 = (Button)calcInterfaceView.findViewById(R.id.btn2);
-        Button btn3 = (Button)calcInterfaceView.findViewById(R.id.btn3);
-        Button btn4 = (Button)calcInterfaceView.findViewById(R.id.btn4);
-        Button btn5 = (Button)calcInterfaceView.findViewById(R.id.btn5);
-        Button btn6 = (Button)calcInterfaceView.findViewById(R.id.btn6);
-        Button btn7 = (Button)calcInterfaceView.findViewById(R.id.btn7);
-        Button btn8 = (Button)calcInterfaceView.findViewById(R.id.btn8);
-        Button btn9 = (Button)calcInterfaceView.findViewById(R.id.btn9);
-        Button btn0 = (Button)calcInterfaceView.findViewById(R.id.btn0);
-        Button btnPoint = (Button)calcInterfaceView.findViewById(R.id.btnPoint);
-        Button btnEqual = (Button)calcInterfaceView.findViewById(R.id.btnEqual);
+        Button btn1 = calcInterfaceView.findViewById(R.id.btn1);
+        Button btn2 = calcInterfaceView.findViewById(R.id.btn2);
+        Button btn3 = calcInterfaceView.findViewById(R.id.btn3);
+        Button btn4 = calcInterfaceView.findViewById(R.id.btn4);
+        Button btn5 = calcInterfaceView.findViewById(R.id.btn5);
+        Button btn6 = calcInterfaceView.findViewById(R.id.btn6);
+        Button btn7 = calcInterfaceView.findViewById(R.id.btn7);
+        Button btn8 = calcInterfaceView.findViewById(R.id.btn8);
+        Button btn9 = calcInterfaceView.findViewById(R.id.btn9);
+        Button btn0 = calcInterfaceView.findViewById(R.id.btn0);
+        Button btnPoint = calcInterfaceView.findViewById(R.id.btnPoint);
+        Button btnEqual = calcInterfaceView.findViewById(R.id.btnEqual);
 
-        Button delLastBtn = (Button)calcInterfaceView.findViewById(R.id.btnDeleteLast);
-        Button btnDel = (Button)calcInterfaceView.findViewById(R.id.btnDel);
-        Button btnC = (Button)calcInterfaceView.findViewById(R.id.btnC);
+        Button delLastBtn = calcInterfaceView.findViewById(R.id.btnDeleteLast);
+        Button btnDel = calcInterfaceView.findViewById(R.id.btnDel);
+        Button btnC = calcInterfaceView.findViewById(R.id.btnC);
 
-        Button btnPlus = (Button)calcInterfaceView.findViewById(R.id.btnPlus);
-        Button btnMinus = (Button)calcInterfaceView.findViewById(R.id.btnMinus);
-        Button btnTimes = (Button)calcInterfaceView.findViewById(R.id.btnTimes);
-        Button btnDivision = (Button)calcInterfaceView.findViewById(R.id.btnDivision);
+        Button btnPlus = calcInterfaceView.findViewById(R.id.btnPlus);
+        Button btnMinus = calcInterfaceView.findViewById(R.id.btnMinus);
+        Button btnTimes = calcInterfaceView.findViewById(R.id.btnTimes);
+        Button btnDivision = calcInterfaceView.findViewById(R.id.btnDivision);
 
-        Button btnX0_5 = (Button)calcInterfaceView.findViewById(R.id.btnX0_5);
-        Button btnX1_5 = (Button)calcInterfaceView.findViewById(R.id.btnX1_5);
-        Button btnX2 = (Button)calcInterfaceView.findViewById(R.id.btnX2);
-        Button btnX2_25 = (Button)calcInterfaceView.findViewById(R.id.btnX2_25);
-        Button btnX2_5 = (Button)calcInterfaceView.findViewById(R.id.btnX2_5);
-        Button btnX2_75 = (Button)calcInterfaceView.findViewById(R.id.btnX2_75);
-        Button btnX3 = (Button)calcInterfaceView.findViewById(R.id.btnX3);
+        Button btnX0_5 = calcInterfaceView.findViewById(R.id.btnX0_5);
+        Button btnX1_5 = calcInterfaceView.findViewById(R.id.btnX1_5);
+        Button btnX2 = calcInterfaceView.findViewById(R.id.btnX2);
+        Button btnX2_25 = calcInterfaceView.findViewById(R.id.btnX2_25);
+        Button btnX2_5 = calcInterfaceView.findViewById(R.id.btnX2_5);
+        Button btnX2_75 = calcInterfaceView.findViewById(R.id.btnX2_75);
+        Button btnX3 = calcInterfaceView.findViewById(R.id.btnX3);
 
         btn1.setOnClickListener(numberOnClickListener);
         btn2.setOnClickListener(numberOnClickListener);
@@ -495,7 +496,7 @@ public class FlyingChopper extends Service {
         btnX2_75.setOnClickListener(multiplyOnClickListener);
         btnX3.setOnClickListener(multiplyOnClickListener);
 
-                mainValue = (EditText)calcInterfaceView.findViewById(R.id.calcValue);
+                mainValue = calcInterfaceView.findViewById(R.id.calcValue);
     }
 
     EditText mainValue;
@@ -732,7 +733,7 @@ public class FlyingChopper extends Service {
                 break;
         }
 
-        final WebView webView = (WebView) dmgCalcInterfaceView.findViewById(R.id.web_view);
+        final WebView webView = dmgCalcInterfaceView.findViewById(R.id.web_view);
 
         WebSettings webSettings = webView.getSettings();
 
@@ -822,8 +823,8 @@ public class FlyingChopper extends Service {
         CookieManager.allowFileSchemeCookies();
         CookieManager.getInstance().setAcceptCookie(true);
 
-        ImageButton navigateBackBtn = (ImageButton)dmgCalcInterfaceView.findViewById(R.id.dmgcalc_navigateback);
-        ImageButton navigateForwardBtn = (ImageButton)dmgCalcInterfaceView.findViewById(R.id.dmgcalc_navigateforward);
+        ImageButton navigateBackBtn = dmgCalcInterfaceView.findViewById(R.id.dmgcalc_navigateback);
+        ImageButton navigateForwardBtn = dmgCalcInterfaceView.findViewById(R.id.dmgcalc_navigateforward);
         navigateBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -923,8 +924,8 @@ public class FlyingChopper extends Service {
         initializeDbDialog();
         populateDbList();
 
-        LinearLayout list_size = (LinearLayout) listInterfaceView.findViewById(R.id.list_size_layout_overlay);
-        ViewGroup.LayoutParams params = list_size.getLayoutParams(); //gitignore
+        LinearLayout list_size = listInterfaceView.findViewById(R.id.list_size_layout_overlay);
+        ViewGroup.LayoutParams params = list_size.getLayoutParams();
 
         if (getScreenWidth() > dpToPx(600))
             params.width = getScreenWidth() - getSideTotalMargin();
@@ -1034,30 +1035,30 @@ public class FlyingChopper extends Service {
 
     private void initializeDbDialog()
     {
-        sortName = (ImageView) listInterfaceView.findViewById(R.id.sortName_overlay);
+        sortName = listInterfaceView.findViewById(R.id.sortName_overlay);
         sortName.setTag(R.id.TAG_SORT_ID, R.id.sortName_overlay);
 
-        sortType = (ImageView) listInterfaceView.findViewById(R.id.sortType_overlay);
+        sortType = listInterfaceView.findViewById(R.id.sortType_overlay);
         sortType.setTag(R.id.TAG_SORT_ID, R.id.sortType_overlay);
 
-        sortStars = (ImageView) listInterfaceView.findViewById(R.id.sortStars_overlay);
+        sortStars = listInterfaceView.findViewById(R.id.sortStars_overlay);
         sortStars.setTag(R.id.TAG_SORT_ID, R.id.sortStars_overlay);
 
-        sortHP = (ImageView) listInterfaceView.findViewById(R.id.sortHp_overlay);
+        sortHP = listInterfaceView.findViewById(R.id.sortHp_overlay);
         sortHP.setTag(R.id.TAG_SORT_ID, R.id.sortHp_overlay);
 
-        sortAtk = (ImageView) listInterfaceView.findViewById(R.id.sortAtk_overlay);
+        sortAtk = listInterfaceView.findViewById(R.id.sortAtk_overlay);
         sortAtk.setTag(R.id.TAG_SORT_ID, R.id.sortAtk_overlay);
 
-        sortRCV = (ImageView) listInterfaceView.findViewById(R.id.sortRcv_overlay);
+        sortRCV = listInterfaceView.findViewById(R.id.sortRcv_overlay);
         sortRCV.setTag(R.id.TAG_SORT_ID, R.id.sortRcv_overlay);
 
-        LinearLayout sortNamel = (LinearLayout) listInterfaceView.findViewById(R.id.sortName_l_overlay);
-        LinearLayout sortTypel = (LinearLayout) listInterfaceView.findViewById(R.id.sortType_l_overlay);
-        LinearLayout sortStarsl = (LinearLayout) listInterfaceView.findViewById(R.id.sortStars_l_overlay);
-        LinearLayout sortAtkl = (LinearLayout) listInterfaceView.findViewById(R.id.sortAtk_l_overlay);
-        LinearLayout sortHPl = (LinearLayout) listInterfaceView.findViewById(R.id.sortHp_l_overlay);
-        LinearLayout sortRCVl = (LinearLayout) listInterfaceView.findViewById(R.id.sortRcv_l_overlay);
+        LinearLayout sortNamel = listInterfaceView.findViewById(R.id.sortName_l_overlay);
+        LinearLayout sortTypel = listInterfaceView.findViewById(R.id.sortType_l_overlay);
+        LinearLayout sortStarsl = listInterfaceView.findViewById(R.id.sortStars_l_overlay);
+        LinearLayout sortAtkl = listInterfaceView.findViewById(R.id.sortAtk_l_overlay);
+        LinearLayout sortHPl = listInterfaceView.findViewById(R.id.sortHp_l_overlay);
+        LinearLayout sortRCVl = listInterfaceView.findViewById(R.id.sortRcv_l_overlay);
 
         sortNamel.setOnClickListener(sortNameOnClick);
         sortTypel.setOnClickListener(sortTypeOnClick);
@@ -1066,9 +1067,9 @@ public class FlyingChopper extends Service {
         sortHPl.setOnClickListener(sortHPOnClick);
         sortRCVl.setOnClickListener(sortRCVOnClick);
 
-        final ImageButton filterBtn = (ImageButton) listInterfaceView.findViewById(R.id.filterBtn_overlay);
-        resetBtn = (ImageButton) listInterfaceView.findViewById(R.id.resetBtn_overlay);
-        filterText = (EditText) listInterfaceView.findViewById(R.id.filterText_overlay);
+        final ImageButton filterBtn = listInterfaceView.findViewById(R.id.filterBtn_overlay);
+        resetBtn = listInterfaceView.findViewById(R.id.resetBtn_overlay);
+        filterText = listInterfaceView.findViewById(R.id.filterText_overlay);
         filterText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
@@ -1080,7 +1081,7 @@ public class FlyingChopper extends Service {
                 return handled;
             }
         });
-        final LinearLayout F_TEXT = (LinearLayout) listInterfaceView.findViewById(R.id.filtertext_layout_overlay);
+        final LinearLayout F_TEXT = listInterfaceView.findViewById(R.id.filtertext_layout_overlay);
         filterText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View view, boolean b) {
@@ -1116,7 +1117,7 @@ public class FlyingChopper extends Service {
                 showKeyboard();
             }
         });
-        dbList = (ListView) listInterfaceView.findViewById(R.id.listView1_overlay);
+        dbList = listInterfaceView.findViewById(R.id.listView1_overlay);
         dbList.setOnItemClickListener(lvOnClick);
     }
 
@@ -1166,12 +1167,6 @@ public class FlyingChopper extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        SmartDBApplication application = (SmartDBApplication) getApplication(); //gitignore
-        mTracker = application.getDefaultTracker(); //gitignore
-
-        mTracker.setScreenName("Floating Icon"); //gitignore
-        mTracker.send(new HitBuilders.ScreenViewBuilder().build()); //gitignore
 
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
@@ -1592,7 +1587,7 @@ public class FlyingChopper extends Service {
         LayoutInflater layoutInflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
         final View dialog = layoutInflater.inflate(R.layout.dialog_main_overlay, null);
 
-        final TabHost tabs = (TabHost) dialog.findViewById(R.id.tabs_host);
+        final TabHost tabs = dialog.findViewById(R.id.tabs_host);
         tabs.setup();
 
         TabHost.TabSpec main_info = tabs.newTabSpec("MAIN_INFO");
@@ -1605,35 +1600,41 @@ public class FlyingChopper extends Service {
         abilities.setContent(R.id.tab_abilities);
         tabs.addTab(abilities);
 
+        TabHost.TabSpec limitbreak_tab = tabs.newTabSpec("LIMIT_BREAK");
+        limitbreak_tab.setIndicator(getString(R.string.tab_limitbreak));
+        limitbreak_tab.setContent(R.id.tab_limitbreak);
+        tabs.addTab(limitbreak_tab);
+        tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
+
         TabHost.TabSpec evolutions_tab = tabs.newTabSpec("EVOLUTIONS");
         evolutions_tab.setIndicator(getString(R.string.tab_evolutions));
         evolutions_tab.setContent(R.id.tab_evolutions);
         tabs.addTab(evolutions_tab);
-        tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
+        tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.GONE);
 
         TabHost.TabSpec drops_tab = tabs.newTabSpec("DROPS");
         drops_tab.setIndicator(getString(R.string.tab_drops));
         drops_tab.setContent(R.id.tab_drops);
         tabs.addTab(drops_tab);
-        tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.GONE);
+        tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.GONE);
 
         TabHost.TabSpec manuals_tab = tabs.newTabSpec("MANUALS");
         manuals_tab.setIndicator(getString(R.string.tab_manuals));
         manuals_tab.setContent(R.id.tab_manuals);
         tabs.addTab(manuals_tab);
-        tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.GONE);
+        tabs.getTabWidget().getChildTabViewAt(5).setVisibility(View.GONE);
 
         tabs.setCurrentTab(0);
 
         for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
-            TextView tv = (TextView) tabs.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
+            TextView tv = tabs.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
             tv.setTextColor(getResources().getColor(R.color.char_info_txt_teal));
         }
 
-        TextView title = (TextView) dialog.findViewById(R.id.titleText);
+        TextView title = dialog.findViewById(R.id.titleText);
 
         // set the custom dialog components - text, image and button
-        ImageView image = (ImageView) dialog.findViewById(R.id.char_img_big);
+        ImageView image = dialog.findViewById(R.id.char_img_big);
 
         Glide
                 .with(context)
@@ -1642,29 +1643,33 @@ public class FlyingChopper extends Service {
 
 
         //NOW WE SHOULD SET EVERYTHING (OUCH!)
-        TextView class1 = (TextView) dialog.findViewById(R.id.class1Text);
-        TextView class2 = (TextView) dialog.findViewById(R.id.class2Text);
-        TextView type = (TextView) dialog.findViewById(R.id.typeText);
-        TextView stars = (TextView) dialog.findViewById(R.id.starsText);
-        TextView cost = (TextView) dialog.findViewById(R.id.costText);
+        TextView class1 = dialog.findViewById(R.id.class1Text);
+        TextView class2 = dialog.findViewById(R.id.class2Text);
+        TextView type = dialog.findViewById(R.id.typeText);
+        TextView stars = dialog.findViewById(R.id.starsText);
+        TextView cost = dialog.findViewById(R.id.costText);
 
-        TextView combo = (TextView) dialog.findViewById(R.id.comboText);
-        TextView slots = (TextView) dialog.findViewById(R.id.slotsText);
-        TextView maxlevel = (TextView) dialog.findViewById(R.id.maxlevelText);
-        TextView exptomax = (TextView) dialog.findViewById(R.id.exptomaxText);
+        TextView combo = dialog.findViewById(R.id.comboText);
+        TextView slots = dialog.findViewById(R.id.slotsText);
+        TextView maxlevel = dialog.findViewById(R.id.maxlevelText);
+        TextView exptomax = dialog.findViewById(R.id.exptomaxText);
 
-        TextView lvl1hp = (TextView) dialog.findViewById(R.id.lvl1hpText);
-        TextView lvl1atk = (TextView) dialog.findViewById(R.id.lvl1atkText);
-        TextView lvl1rcv = (TextView) dialog.findViewById(R.id.lvl1rcvText);
+        TextView lvl1hp = dialog.findViewById(R.id.lvl1hpText);
+        TextView lvl1atk = dialog.findViewById(R.id.lvl1atkText);
+        TextView lvl1rcv = dialog.findViewById(R.id.lvl1rcvText);
 
-        TextView maxhp = (TextView) dialog.findViewById(R.id.lvlmaxhpText);
-        TextView maxatk = (TextView) dialog.findViewById(R.id.lvlmaxatkText);
-        TextView maxrcv = (TextView) dialog.findViewById(R.id.lvlmaxrcvText);
-        TextView lvlmax = (TextView) dialog.findViewById(R.id.lvlmaxtext);
+        TextView maxhp = dialog.findViewById(R.id.lvlmaxhpText);
+        TextView maxatk = dialog.findViewById(R.id.lvlmaxatkText);
+        TextView maxrcv = dialog.findViewById(R.id.lvlmaxrcvText);
+        TextView lvlmax = dialog.findViewById(R.id.lvlmaxtext);
 
-        TextView captability = (TextView) dialog.findViewById(R.id.captabilityText);
-        TextView captnotes = (TextView) dialog.findViewById(R.id.capt_notes);
-        TextView specname = (TextView) dialog.findViewById(R.id.specnameText);
+        TextView lbhp = dialog.findViewById(R.id.lvllbhpText);
+        TextView lbatk = dialog.findViewById(R.id.lvllbatkText);
+        TextView lbrcv = dialog.findViewById(R.id.lvllbrcvText);
+
+        HtmlTextView captability = dialog.findViewById(R.id.captabilityText);
+        TextView captnotes = dialog.findViewById(R.id.capt_notes);
+        TextView specname = dialog.findViewById(R.id.specnameText);
 
         DBHelper db = new DBHelper(context);
         SQLiteDatabase database = db.getReadableDatabase();
@@ -1754,6 +1759,51 @@ public class FlyingChopper extends Service {
         maxatk.setText(charInfo.getMaxATK().toString());
         maxrcv.setText(charInfo.getMaxRCV().toString());
 
+        Limits charLimits = charInfo.getCharLimits();
+        Potentials charPotentials = charInfo.getCharPotentials();
+
+        int additionalHP = 0;
+        int additionalATK = 0;
+        int additionalRCV = 0;
+        if(charLimits!=null) {
+            String pattern = "Boosts base %s by (\\d+)";
+            Pattern atkP = Pattern.compile(String.format(pattern, "ATK"));
+            Pattern hpP = Pattern.compile(String.format(pattern, "HP"));
+            Pattern rcvP = Pattern.compile(String.format(pattern, "RCV"));
+            for(String lE : charLimits.getLimitEntries()) {
+                try {
+                    Matcher hpM = hpP.matcher(lE);
+                    if (hpM.matches()) {
+                        additionalHP += Integer.parseInt(hpM.group(1));
+                        continue;
+                    }
+                    Matcher atkM = atkP.matcher(lE);
+                    if (atkM.matches()) {
+                        additionalATK += Integer.parseInt(atkM.group(1));
+                        continue;
+                    }
+                    Matcher rcvM = rcvP.matcher(lE);
+                    if (rcvM.matches())
+                        additionalRCV += Integer.parseInt(rcvM.group(1));
+                } catch (NumberFormatException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if(additionalHP>0)
+            lbhp.setText(String.valueOf(charInfo.getMaxHP()+additionalHP));
+        else
+            lbhp.setText(R.string.noLbStatsIncrease);
+        if(additionalATK>0)
+            lbatk.setText(String.valueOf(charInfo.getMaxATK()+additionalATK));
+        else
+            lbatk.setText(R.string.noLbStatsIncrease);
+        if(additionalRCV>0)
+            lbrcv.setText(String.valueOf(charInfo.getMaxRCV()+additionalRCV));
+        else
+            lbrcv.setText(R.string.noLbStatsIncrease);
+
         captability.setText(charInfo.getCaptainDescription());
         String capt_notes = charInfo.getCaptainNotes();
         if (!capt_notes.equals("")) {
@@ -1764,7 +1814,7 @@ public class FlyingChopper extends Service {
         List<CharacterSpecials> char_specials = charInfo.getSpecials();
         if (char_specials.size() > 0) {
             specname.setText(charInfo.getSpecialName());
-            LinearLayout specials_container = (LinearLayout) dialog.findViewById(R.id.specials_container);
+            LinearLayout specials_container = dialog.findViewById(R.id.specials_container);
             for (CharacterSpecials special : char_specials) {
                 TextView special_description = new TextView(context);
                 special_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
@@ -1825,7 +1875,7 @@ public class FlyingChopper extends Service {
         String cwNotes = charInfo.getCrewmateNotes();
         if(cwDesc!=null) {
 
-            LinearLayout specials_container = (LinearLayout) dialog.findViewById(R.id.specials_container);
+            LinearLayout specials_container = dialog.findViewById(R.id.specials_container);
 
             View sep = new View(context);
             LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
@@ -1858,7 +1908,81 @@ public class FlyingChopper extends Service {
             }
         }
 
-        LinearLayout evolutions_content = (LinearLayout) dialog.findViewById(R.id.evolutions_content);
+        if(charLimits != null) {
+            LinearLayout limitbreak_content = dialog.findViewById(R.id.limitbreak_content);
+            /*ScrollView limitbreakScroll = new ScrollView(context);
+            limitbreakScroll.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.MATCH_PARENT));*/
+            LinearLayout limitbreakContent = new LinearLayout(context);
+            limitbreakContent.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT));
+            limitbreakContent.setOrientation(LinearLayout.VERTICAL
+            );
+            ArrayList<String> limEntries = charLimits.getLimitEntries();
+            for(String entry : limEntries) {
+                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                limitRow.setText(entry);
+                limitRow.setTextColor(getResources().getColor(R.color.char_info_txt_teal));
+                limitbreakContent.addView(limitRow);
+            }
+            String limitNotes = charLimits.getLimitNotes();
+            if((limitNotes!= null) && (!limitNotes.equals(""))) {
+                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                limitRow.setText(getResources().getString(R.string.limitnotes)+" "+limitNotes);
+                limitRow.setTextColor(getResources().getColor(R.color.char_info_header_txt_teal));
+                limitbreakContent.addView(limitRow);
+            }
+
+            if(charPotentials != null) {
+                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.WRAP_CONTENT));
+                limitRow.setText(getResources().getString(R.string.potentials));
+                limitRow.setTypeface(limitRow.getTypeface(), Typeface.BOLD);
+                limitRow.setGravity(Gravity.CENTER);
+                limitRow.setTextColor(getResources().getColor(R.color.char_info_txt_teal));
+                limitbreakContent.addView(limitRow);
+                LinkedHashMap<String, ArrayList<String>> potEntries = charPotentials.getPotentialEntries();
+                for(Map.Entry<String,ArrayList<String>> potEntry : potEntries.entrySet()) {
+                    TextView limitPRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                    limitPRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
+                    limitPRow.setText(potEntry.getKey());
+                    limitPRow.setTypeface(limitPRow.getTypeface(), Typeface.BOLD);
+                    limitPRow.setBackgroundColor(getResources().getColor(R.color.char_info_header_bg_teal));
+                    limitPRow.setTextColor(getResources().getColor(R.color.char_info_header_txt_teal));
+                    limitbreakContent.addView(limitPRow);
+
+                    ArrayList<String> potEntryList = potEntry.getValue();
+                    for(String potValue : potEntryList) {
+                        TextView limitP2Row = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                        limitP2Row.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT));
+                        limitP2Row.setText(potValue);
+                        limitP2Row.setTextColor(getResources().getColor(R.color.char_info_txt_teal));
+                        limitbreakContent.addView(limitP2Row);
+                    }
+                }
+                String potentialNotes = charPotentials.getPotentialNotes();
+                if((potentialNotes!= null) && (!potentialNotes.equals(""))) {
+                    TextView limitNRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
+                    limitNRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT));
+                    limitNRow.setText(getResources().getString(R.string.limitnotes)+" "+potentialNotes);
+                    limitNRow.setTextColor(getResources().getColor(R.color.char_info_header_txt_teal));
+                    limitbreakContent.addView(limitNRow);
+                }
+            }
+            /*limitbreakScroll.addView(limitbreakContent);*/
+            limitbreak_content.addView(limitbreakContent);
+            tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
+        }
+
+        LinearLayout evolutions_content = dialog.findViewById(R.id.evolutions_content);
         List<CharacterEvolutions> evos = charInfo.getEvolutions();
 
         if (evos.size() > 0) {
@@ -1925,29 +2049,45 @@ public class FlyingChopper extends Service {
                         evolver_pic.setLayoutParams(params2); // SET WIDTH AND HEIGHT OF PIC
                         evolver_pic.setPadding(0, 0, 0, 0);
                         evolver_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                        Glide
-                                .with(context)
-                                .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver) + ".png")
-                                .dontTransform()
-                                .override(thumbnail_width, thumbnail_height)
-                                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                                .into(evolver_pic); //ADD PIC
-                        evolver_pic.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                launchDialog(evolver);
-                            }
-                        });
+                        if(evolver>0) {
+                            Glide
+                                    .with(context)
+                                    .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver) + ".png")
+                                    .dontTransform()
+                                    .override(thumbnail_width, thumbnail_height)
+                                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                                    .into(evolver_pic); //ADD PIC
+                            evolver_pic.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    launchDialog(evolver);
+                                }
+                            });
+                        } else {
+                            Glide
+                                    .with(context)
+                                    .load(SkullsHelper.getThumbFromId(evolver))
+                                    .dontTransform()
+                                    .override(thumbnail_width, thumbnail_height)
+                                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                                    .into(evolver_pic); //ADD PIC
+                            evolver_pic.setOnClickListener(new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    launchDialog(evolver);
+                                }
+                            });
+                        }
                         evolution_row.addView(evolver_pic);
                     }
                 }
                 evolution_scroll.addView(evolution_row);
                 evolutions_content.addView(evolution_scroll);
             }
-            tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
+            tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.VISIBLE);
         }
 
-        LinearLayout drops_content = (LinearLayout) dialog.findViewById(R.id.drops_content);
+        LinearLayout drops_content = dialog.findViewById(R.id.drops_content);
         List<DropInfo> drops = charInfo.getDropInfo();
 
         if (drops.size() > 0) {
@@ -1973,13 +2113,23 @@ public class FlyingChopper extends Service {
                 evo_pic.setPadding(0, 0, 0, 0);
                 evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
                 Integer cont_id = this_drops.getDropThumbnail();
-                Glide
-                        .with(context)
-                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
-                        .dontTransform()
-                        .override(thumbnail_width, thumbnail_height)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                        .into(evo_pic); //ADD PIC
+                if(cont_id>0) {
+                    Glide
+                            .with(context)
+                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
+                            .dontTransform()
+                            .override(thumbnail_width, thumbnail_height)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .into(evo_pic); //ADD PIC
+                } else {
+                    Glide
+                            .with(context)
+                            .load(SkullsHelper.getThumbFromId(cont_id))
+                            .dontTransform()
+                            .override(thumbnail_width, thumbnail_height)
+                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                            .into(evo_pic); //ADD PIC
+                }
                 drops_row.addView(evo_pic);
 
                 TextView drop_name = new TextView(context);
@@ -2022,10 +2172,10 @@ public class FlyingChopper extends Service {
                 drops_content.addView(drops_row);
                 if(!drop_notes.getText().equals("")) drops_content.addView(drop_notes);
             }
-            tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.VISIBLE);
+            tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.VISIBLE);
         }
 
-        LinearLayout manuals_content = (LinearLayout) dialog.findViewById(R.id.manuals_content);
+        LinearLayout manuals_content = dialog.findViewById(R.id.manuals_content);
         List<DropInfo> manuals = charInfo.getManualsInfos();
 
         if (manuals.size() > 0) {
@@ -2100,14 +2250,14 @@ public class FlyingChopper extends Service {
                 manuals_content.addView(manuals_row);
                 if(!manual_notes.getText().equals("")) manuals_content.addView(manual_notes);
             }
-            tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.VISIBLE);
+            tabs.getTabWidget().getChildTabViewAt(5).setVisibility(View.VISIBLE);
         }
 
-        HorizontalScrollView scr = (HorizontalScrollView) dialog.findViewById(R.id.tabs_scrollview);
+        HorizontalScrollView scr = dialog.findViewById(R.id.tabs_scrollview);
         scr.invalidate();
         scr.requestLayout();
 
-        ImageButton backbtn = (ImageButton) dialog.findViewById(R.id.backBtn);
+        ImageButton backbtn = dialog.findViewById(R.id.backBtn);
         backbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

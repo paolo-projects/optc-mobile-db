@@ -1,6 +1,5 @@
 package it.instruman.treasurecruisedatabase;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.graphics.Paint;
@@ -22,15 +21,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import cz.msebera.android.httpclient.HttpResponse;
 import cz.msebera.android.httpclient.NameValuePair;
-import cz.msebera.android.httpclient.client.ClientProtocolException;
 import cz.msebera.android.httpclient.client.HttpClient;
 import cz.msebera.android.httpclient.client.entity.UrlEncodedFormEntity;
 import cz.msebera.android.httpclient.client.methods.HttpPost;
@@ -54,7 +50,7 @@ public class FeedbackDialogFragment extends DialogFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.dialog_feedback, container, false);
 
-        mPager = (LockableViewPager) v.findViewById(R.id.feedback_pager);
+        mPager = v.findViewById(R.id.feedback_pager);
         PagerAdapter mPagerAdapter = new ScreenSlidePagerAdapter(getChildFragmentManager());
         mPager.setAdapter(mPagerAdapter);
         mPager.setPageTransformer(true, new ZoomOutPageTransformer());
@@ -88,14 +84,14 @@ public class FeedbackDialogFragment extends DialogFragment {
             rootView = (ViewGroup) inflater.inflate(
                     R.layout.dialog_feedback_review, container, false);
 
-            Button fbNext = (Button)rootView.findViewById(R.id.feedback_next);
+            Button fbNext = rootView.findViewById(R.id.feedback_next);
             fbNext.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     String messageText = messageField.getText().toString();
                     if(!(numStars==0 && messageText.equals("")))
                         (new PostTask()).execute(numStars.toString(), messageText);
-                    ViewPager pager = (ViewPager)container.findViewById(R.id.feedback_pager);
+                    ViewPager pager = container.findViewById(R.id.feedback_pager);
                     pager.setCurrentItem(1);
                 }
             });
@@ -105,7 +101,7 @@ public class FeedbackDialogFragment extends DialogFragment {
                 View v = rootView.findViewWithTag(star+i.toString());
                 v.setOnClickListener(starListener);
             }
-            messageField = (EditText)rootView.findViewById(R.id.feedback_message);
+            messageField = rootView.findViewById(R.id.feedback_message);
             return rootView;
         }
 
@@ -116,13 +112,13 @@ public class FeedbackDialogFragment extends DialogFragment {
                 Integer m = Integer.parseInt(tag.replace("star", ""));
                 for(Integer i = 1; i<= m; i++)
                 {
-                    ImageButton v = (ImageButton)rootView.findViewWithTag("star"+i.toString());
-                    v.setBackgroundResource(R.drawable.ic_star_full);
+                    ImageButton v = rootView.findViewWithTag("star"+i.toString());
+                    v.setImageResource(R.drawable.ic_star_full);
                 }
                 for(Integer i = m+1; i<=5; i++)
                 {
-                    ImageButton v = (ImageButton)rootView.findViewWithTag("star"+i.toString());
-                    v.setBackgroundResource(R.drawable.ic_star_empty);
+                    ImageButton v = rootView.findViewWithTag("star"+i.toString());
+                    v.setImageResource(R.drawable.ic_star_empty);
                 }
                 numStars = m;
             }
@@ -138,7 +134,7 @@ public class FeedbackDialogFragment extends DialogFragment {
                 try {
                     //add data
                     List<NameValuePair> nameValuePairs = new ArrayList<>(1);
-                    nameValuePairs.add(new BasicNameValuePair("key", "d715f58d97ad1e66294944a9d874134f"));//gitignore
+                    nameValuePairs.add(new BasicNameValuePair("key", "d715f58d97ad1e66294944a9d874134f"));
                     nameValuePairs.add(new BasicNameValuePair("stars", message[0]));
                     nameValuePairs.add(new BasicNameValuePair("message", message[1]));
                     httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
@@ -165,8 +161,8 @@ public class FeedbackDialogFragment extends DialogFragment {
             ViewGroup rootView = (ViewGroup) inflater.inflate(
                     R.layout.dialog_feedback_donate, container, false);
 
-            ImageButton feedback_donate = (ImageButton)rootView.findViewById(R.id.feedback_donate);
-            TextView feedback_nodonation = (TextView)rootView.findViewById(R.id.feedback_nodonation);
+            ImageButton feedback_donate = rootView.findViewById(R.id.feedback_donate);
+            TextView feedback_nodonation = rootView.findViewById(R.id.feedback_nodonation);
 
             feedback_donate.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -186,17 +182,17 @@ public class FeedbackDialogFragment extends DialogFragment {
                 }
             });
 
-            TextView readMore = (TextView)rootView.findViewById(R.id.feedback_moreinfo);
+            TextView readMore = rootView.findViewById(R.id.feedback_moreinfo);
             readMore.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     final Dialog dialog = new Dialog(getContext());
                     dialog.setContentView(R.layout.dialog_feedback_readmore);
-                    TextView viewFeedbacks = (TextView)dialog.findViewById(R.id.feedback_view_feedbacks);
+                    TextView viewFeedbacks = dialog.findViewById(R.id.feedback_view_feedbacks);
                     viewFeedbacks.setPaintFlags(viewFeedbacks.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-                    TextView viewDonations = (TextView)dialog.findViewById(R.id.feedback_view_donations);
+                    TextView viewDonations = dialog.findViewById(R.id.feedback_view_donations);
                     viewDonations.setPaintFlags(viewDonations.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
-                    TextView confirm = (TextView)dialog.findViewById(R.id.feedback_ok);
+                    TextView confirm = dialog.findViewById(R.id.feedback_ok);
                     confirm.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
