@@ -212,4 +212,20 @@
     <string name="clearingThumbCacheToast">Clearing thumbnails cache...</string>
     <string name="lvlLB">LB</string>
     <string name="noLbStatsIncrease">/</string>
+    <string name="prefShowNNTeamsSummary">Show teams from nakama.network</string>
+    <string name="prefShowNNTeamsTitle">Nakama.network</string>
+    <string name="tab_nnteams">Teams</string>
+    <string name="dialogNNTeamsTitle">Teams with this character as a captain</string>
+    <string name="dialogNNTeamsPoweredBy"><b>Powered by <u>Nakama.network</u></b></string>
+    <string name="nnTeamsTeamName">Team name:</string>
+    <string name="nnTeamsShip">Ship:</string>
+    <string name="nnTeamsStage">Quest:</string>
+    <string name="nnTeamsUser">By:</string>
+    <string name="nnTeamsViewMore">View More...</string>
+    <string name="nnTeamsNoEntries">No entries</string>
+    <string name="nnteamsSearchQuestHint">Search quest</string>
+    <string name="stagesDialogStageNameLabel">Quest name:</string>
+    <string name="stagesDialogSelectQuestTextView">Select a quest to continue</string>
+    <string name="stagesDialogNone">None</string>
+    <string name="nnSyncStartedMsg">Nakama.network synchronization started</string>
 </resources>

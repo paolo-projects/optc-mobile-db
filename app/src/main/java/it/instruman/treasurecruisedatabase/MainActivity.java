@@ -1,6 +1,8 @@
 package it.instruman.treasurecruisedatabase;
 
 import android.Manifest;
+import android.accounts.Account;
+import android.accounts.AccountManager;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
@@ -23,7 +25,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
-import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
@@ -66,13 +67,11 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ExpandableListView;
-import android.widget.HorizontalScrollView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RemoteViews;
-import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -101,11 +100,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Field;
-import java.math.RoundingMode;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -122,13 +119,15 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import it.instruman.treasurecruisedatabase.sync.SyncAdapterManager;
+
 public class MainActivity extends AppCompatActivity {
     private final Context context = this;
 
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 5.5;
+private final static Double APP_VERSION = 5.6;
 /*
     ##################################################
 */
@@ -138,6 +137,11 @@ private final static Double APP_VERSION = 5.5;
 
     private static final String locale_pref = "locale-set";
     private boolean goingToSettings = false;
+
+    public static final String AUTHORITY = "it.instruman.treasurecruisedatabase.provider";
+    public static final String ACCOUNT_TYPE = "appmywod.com";
+    public static final String ACCOUNT = "dummyaccount";
+    Account mAccount;
 
     ExpandableListAdapter explistAdapter;
     ExpandableListView expListView;
@@ -567,13 +571,6 @@ private final static Double APP_VERSION = 5.5;
         }
     };
 
-    private String replaceBr(String input) {
-        String output = input.replace(" <br> ", System.getProperty("line.separator"));
-        output = output.replace("<br> ", System.getProperty("line.separator"));
-        output = output.replace("<br>", System.getProperty("line.separator"));
-        return output;
-    }
-
     private void feedbackDialog() {
         FeedbackDialogFragment newFragment = FeedbackDialogFragment.newInstance();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -592,721 +589,13 @@ private final static Double APP_VERSION = 5.5;
             e.printStackTrace();
         }
 
-        final Dialog dialog = new Dialog(context, theme_id);
-
-        dialog.setContentView(R.layout.dialog_main);//dialog.setContentView(R.layout.character_info);
-
-        boolean daynightTheme = PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.pref_daynight_theme), false);
-        if(daynightTheme) {
-            int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-            LinearLayout mainContent = dialog.findViewById(R.id.charInfoMainContent);
-            /*if((8<=hour)&&(hour<20))
-            {
-                //DAYLIGHT
-                KenBurnsView charInfoBgImg = (KenBurnsView)dialog.findViewById(R.id.charInfoBgImg);
-                charInfoBgImg.setBackgroundDrawable(getResources().getDrawable(R.drawable.ic_sunny_sky));
-                RandomTransitionGenerator generator = new RandomTransitionGenerator(15000, new LinearInterpolator());
-                charInfoBgImg.setTransitionGenerator(generator);
-                charInfoBgImg.resume();
-            } else {
-                //NIGHT
-                animateColor(mainContent, anim_charlist, "#333333", "#504e3c");
-            }*/
-        }
-
-        final TabHost tabs = dialog.findViewById(R.id.tabs_host);
-        tabs.setup();
-
-        TabHost.TabSpec main_info = tabs.newTabSpec("MAIN_INFO");
-        main_info.setIndicator(getString(R.string.tab_maininfo));
-        main_info.setContent(R.id.tab_maininfo);
-        tabs.addTab(main_info);
-
-        TabHost.TabSpec abilities = tabs.newTabSpec("ABILITIES");
-        abilities.setIndicator(getString(R.string.tab_abilities));
-        abilities.setContent(R.id.tab_abilities);
-        tabs.addTab(abilities);
-
-        TabHost.TabSpec limitbreak_tab = tabs.newTabSpec("LIMIT_BREAK");
-        limitbreak_tab.setIndicator(getString(R.string.tab_limitbreak));
-        limitbreak_tab.setContent(R.id.tab_limitbreak);
-        tabs.addTab(limitbreak_tab);
-        tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.GONE);
-
-        TabHost.TabSpec evolutions_tab = tabs.newTabSpec("EVOLUTIONS");
-        evolutions_tab.setIndicator(getString(R.string.tab_evolutions));
-        evolutions_tab.setContent(R.id.tab_evolutions);
-        tabs.addTab(evolutions_tab);
-        tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.GONE);
-
-        TabHost.TabSpec drops_tab = tabs.newTabSpec("DROPS");
-        drops_tab.setIndicator(getString(R.string.tab_drops));
-        drops_tab.setContent(R.id.tab_drops);
-        tabs.addTab(drops_tab);
-        tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.GONE);
-
-        TabHost.TabSpec manuals_tab = tabs.newTabSpec("MANUALS");
-        manuals_tab.setIndicator(getString(R.string.tab_manuals));
-        manuals_tab.setContent(R.id.tab_manuals);
-        tabs.addTab(manuals_tab);
-        tabs.getTabWidget().getChildTabViewAt(5).setVisibility(View.GONE);
-
-        tabs.setCurrentTab(0);
-
-        for (int i = 0; i < tabs.getTabWidget().getChildCount(); i++) {
-            TextView tv = tabs.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
-            tv.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-        }
-
-        TextView title = dialog.findViewById(R.id.titleText);
-
-        // set the custom dialog components - text, image and button
-        ImageView image = dialog.findViewById(R.id.char_img_big);
-
-        Glide
-                .with(context)
-                .load("http://onepiece-treasurecruise.com/wp-content/uploads/c" + convertID(id) + ".png")
-                .into(image);
-
-        dialog.setCanceledOnTouchOutside(true);
-
-        //NOW WE SHOULD SET EVERYTHING (OUCH!)
-        TextView class1 = dialog.findViewById(R.id.class1Text);
-        TextView class2 = dialog.findViewById(R.id.class2Text);
-        TextView type = dialog.findViewById(R.id.typeText);
-        TextView stars = dialog.findViewById(R.id.starsText);
-        TextView cost = dialog.findViewById(R.id.costText);
-
-        TextView combo = dialog.findViewById(R.id.comboText);
-        TextView slots = dialog.findViewById(R.id.slotsText);
-        TextView maxlevel = dialog.findViewById(R.id.maxlevelText);
-        TextView exptomax = dialog.findViewById(R.id.exptomaxText);
-
-        TextView lvl1hp = dialog.findViewById(R.id.lvl1hpText);
-        TextView lvl1atk = dialog.findViewById(R.id.lvl1atkText);
-        TextView lvl1rcv = dialog.findViewById(R.id.lvl1rcvText);
-
-        TextView maxhp = dialog.findViewById(R.id.lvlmaxhpText);
-        TextView maxatk = dialog.findViewById(R.id.lvlmaxatkText);
-        TextView maxrcv = dialog.findViewById(R.id.lvlmaxrcvText);
-        TextView lvlmax = dialog.findViewById(R.id.lvlmaxtext);
-
-        TextView lbhp = dialog.findViewById(R.id.lvllbhpText);
-        TextView lbatk = dialog.findViewById(R.id.lvllbatkText);
-        TextView lbrcv = dialog.findViewById(R.id.lvllbrcvText);
-
-        HtmlTextView captability = dialog.findViewById(R.id.captabilityText);
-        TextView captnotes = dialog.findViewById(R.id.capt_notes);
-        TextView specname = dialog.findViewById(R.id.specnameText);
-
-        DBHelper db = new DBHelper(context);
-        SQLiteDatabase database = db.getReadableDatabase();
-        CharacterInfo charInfo = DBHelper.getCharacterInfo(database, id);
-        database.close();
-        db.close();
-
-        if (charInfo == null) return;
-
-        title.setText(charInfo.getName());
-        title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-
-        class1.setText(charInfo.getClass1());
-        class2.setText(charInfo.getClass2());
-
-        String ch_type = charInfo.getType();
-        type.setText(ch_type);
-        switch (ch_type.toLowerCase()) {
-            case "str":
-                type.setBackgroundColor(getResources().getColor(R.color.str_bg));
-                type.setTextColor(getResources().getColor(R.color.str_txt));
-                break;
-            case "dex":
-                type.setBackgroundColor(getResources().getColor(R.color.dex_bg));
-                type.setTextColor(getResources().getColor(R.color.dex_txt));
-                break;
-            case "qck":
-                type.setBackgroundColor(getResources().getColor(R.color.qck_bg));
-                type.setTextColor(getResources().getColor(R.color.qck_txt));
-                break;
-            case "psy":
-                type.setBackgroundColor(getResources().getColor(R.color.psy_bg));
-                type.setTextColor(getResources().getColor(R.color.psy_txt));
-                break;
-            case "int":
-                type.setBackgroundColor(getResources().getColor(R.color.int_bg));
-                type.setTextColor(getResources().getColor(R.color.int_txt));
-                break;
-        }
-
-        Double ch_stars = charInfo.getStars();
-        DecimalFormat df = new DecimalFormat("0");
-        df.setRoundingMode(RoundingMode.DOWN);
-        String stars_p = df.format(ch_stars);
-
-        if (ch_stars == 5.5)
-            stars.setText("5+");
-        else if (ch_stars == 6.5)
-            stars.setText("6+");
-        else
-            stars.setText(stars_p);
-
-        switch (stars_p) {
-            case "1":
-            case "2":
-                stars.setBackgroundColor(getResources().getColor(R.color.bronze_bg));
-                stars.setTextColor(getResources().getColor(R.color.bronze_txt));
-                break;
-            case "3":
-                stars.setBackgroundColor(getResources().getColor(R.color.silver_bg));
-                stars.setTextColor(getResources().getColor(R.color.silver_txt));
-                break;
-            case "4":
-            case "5":
-                stars.setBackgroundColor(getResources().getColor(R.color.gold_bg));
-                stars.setTextColor(getResources().getColor(R.color.gold_txt));
-                break;
-            case "6":
-                stars.setBackgroundColor(getResources().getColor(R.color.red_bg));
-                stars.setTextColor(getResources().getColor(R.color.red_txt));
-                break;
-        }
-
-        cost.setText(charInfo.getCost().toString());
-        combo.setText(charInfo.getCombo().toString());
-        slots.setText(charInfo.getSockets().toString());
-        maxlevel.setText(charInfo.getMaxLvl().toString());
-        exptomax.setText(charInfo.getExpToMax().toString());
-
-        lvl1hp.setText(charInfo.getLvl1HP().toString());
-        lvl1atk.setText(charInfo.getLvl1ATK().toString());
-        lvl1rcv.setText(charInfo.getLvl1RCV().toString());
-        lvlmax.setText(charInfo.getMaxLvl().toString());
-
-        maxhp.setText(charInfo.getMaxHP().toString());
-        maxatk.setText(charInfo.getMaxATK().toString());
-        maxrcv.setText(charInfo.getMaxRCV().toString());
-
-        Limits charLimits = charInfo.getCharLimits();
-        Potentials charPotentials = charInfo.getCharPotentials();
-
-        int additionalHP = 0;
-        int additionalATK = 0;
-        int additionalRCV = 0;
-        if(charLimits!=null) {
-            String pattern = "Boosts base %s by (\\d+)";
-            Pattern atkP = Pattern.compile(String.format(pattern, "ATK"));
-            Pattern hpP = Pattern.compile(String.format(pattern, "HP"));
-            Pattern rcvP = Pattern.compile(String.format(pattern, "RCV"));
-            for(String lE : charLimits.getLimitEntries()) {
-                try {
-                    Matcher hpM = hpP.matcher(lE);
-                    if (hpM.matches()) {
-                        additionalHP += Integer.parseInt(hpM.group(1));
-                        continue;
-                    }
-                    Matcher atkM = atkP.matcher(lE);
-                    if (atkM.matches()) {
-                        additionalATK += Integer.parseInt(atkM.group(1));
-                        continue;
-                    }
-                    Matcher rcvM = rcvP.matcher(lE);
-                    if (rcvM.matches())
-                        additionalRCV += Integer.parseInt(rcvM.group(1));
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        if(additionalHP>0)
-            lbhp.setText(String.valueOf(charInfo.getMaxHP()+additionalHP));
-        else
-            lbhp.setText(R.string.noLbStatsIncrease);
-        if(additionalATK>0)
-            lbatk.setText(String.valueOf(charInfo.getMaxATK()+additionalATK));
-        else
-            lbatk.setText(R.string.noLbStatsIncrease);
-        if(additionalRCV>0)
-            lbrcv.setText(String.valueOf(charInfo.getMaxRCV()+additionalRCV));
-        else
-            lbrcv.setText(R.string.noLbStatsIncrease);
-
-        captability.setText(charInfo.getCaptainDescription());
-        String capt_notes = charInfo.getCaptainNotes();
-        if (!capt_notes.equals("")) {
-            capt_notes = replaceBr(capt_notes);
-            captnotes.setText(getString(R.string.notes_text) + capt_notes);
-            captnotes.setVisibility(View.VISIBLE);
-        }
-        List<CharacterSpecials> char_specials = charInfo.getSpecials();
-        if (char_specials.size() > 0) {
-            specname.setText(charInfo.getSpecialName());
-            LinearLayout specials_container = dialog.findViewById(R.id.specials_container);
-            for (CharacterSpecials special : char_specials) {
-                TextView special_description = new TextView(context);
-                special_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                special_description.setText(special.getSpecialDescription());
-                special_description.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                specials_container.addView(special_description);
-
-                LinearLayout coold_layout = new LinearLayout(context);
-                coold_layout.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-
-                TextView coold_title = new TextView(context);
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-                params.setMargins(0, 0, dpToPx(4), 0);
-                coold_title.setLayoutParams(params);
-                coold_title.setText(getString(R.string.speccooldown));
-                coold_title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-                coold_title.setBackgroundColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_bg)));
-                coold_title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-                coold_title.setText(getString(R.string.speccooldown));
-                coold_layout.addView(coold_title);
-
-                TextView coold_content = new TextView(context);
-                coold_content.setLayoutParams(new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1));
-                Integer maxCD = special.getMaxCooldown();
-                Integer minCD = special.getMinCooldown();
-
-                String maxCDs = "?";
-                if ((maxCD != -1) && (maxCD != 0))
-                    maxCDs = String.valueOf(maxCD);
-
-                String minCDs = "?";
-                if ((minCD != -1) && (minCD != 0))
-                    minCDs = String.valueOf(minCD);
-
-                String coold_s = maxCDs + "/" + minCDs;
-                coold_content.setText(coold_s);
-                coold_content.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-
-                coold_layout.addView(coold_content);
-
-                String specialnotes = special.getSpecialNotes();
-                if (!specialnotes.equals("")) {
-                    specialnotes = replaceBr(specialnotes);
-                    TextView special_notes = new TextView(context);
-                    special_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                    special_notes.setText(getString(R.string.notes_text) + specialnotes);
-                    special_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-                    specials_container.addView(special_notes);
-                }
-
-                coold_layout.setPadding(2, 8, 2, 8);
-
-                specials_container.addView(coold_layout);
-            }
-        }
-
-        String cwDesc = charInfo.getCrewmateDescription();
-        String cwNotes = charInfo.getCrewmateNotes();
-        if(cwDesc!=null) {
-
-            LinearLayout specials_container = dialog.findViewById(R.id.specials_container);
-
-            View sep = new View(context);
-            LinearLayout.LayoutParams sepParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(1));
-            sepParams.setMargins(0, dpToPx(5), 0, dpToPx(5));
-            sep.setLayoutParams(sepParams);
-            sep.setBackgroundColor(Color.parseColor("#aaaaaa"));
-
-            specials_container.addView(sep);
-
-            TextView cw_title = new TextView(context);
-            cw_title.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
-            cw_title.setBackgroundColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_bg)));
-            cw_title.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-            cw_title.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-            cw_title.setText(getString(R.string.cw_text));
-            specials_container.addView(cw_title);
-
-            HtmlTextView cw_description = new HtmlTextView(context);
-            cw_description.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-            cw_description.setText(cwDesc);
-            cw_description.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-            specials_container.addView(cw_description);
-
-            if (cwNotes != null) {
-                HtmlTextView cw_notes = new HtmlTextView(context);
-                cw_notes.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
-                cw_notes.setText(getString(R.string.notes_text) + cwNotes);
-                cw_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-                specials_container.addView(cw_notes);
-            }
-        }
-
-        if(charLimits != null) {
-            LinearLayout limitbreak_content = dialog.findViewById(R.id.limitbreak_content);
-            /*ScrollView limitbreakScroll = new ScrollView(context);
-            limitbreakScroll.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.MATCH_PARENT));*/
-            LinearLayout limitbreakContent = new LinearLayout(context);
-            limitbreakContent.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT));
-            limitbreakContent.setOrientation(LinearLayout.VERTICAL
-            );
-            ArrayList<String> limEntries = charLimits.getLimitEntries();
-            for(String entry : limEntries) {
-                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
-                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                limitRow.setText(entry);
-                limitRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                limitbreakContent.addView(limitRow);
-            }
-            String limitNotes = charLimits.getLimitNotes();
-            if((limitNotes!= null) && (!limitNotes.equals(""))) {
-                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
-                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                limitRow.setText(getResources().getString(R.string.limitnotes)+" "+limitNotes);
-                limitRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-                limitbreakContent.addView(limitRow);
-            }
-
-            if(charPotentials != null) {
-                TextView limitRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
-                limitRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT));
-                limitRow.setText(getResources().getString(R.string.potentials));
-                limitRow.setTypeface(limitRow.getTypeface(), Typeface.BOLD);
-                limitRow.setGravity(Gravity.CENTER);
-                limitRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                limitbreakContent.addView(limitRow);
-                LinkedHashMap<String, ArrayList<String>> potEntries = charPotentials.getPotentialEntries();
-                for(Map.Entry<String,ArrayList<String>> potEntry : potEntries.entrySet()) {
-                    TextView limitPRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
-                    limitPRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT));
-                    limitPRow.setText(potEntry.getKey());
-                    limitPRow.setTypeface(limitPRow.getTypeface(), Typeface.BOLD);
-                    limitPRow.setBackgroundColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_bg)));
-                    limitPRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-                    limitbreakContent.addView(limitPRow);
-
-                    ArrayList<String> potEntryList = potEntry.getValue();
-                    for(String potValue : potEntryList) {
-                        TextView limitP2Row = new TextView(context); //ROW WITH LIMIT BREAK TEXT
-                        limitP2Row.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.WRAP_CONTENT));
-                        limitP2Row.setText(potValue);
-                        limitP2Row.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                        limitbreakContent.addView(limitP2Row);
-                    }
-                }
-                String potentialNotes = charPotentials.getPotentialNotes();
-                if((potentialNotes!= null) && (!potentialNotes.equals(""))) {
-                    TextView limitNRow = new TextView(context); //ROW WITH LIMIT BREAK TEXT
-                    limitNRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT));
-                    limitNRow.setText(getResources().getString(R.string.limitnotes)+" "+potentialNotes);
-                    limitNRow.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-                    limitbreakContent.addView(limitNRow);
-                }
-            }
-            /*limitbreakScroll.addView(limitbreakContent);*/
-            limitbreak_content.addView(limitbreakContent);
-            tabs.getTabWidget().getChildTabViewAt(2).setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout evolutions_content = dialog.findViewById(R.id.evolutions_content);
-        List<CharacterEvolutions> evos = charInfo.getEvolutions();
-
-        if (evos.size() > 0) {
-            //MULTIPLE EVOLUTIONS
-            for (int i = 0; i < evos.size(); i++) {
-                final Integer this_id = evos.get(i).getEvolutionCharacter();
-                HorizontalScrollView evolution_scroll = new HorizontalScrollView(context);
-                evolution_scroll.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT
-                ));
-                LinearLayout evolution_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
-                evolution_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
-                evolution_row.setLayoutParams(new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                )); // SET WIDTH AND HEIGHT
-
-                //############# EVOLUTION SMALL ICON ###############
-                ImageButton evo_pic = new ImageButton(context); //CREATE EVOLUTION PIC
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        dpToPx(48), dpToPx(48)
-                );
-                params.setMargins(2, 5, 2, 5);
-                params.gravity = Gravity.CENTER;
-                evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
-                evo_pic.setPadding(0, 0, 0, 0);
-                evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                Glide
-                        .with(context)
-                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(this_id) + ".png")
-                        .dontTransform()
-                        .override(thumbnail_width, thumbnail_height)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                        .into(evo_pic); //ADD PIC
-                evo_pic.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        launchDialog(this_id);
-                    }
-                });
-                evolution_row.addView(evo_pic);
-
-                ImageView evo_text = new ImageView(context);
-                LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-                params1.setMargins(dpToPx(5), 5, dpToPx(5), 5);
-                params1.gravity = Gravity.CENTER;
-                evo_text.setLayoutParams(params1);
-                Drawable imgDrw = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_left_arrow));
-                DrawableCompat.setTintMode(imgDrw, PorterDuff.Mode.SRC_IN);
-                DrawableCompat.setTint(imgDrw, getResources().getColor(getResIdFromAttribute(this, R.attr.char_info_txt)));
-                evo_text.setImageDrawable(imgDrw);
-                evolution_row.addView(evo_text);
-
-                List<Integer> evolvers = evos.get(i).getEvolvers();
-                //########## EVOLVER MATERIAL PICS ###########
-                for (final Integer evolver : evolvers) {
-                    if (evolver != 0) {
-                        ImageButton evolver_pic = new ImageButton(context); //CREATE EVOLUTION PIC
-                        LinearLayout.LayoutParams params2 = new LinearLayout.LayoutParams(
-                                dpToPx(48), dpToPx(48)
-                        );
-                        params.setMargins(0, 5, 2, 5);
-                        params.gravity = Gravity.CENTER;
-                        evolver_pic.setLayoutParams(params2); // SET WIDTH AND HEIGHT OF PIC
-                        evolver_pic.setPadding(0, 0, 0, 0);
-                        evolver_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                        if(evolver>0) {
-                            Glide
-                                    .with(context)
-                                    .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(evolver) + ".png")
-                                    .dontTransform()
-                                    .override(thumbnail_width, thumbnail_height)
-                                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                                    .into(evolver_pic); //ADD PIC
-                            evolver_pic.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    launchDialog(evolver);
-                                }
-                            });
-                        } else {
-                            Glide
-                                    .with(context)
-                                    .load(SkullsHelper.getThumbFromId(evolver))
-                                    .dontTransform()
-                                    .override(thumbnail_width, thumbnail_height)
-                                    .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                                    .into(evolver_pic); //ADD PIC
-                            evolver_pic.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View view) {
-                                    //null
-                                }
-                            });
-                        }
-                        evolution_row.addView(evolver_pic);
-                    }
-                }
-                evolution_scroll.addView(evolution_row);
-                evolutions_content.addView(evolution_scroll);
-            }
-            tabs.getTabWidget().getChildTabViewAt(3).setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout drops_content = dialog.findViewById(R.id.drops_content);
-        List<DropInfo> drops = charInfo.getDropInfo();
-
-        if (drops.size() > 0) {
-            for (int i = 0; i < drops.size(); i++) {
-                DropInfo this_drops = drops.get(i);
-
-                LinearLayout drops_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
-                drops_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
-                drops_row.setLayoutParams(new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                )); // SET WIDTH AND HEIGHT
-                drops_row.setGravity(Gravity.CENTER_VERTICAL);
-
-                //############# SMALL ICON ###############
-                ImageButton evo_pic = new ImageButton(context); //CREATE PIC
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        dpToPx(48), dpToPx(48)
-                );
-                params.setMargins(2, 5, 2, 5);
-                params.gravity = Gravity.CENTER;
-                evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
-                evo_pic.setPadding(0, 0, 0, 0);
-                evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                Integer cont_id = this_drops.getDropThumbnail();
-                if(cont_id>0) {
-                    Glide
-                            .with(context)
-                            .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
-                            .dontTransform()
-                            .override(thumbnail_width, thumbnail_height)
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                            .into(evo_pic); //ADD PIC
-                } else {
-                    Glide
-                            .with(context)
-                            .load(SkullsHelper.getThumbFromId(cont_id))
-                            .dontTransform()
-                            .override(thumbnail_width, thumbnail_height)
-                            .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                            .into(evo_pic); //ADD PIC
-                }
-                drops_row.addView(evo_pic);
-
-                TextView drop_name = new TextView(context);
-                LinearLayout.LayoutParams txt_params =  new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.MATCH_PARENT, 1
-                );
-                txt_params.setMargins(dpToPx(10), 0, 5, 0);
-                drop_name.setLayoutParams(txt_params);
-                drop_name.setText(this_drops.getDropLocation());
-                drop_name.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                drop_name.setGravity(Gravity.CENTER);
-
-                drops_row.addView(drop_name);
-
-                TextView drop_det = new TextView(context);
-                LinearLayout.LayoutParams txt2_params =  new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.MATCH_PARENT, 1
-                );
-                txt2_params.setMargins(5, 0, 5, 0);
-                drop_det.setLayoutParams(txt2_params);
-                drop_det.setText(this_drops.getDropChapterOrDifficulty());
-                drop_det.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                drop_det.setGravity(Gravity.CENTER);
-
-                drops_row.addView(drop_det);
-
-                TextView drop_notes = new TextView(context);
-                drop_notes.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                drop_notes.setGravity(Gravity.CENTER);
-                drop_notes.setTypeface(drop_notes.getTypeface(), Typeface.BOLD);
-                drop_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-
-                if(this_drops.isGlobal() && !this_drops.isJapan())
-                    drop_notes.setText(getString(R.string.drops_global));
-                else if(!this_drops.isGlobal() && this_drops.isJapan())
-                    drop_notes.setText(getString(R.string.drops_japan));
-
-                drops_content.addView(drops_row);
-                if(!drop_notes.getText().equals("")) drops_content.addView(drop_notes);
-            }
-            tabs.getTabWidget().getChildTabViewAt(4).setVisibility(View.VISIBLE);
-        }
-
-        LinearLayout manuals_content = dialog.findViewById(R.id.manuals_content);
-        List<DropInfo> manuals = charInfo.getManualsInfos();
-
-        if (manuals.size() > 0) {
-            for (int i = 0; i < manuals.size(); i++) {
-                DropInfo this_manuals = manuals.get(i);
-
-                LinearLayout manuals_row = new LinearLayout(context); //CREATE ROW TO SHOW EVOLUTION AND EVOLVERS
-                manuals_row.setOrientation(LinearLayout.HORIZONTAL); //SET ORIENTATION TO HORIZONTAL
-                manuals_row.setLayoutParams(new LinearLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                )); // SET WIDTH AND HEIGHT
-                manuals_row.setGravity(Gravity.CENTER_VERTICAL);
-
-                //############# SMALL ICON ###############
-                ImageButton evo_pic = new ImageButton(context); //CREATE PIC
-                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                        dpToPx(48), dpToPx(48)
-                );
-                params.setMargins(2, 5, 2, 5);
-                params.gravity = Gravity.CENTER;
-                evo_pic.setLayoutParams(params); // SET WIDTH AND HEIGHT OF PIC
-                evo_pic.setPadding(0, 0, 0, 0);
-                evo_pic.setScaleType(ImageButton.ScaleType.FIT_CENTER);
-                Integer cont_id = this_manuals.getDropThumbnail();
-                Glide
-                        .with(context)
-                        .load("http://onepiece-treasurecruise.com/wp-content/uploads/f" + convertID(cont_id) + ".png")
-                        .dontTransform()
-                        .override(thumbnail_width, thumbnail_height)
-                        .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                        .into(evo_pic); //ADD PIC
-                manuals_row.addView(evo_pic);
-
-                TextView manual_name = new TextView(context);
-                LinearLayout.LayoutParams txt_params =  new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.MATCH_PARENT, 1
-                );
-                txt_params.setMargins(dpToPx(10), 0, 5, 0);
-                manual_name.setLayoutParams(txt_params);
-                manual_name.setText(this_manuals.getDropLocation());
-                manual_name.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                manual_name.setGravity(Gravity.CENTER);
-
-                manuals_row.addView(manual_name);
-
-                TextView manual_det = new TextView(context);
-                LinearLayout.LayoutParams txt2_params =  new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.MATCH_PARENT, 1
-                );
-                txt2_params.setMargins(5, 0, 5, 0);
-                manual_det.setLayoutParams(txt2_params);
-                manual_det.setText(this_manuals.getDropChapterOrDifficulty());
-                manual_det.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_txt)));
-                manual_det.setGravity(Gravity.CENTER);
-
-                manuals_row.addView(manual_det);
-
-                TextView manual_notes = new TextView(context);
-                manual_notes.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                manual_notes.setGravity(Gravity.CENTER);
-                manual_notes.setTypeface(manual_notes.getTypeface(), Typeface.BOLD);
-                manual_notes.setTextColor(getResources().getColor(getResIdFromAttribute(activity, R.attr.char_info_header_txt)));
-
-                if(this_manuals.isGlobal() && !this_manuals.isJapan())
-                    manual_notes.setText(getString(R.string.drops_global));
-                else if(!this_manuals.isGlobal() && this_manuals.isJapan())
-                    manual_notes.setText(getString(R.string.drops_japan));
-
-                manuals_content.addView(manuals_row);
-                if(!manual_notes.getText().equals("")) manuals_content.addView(manual_notes);
-            }
-            tabs.getTabWidget().getChildTabViewAt(5).setVisibility(View.VISIBLE);
-        }
-
-        HorizontalScrollView scr = dialog.findViewById(R.id.tabs_scrollview);
-        scr.invalidate();
-        scr.requestLayout();
-
-        ImageButton backbtn = dialog.findViewById(R.id.backBtn);
-        backbtn.setOnClickListener(new View.OnClickListener() {
+        final CharacterDetailsDialog dialog = new CharacterDetailsDialog(context, theme_id, id);
+        dialog.setLaunchDialogInterface(new CharacterDetailsDialog.LaunchDialogInterface() {
             @Override
-            public void onClick(View v) {
-                dialog.dismiss();
+            public void launch(int charId) {
+                launchDialog(charId);
             }
         });
-
-        dlg_hwnd = dialog;
-
-        int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.97);
-        int height = (int) (getResources().getDisplayMetrics().heightPixels * 0.85);
-        if (dialog.getWindow() != null) {
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-            WindowManager.LayoutParams layoutParams = dialog.getWindow().getAttributes();
-            layoutParams.dimAmount = .7f;
-            dialog.getWindow().setAttributes(layoutParams);
-            dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            dialog.getWindow().setLayout(width, height);
-        }
         dialog.show();
     }
 
@@ -1476,7 +765,7 @@ private final static Double APP_VERSION = 5.5;
 
         Set<String> nbViewed = mPrefs.getStringSet(getString(R.string.prefs_noticeboard_viewed), new HashSet<String>());
         Boolean somethingNew = false;
-        String bulletinWeb = isNetworkConnected() ? getFileURL("https://paolo-optc.github.io/json/notices.json") : "";
+        String bulletinWeb = isNetworkConnected() ? getFileURL("http://paolo-optc.github.io/json/notices.json") : "";
         try {
             JSONArray bulletinParsed = new JSONArray(bulletinWeb);
             for(int i = 0; i < bulletinParsed.length(); i++) {
@@ -1607,6 +896,13 @@ private final static Double APP_VERSION = 5.5;
         }
 
         setContentView(R.layout.activity_main);
+
+
+        mAccount = CreateSyncAccount(this);
+        if(PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.prefShowNNIntegration), true)) {
+            SyncAdapterManager syncAdapterManager = new SyncAdapterManager(this);
+            syncAdapterManager.beginPeriodicSync(getResources().getInteger(R.integer.syncUpdateIntervalHours)*60*60);
+        }
 
         boolean failedPrevUpdate = mPrefs.getBoolean(getString(R.string.pref_failedupdate), false);
         if(failedPrevUpdate) {
@@ -1838,6 +1134,20 @@ private final static Double APP_VERSION = 5.5;
             bulletinBtn.setImageDrawable(ntcBtn);
         }
 
+        ImageButton nnSyncBtn = findViewById(R.id.nnsync_btn);
+        if(!PreferenceManager.getDefaultSharedPreferences(this).getBoolean(getString(R.string.prefShowNNIntegration), true)) {
+            nnSyncBtn.setVisibility(View.GONE);
+        } else {
+            nnSyncBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    SyncAdapterManager syncManager = new SyncAdapterManager(context);
+                    syncManager.syncImmediately();
+                    Toast.makeText(context, R.string.nnSyncStartedMsg, Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
         Button tealBtn = findViewById(R.id.tealBtn);
         Button redBtn = findViewById(R.id.redBtn);
         Button amberBtn = findViewById(R.id.amberBtn);
@@ -1913,9 +1223,9 @@ private final static Double APP_VERSION = 5.5;
         Boolean displayedTutorial = mPrefs.getBoolean(getString(R.string.tutorial_displayed), false);
         if (!displayedTutorial) {
             new ShowcaseView.Builder(this)
-                    .setContentTitle("Fast Calculator available!")
-                    .setContentText("Flying chopper is now equipped with the super Fast Calculator!\n"
-                    +"You can now do your optc math quickly while playing the game!")
+                    .setContentTitle("Nakama.network teams available!")
+                    .setContentText("Open a character's details, go to the TEAMS tab and" +
+                            " take a look at all the teams available on Nakama.network!\nYou can even search for a team that clears a specific quest!")
                     .setStyle(R.style.CustomShowcaseTheme2)
                     .hideOnTouchOutside()
                     .build();
@@ -2015,7 +1325,7 @@ private final static Double APP_VERSION = 5.5;
 
         LinearLayout mainBC = bulletinDialog.findViewById(R.id.main_bulletin_content);
         String bulletinWeb;
-        bulletinWeb = isNetworkConnected() ? getFileURL("https://paolo-optc.github.io/json/notices.json") : "";
+        bulletinWeb = isNetworkConnected() ? getFileURL("http://paolo-optc.github.io/json/notices.json") : "";
         try {
             JSONArray bulletinParsed = new JSONArray(bulletinWeb);
             SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
@@ -2550,14 +1860,14 @@ private final static Double APP_VERSION = 5.5;
             String version = "";
             String content = "";
             try {
-                InputStream releases = FeedParser.downloadUrl("https://github.com/paolo-optc/optc-mobile-db/releases.atom");
+                InputStream releases = FeedParser.downloadUrl("http://github.com/paolo-optc/optc-mobile-db/releases.atom");
                 List<FeedParser.Entry> feed = parser.parse(releases);
                 for (FeedParser.Entry entry : feed) {
                     version = entry.id.replace("tag:github.com,2008:Repository/70237456/", "");
                     Double vrs = Double.valueOf(version);
                     content = entry.content;
                     if (vrs > APP_VERSION) {
-                        uri += "https://github.com/paolo-optc/optc-mobile-db/releases/download/" + version + "/app-release.apk";
+                        uri += "http://github.com/paolo-optc/optc-mobile-db/releases/download/" + version + "/app-release.apk";
                         break;
                     }
                 }
@@ -2715,7 +2025,7 @@ private final static Double APP_VERSION = 5.5;
         Date lastupdate = new Date(0);
         try {
             FeedParser optc_db_check = new FeedParser(); // 2016-10-08T19:12:23+02:00
-            String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("https://github.com/optc-db/optc-db.github.io/commits/master.atom"));
+            String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("http://github.com/optc-db/optc-db.github.io/commits/master.atom"));
             //DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
             lastupdate = ISODateTimeFormat.dateTimeParser().parseDateTime(update_date).toDate();
             //lastupdate = df1.parse(update_date);
@@ -3205,6 +2515,35 @@ private final static Double APP_VERSION = 5.5;
                     }
                 }
                 break;
+        }
+    }
+
+    public static Account CreateSyncAccount(Context context) {
+        // Create the account type and default account
+        Account newAccount = new Account(
+                ACCOUNT, ACCOUNT_TYPE);
+        // Get an instance of the Android account manager
+        AccountManager accountManager =
+                (AccountManager) context.getSystemService(
+                        ACCOUNT_SERVICE);
+        /*
+         * Add the account and account type, no password or user data
+         * If successful, return the Account object, otherwise report an error.
+         */
+        if (accountManager!=null && accountManager.addAccountExplicitly(newAccount, null, null)) {
+            /*
+             * If you don't set android:syncable="true" in
+             * in your <provider> element in the manifest,
+             * then call context.setIsSyncable(account, AUTHORITY, 1)
+             * here.
+             */
+            return newAccount;
+        } else {
+            /*
+             * The account exists or some other error occurred. Log this, report it,
+             * or handle it internally.
+             */
+            return null;
         }
     }
 

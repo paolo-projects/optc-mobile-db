@@ -231,4 +231,20 @@
     <string name="clearingThumbCacheToast">Cancellando la cache delle anteprime</string>
     <string name="lvlLB">LB</string>
     <string name="noLbStatsIncrease">/</string>
+    <string name="prefShowNNTeamsSummary">Mostra i team di nakama.network</string>
+    <string name="prefShowNNTeamsTitle">Nakama.network</string>
+    <string name="tab_nnteams">Teams</string>
+    <string name="dialogNNTeamsTitle">Teams con questo personaggio come capitano</string>
+    <string name="dialogNNTeamsPoweredBy"><b>Powered by <u>Nakama.network</u></b></string>
+    <string name="nnTeamsTeamName">Nome team:</string>
+    <string name="nnTeamsShip">Nave:</string>
+    <string name="nnTeamsStage">Missione:</string>
+    <string name="nnTeamsUser">Da:</string>
+    <string name="nnTeamsViewMore">Vedi altro...</string>
+    <string name="nnTeamsNoEntries">Nessun elemento</string>
+    <string name="nnteamsSearchQuestHint">Cerca missione</string>
+    <string name="stagesDialogStageNameLabel">Nome missione:</string>
+    <string name="stagesDialogSelectQuestTextView">Scegli una missione per continuare</string>
+    <string name="stagesDialogNone">Nessuna missione</string>
+    <string name="nnSyncStartedMsg">Sincronizzazione con Nakama.network iniziata</string>
 </resources>

@@ -4,6 +4,15 @@
         <item name="android:windowBackground">@drawable/splash_screen</item>
     </style>
 
+    <style name="SearchViewStyle" parent="Widget.AppCompat.SearchView">
+        <!-- Gets rid of the search icon -->
+        <!-- Gets rid of the "underline" in the text -->
+        <item name="queryBackground">@color/searchViewBg</item>
+        <!-- Gets rid of the search icon when the SearchView is expanded -->
+        <item name="searchHintIcon">@null</item>
+        <!-- The hint text that appears when the user has not typed anything -->
+    </style>
+
     <!-- Base application theme. -->
     <style name="AppThemeTeal" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -253,4 +262,6 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorAccent">#ee4444</item>-->
     </style>
+
+    <color name="searchViewBg">#66FFFFFF</color>
 </resources>

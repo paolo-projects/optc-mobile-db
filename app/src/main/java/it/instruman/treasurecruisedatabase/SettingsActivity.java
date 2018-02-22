@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,10 +15,14 @@ import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.util.TypedValue;
 import android.view.View;
+
+import it.instruman.treasurecruisedatabase.sync.SyncAdapterManager;
 
 public class SettingsActivity extends PreferenceActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -55,6 +60,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                     }).show();
                 }
             }
+        } else if (key.equals(getString(R.string.prefShowNNIntegration))) {
+            SyncAdapterManager syncManager = new SyncAdapterManager(this);
+            if(sharedPreferences.getBoolean(key, true)) {
+                syncManager.beginPeriodicSync(getResources().getInteger(R.integer.syncUpdateIntervalHours)*60*60);
+            } else {
+                syncManager.cancelPeriodicSyncs();
+            }
         }
     }
     private int appTheme;
@@ -84,6 +96,9 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
                     finish();
                 }
             });
+            Drawable dr = DrawableCompat.wrap(getResources().getDrawable(R.drawable.ic_arrow_back));
+            DrawableCompat.setTint(dr, getResources().getColor(getResIdFromAttribute(this, R.attr.drawer_bar_btn)));
+            actionBar.setHomeAsUpIndicator(dr);
         }
         addPreferencesFromResource(R.xml.preferences);
         Preference upd_pref = findPreference(getString(R.string.pref_update_app));
@@ -189,5 +204,13 @@ public class SettingsActivity extends PreferenceActivity implements SharedPrefer
     protected void onPause() {
         super.onPause();
         PreferenceManager.getDefaultSharedPreferences(this).unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    public static int getResIdFromAttribute(final Context context, final int attr) {
+        if (attr == 0)
+            return 0;
+        final TypedValue typedvalueattr = new TypedValue();
+        context.getTheme().resolveAttribute(attr, typedvalueattr, true);
+        return typedvalueattr.resourceId;
     }
 }

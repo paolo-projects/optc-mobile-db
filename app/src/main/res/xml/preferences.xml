@@ -24,6 +24,12 @@
             android:icon="@drawable/ic_signal_wifi"
             />
         <it.instruman.treasurecruisedatabase.ModSwitchPreference
+            android:defaultValue="true"
+            android:title="@string/prefShowNNTeamsTitle"
+            android:summary="@string/prefShowNNTeamsSummary"
+            android:key="@string/prefShowNNIntegration"
+            android:icon="@drawable/ic_cloud_circle" />
+        <it.instruman.treasurecruisedatabase.ModSwitchPreference
             android:defaultValue="false"
             android:title="@string/prefs_overlay"
             android:key="@string/pref_overlay"

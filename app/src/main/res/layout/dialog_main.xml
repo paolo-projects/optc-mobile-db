@@ -119,6 +119,12 @@
                             layout="@layout/dialog_manuals"
                             android:layout_height="match_parent"
                             android:layout_width="match_parent" />
+
+                        <include
+                            android:id="@+id/tab_nnteams"
+                            layout="@layout/dialog_nnteams"
+                            android:layout_height="match_parent"
+                            android:layout_width="match_parent" />
                     </FrameLayout>
                 </LinearLayout>
             </TabHost>

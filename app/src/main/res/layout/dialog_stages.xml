@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:background="?char_info_bg"
+    android:padding="24dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/stagesDialogSelectQuestTextView"
+        android:textColor="?char_info_txt"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"/>
+    <ProgressBar
+        android:id="@+id/progressBar_cyclic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:minHeight="40dp"
+        android:minWidth="40dp"
+        android:visibility="visible" />
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/stagesRecyclerView"/>
+    <TextView
+        android:id="@+id/stagesDialogNoneText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="?char_info_txt"
+        android:text="@string/stagesDialogNone"
+        android:visibility="gone"
+        android:textStyle="bold"
+        android:padding="8dp"/>
+</LinearLayout>

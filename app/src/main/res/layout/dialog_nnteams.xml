@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:animateLayoutChanges="true"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="@string/dialogNNTeamsTitle"
+            android:textColor="?char_info_txt"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?selectableItemBackground"
+            android:src="@drawable/ic_search"
+            android:tint="?char_info_txt"
+            android:id="@+id/nnteam_searchBtn"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/dialogNNTeamsPoweredBy"
+        android:textColor="?char_info_txt" />
+
+    <android.support.v7.widget.SearchView
+        android:id="@+id/nnteam_searchView"
+        style="@style/SearchViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:queryHint="@string/nnteamsSearchQuestHint"
+        app:iconifiedByDefault="false"
+        android:visibility="gone"
+        android:padding="3dp"/>
+
+    <LinearLayout
+        android:id="@+id/nnteams_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="3dp"
+        android:animateLayoutChanges="true"/>
+
+    <ProgressBar
+        android:id="@+id/progressBar_cyclic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:minHeight="40dp"
+        android:minWidth="40dp"
+        android:visibility="gone" />
+</LinearLayout>

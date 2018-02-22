@@ -41,11 +41,11 @@ private String DMGCALC_URL = "http://optc-db.github.io/damage/";
                 DMGCALC_URL = "http://www.one-piece-treasure-cruise-italia.org/damage/";
                 break;
             case "es":
-                DMGCALC_URL = "https://optc-sp.github.io/damage/";
+                DMGCALC_URL = "http://optc-sp.github.io/damage/";
                 break;
             case "":
             default:
-                DMGCALC_URL = "https://optc-db.github.io/damage/";
+                DMGCALC_URL = "http://optc-db.github.io/damage/";
                 break;
         }
 

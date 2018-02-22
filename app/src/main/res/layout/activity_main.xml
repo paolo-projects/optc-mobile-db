@@ -385,6 +385,21 @@
                 style="?android:attr/buttonBarButtonStyle" />
 
             <ImageButton
+                android:id="@+id/nnsync_btn"
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_toEndOf="@id/bulletin_btn"
+                android:layout_toRightOf="@id/bulletin_btn"
+                android:src="@drawable/ic_cloud_circle"
+                android:tint="?drawer_bar_btn"
+                android:background="@android:color/transparent"
+                android:scaleType="fitCenter"
+                android:contentDescription=""
+                style="?android:attr/buttonBarButtonStyle" />
+
+            <ImageButton
                 android:id="@+id/reset_filters"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
