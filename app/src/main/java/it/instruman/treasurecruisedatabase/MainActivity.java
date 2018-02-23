@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
 /*
     ################### APP VERSION ##################
 */
-private final static Double APP_VERSION = 5.6;
+private final static Double APP_VERSION = 5.7;
 /*
     ##################################################
 */
@@ -765,7 +765,7 @@ private final static Double APP_VERSION = 5.6;
 
         Set<String> nbViewed = mPrefs.getStringSet(getString(R.string.prefs_noticeboard_viewed), new HashSet<String>());
         Boolean somethingNew = false;
-        String bulletinWeb = isNetworkConnected() ? getFileURL("http://paolo-optc.github.io/json/notices.json") : "";
+        String bulletinWeb = isNetworkConnected() ? getFileURL("https://paolo-optc.github.io/json/notices.json") : "";
         try {
             JSONArray bulletinParsed = new JSONArray(bulletinWeb);
             for(int i = 0; i < bulletinParsed.length(); i++) {
@@ -1325,7 +1325,7 @@ private final static Double APP_VERSION = 5.6;
 
         LinearLayout mainBC = bulletinDialog.findViewById(R.id.main_bulletin_content);
         String bulletinWeb;
-        bulletinWeb = isNetworkConnected() ? getFileURL("http://paolo-optc.github.io/json/notices.json") : "";
+        bulletinWeb = isNetworkConnected() ? getFileURL("https://paolo-optc.github.io/json/notices.json") : "";
         try {
             JSONArray bulletinParsed = new JSONArray(bulletinWeb);
             SharedPreferences mPrefs = getSharedPreferences(getString(R.string.pref_name), 0);
@@ -1860,14 +1860,14 @@ private final static Double APP_VERSION = 5.6;
             String version = "";
             String content = "";
             try {
-                InputStream releases = FeedParser.downloadUrl("http://github.com/paolo-optc/optc-mobile-db/releases.atom");
+                InputStream releases = FeedParser.downloadUrl("https://github.com/paolo-optc/optc-mobile-db/releases.atom");
                 List<FeedParser.Entry> feed = parser.parse(releases);
                 for (FeedParser.Entry entry : feed) {
                     version = entry.id.replace("tag:github.com,2008:Repository/70237456/", "");
                     Double vrs = Double.valueOf(version);
                     content = entry.content;
                     if (vrs > APP_VERSION) {
-                        uri += "http://github.com/paolo-optc/optc-mobile-db/releases/download/" + version + "/app-release.apk";
+                        uri += "https://github.com/paolo-optc/optc-mobile-db/releases/download/" + version + "/app-release.apk";
                         break;
                     }
                 }
@@ -2025,7 +2025,7 @@ private final static Double APP_VERSION = 5.6;
         Date lastupdate = new Date(0);
         try {
             FeedParser optc_db_check = new FeedParser(); // 2016-10-08T19:12:23+02:00
-            String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("http://github.com/optc-db/optc-db.github.io/commits/master.atom"));
+            String update_date = optc_db_check.readUpdated(FeedParser.downloadUrl("https://github.com/optc-db/optc-db.github.io/commits/master.atom"));
             //DateFormat df1 = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
             lastupdate = ISODateTimeFormat.dateTimeParser().parseDateTime(update_date).toDate();
             //lastupdate = df1.parse(update_date);

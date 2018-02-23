@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -29,7 +30,16 @@ public class DatabasePopulator {
                 for (int i = 0; i < char_size; i++) {
                     List arr_2 = characters.get(i);
                     String name = (arr_2.get(0) == null) ? "" : (String) arr_2.get(0);
-                    String type = (arr_2.get(1) == null) ? "" : (String) arr_2.get(1);
+                    Object typeObj = arr_2.get(1);
+                    String type = "";
+                    if(typeObj.getClass().equals(String.class)) {
+                        type = (arr_2.get(1) == null) ? "" : (String) arr_2.get(1);
+                    } else if (typeObj.getClass().equals(NativeArray.class)) {
+                        if(((NativeArray)typeObj).size()==2) {
+                            List<String> typesDoubleChar = (List<String>)typeObj;
+                            type = typesDoubleChar.get(0) + "," + typesDoubleChar.get(1);
+                        }
+                    }
                     //Integer stars = (arr_2.get(3) == null) ? 1 : ((arr_2.get(3))?((Double) arr_2.get(3)).intValue();
                     Double stars = 1.0;
                     Object stars_o = arr_2.get(3);
@@ -126,6 +136,14 @@ public class DatabasePopulator {
                                 for(int i = 0; i<captLevels.size(); i++) {
                                     captain += "<br><b>"+(i+1)+":</b> "+captLevels.get(i);
                                 }
+                            } else if (captainMap.get("character1") != null) {
+                                captain += String.format("<b>%s:</b> %s", "Character 1", captainMap.get("character1"));
+                                if(captainMap.get("character2")!=null) {
+                                    captain += String.format("<br/><b>%s:</b> %s", "Character 2", captainMap.get("character2"));
+                                }
+                                if(captainMap.get("combined")!=null) {
+                                    captain += String.format("<br/><b>%s:</b> %s", "Combined", captainMap.get("combined"));
+                                }
                             }
                         }
                     }
@@ -149,7 +167,7 @@ public class DatabasePopulator {
                                 for (Map.Entry<String, String> e : cwDescH.entrySet()) {
                                     if (e.getKey().equals("base"))
                                         continue;
-                                    cwDesc += String.format("<br><b>%s:</b> %s", e.getKey().replace("level",""), e.getValue());
+                                    cwDesc += formatCrewmateDescription(e.getKey(), e.getValue());
                                 }
                             } catch (ClassCastException e) {
                                 e.printStackTrace();
@@ -717,5 +735,17 @@ public class DatabasePopulator {
         } finally {
             database.endTransaction();
         }
+    }
+
+    private static String formatCrewmateDescription(String key, String value) {
+        Pattern p = Pattern.compile("(?i)character(\\d)");
+        Matcher m;
+        if(key.contains("level"))
+            return String.format("<br><b>%s:</b> %s", key.replace("level", ""), value);
+        else if((m = p.matcher(key)).find())
+            return String.format("<br><b>%s %s:</b> %s", "Character", m.group(1), value);
+        else if(key.contains("combined"))
+            return String.format("<br><b>%s:</b> %s", "Combined", value);
+        else return key + ": " + value;
     }
 }

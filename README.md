@@ -36,3 +36,7 @@ Most of the work done for this app is from the people at optc-db.github.io, caus
 
 * one-piece-treasure-cruise-italia.forumfree.it and user _CannotDoThat_ for the DB italian translation
 * reddit user joseic1998 who is translating the DB in spanish
+
+**Special thanks to:**
+
+Nakama.network for the amazing team database and box management!

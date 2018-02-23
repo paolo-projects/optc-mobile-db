@@ -203,4 +203,6 @@
     <color name="char_info_stats_max_txt_dark_daynight">#222</color>
     <color name="char_info_stats_lb_bg_dark_daynight">#efebe9</color>
     <color name="char_info_stats_lb_txt_dark_daynight">#de000000</color>
+    <color name="multitype_bg">#CCCCCC</color>
+    <color name="multitype_txt">#000</color>
 </resources>
